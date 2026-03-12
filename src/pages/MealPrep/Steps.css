@@ -1,0 +1,492 @@
+/* ===================================================
+   Shared Step Styles
+=================================================== */
+
+/* ── Panel wrapper ── */
+.step-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+}
+
+.step-panel__header {
+  margin-bottom: 2rem;
+}
+.step-panel__title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--color-secondary);
+  margin-bottom: 0.5rem;
+}
+.step-panel__sub {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+  max-width: 540px;
+}
+
+/* ── Navigation ── */
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ── Info note ── */
+.step-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: var(--primary-alpha-6);
+  border: 1px solid var(--primary-alpha-20);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-top: 1.5rem;
+}
+.step-note svg { flex-shrink: 0; margin-top: 1px; color: var(--color-primary); }
+
+/* ══════════════════════════════════════
+   Step 1 — Preferences
+══════════════════════════════════════ */
+.pref-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.85rem;
+}
+
+.pref-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+  user-select: none;
+}
+.pref-card:hover { border-color: var(--color-primary); background: var(--primary-alpha-3); }
+.pref-card--selected {
+  border-color: var(--color-primary);
+  background: var(--primary-alpha-6);
+  box-shadow: 0 0 0 3px var(--primary-alpha-12);
+}
+
+.pref-card__input { display: none; }
+
+.pref-card__check {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  transition: all 150ms ease;
+}
+.pref-card--selected .pref-card__check {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.pref-card__label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-secondary);
+  margin-bottom: 0.1rem;
+}
+.pref-card__desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* ══════════════════════════════════════
+   Step 2 — Meal Selection
+══════════════════════════════════════ */
+.meals-quota-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.meals-quota-bar__text {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  flex: 1;
+  min-width: 200px;
+}
+.meals-quota-bar__text strong { color: var(--color-text); }
+.meals-quota-bar__progress {
+  flex: 1;
+  min-width: 120px;
+  max-width: 240px;
+}
+.quota-track {
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.quota-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 4px;
+  transition: width 250ms ease;
+}
+.quota-fill.quota-full { background: #16A34A; }
+.quota-fill.quota-over { background: #DC2626; }
+
+.meals-cat-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.meal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.meal-card {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow var(--transition), border-color var(--transition);
+  position: relative;
+}
+.meal-card:hover { box-shadow: var(--shadow-md); }
+.meal-card--selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--primary-alpha-15);
+}
+.meal-card--match { border-color: #16A34A; }
+
+.meal-card__match-badge {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: #16A34A;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.meal-card__img-wrap {
+  position: relative;
+  aspect-ratio: 3/2;
+  overflow: hidden;
+}
+.meal-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 350ms ease;
+}
+.meal-card:hover .meal-card__img { transform: scale(1.04); }
+
+.meal-card__body {
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.meal-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+.meal-card__name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-secondary);
+  font-family: var(--font-heading);
+  margin-bottom: 0.3rem;
+}
+.meal-card__desc {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+/* Macros */
+.meal-card__macros {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.25rem;
+  margin: 0.75rem 0;
+  padding: 0.6rem;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+.macro-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.macro-item strong {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+/* Counter */
+.meal-card__counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.counter__btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.counter__btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--primary-alpha-6);
+}
+.counter__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.counter__btn--add {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+.counter__btn--add:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+.counter__val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  min-width: 1.2rem;
+  text-align: center;
+}
+
+/* ══════════════════════════════════════
+   Step 3 — Schedule
+══════════════════════════════════════ */
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.days-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.day-btn {
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.day-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.day-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.schedule-address {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+.schedule-address__full { grid-column: 1 / -1; }
+
+/* ══════════════════════════════════════
+   Step 4 — Summary
+══════════════════════════════════════ */
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 2rem;
+}
+
+.summary-section {
+  margin-bottom: 1.75rem;
+}
+.summary-section__title {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.summary-plan-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.summary-meal-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.summary-meal-row:last-child { border-bottom: none; }
+.summary-meal-img {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.summary-meal-name {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.summary-meal-qty {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin-right: 0.5rem;
+}
+
+.summary-schedule-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+.summary-schedule-row svg { flex-shrink: 0; color: var(--color-primary); margin-top: 2px; }
+
+/* Pricing card */
+.pricing-card {
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  position: sticky;
+  top: 80px;
+}
+.pricing-card__title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  color: var(--color-secondary);
+  margin-bottom: 1.25rem;
+}
+.pricing-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  padding: 0.4rem 0;
+}
+.pricing-row--total {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-text);
+  border-top: 2px solid var(--color-border);
+  padding-top: 0.75rem;
+  margin-top: 0.25rem;
+}
+.pricing-row--total span:last-child { color: var(--color-primary); }
+
+.pricing-card__place-btn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+.pricing-card__note {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  text-align: center;
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .pricing-card { position: static; }
+  .schedule-grid { grid-template-columns: 1fr; }
+  .schedule-address { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 540px) {
+  .step-panel { padding: 1.25rem; }
+  .pref-grid { grid-template-columns: 1fr; }
+  .meal-grid { grid-template-columns: 1fr; }
+  .schedule-address { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: 1fr; }
+}

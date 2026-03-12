@@ -1,0 +1,77 @@
+/* ===================================================
+   Step Indicator Styles
+=================================================== */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.step-indicator::-webkit-scrollbar { display: none; }
+
+.step-indicator__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  min-width: 80px;
+  cursor: default;
+}
+
+.step-indicator__circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-light);
+  transition: all 200ms ease;
+}
+
+.step-indicator__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  text-align: center;
+  white-space: nowrap;
+  transition: color 200ms ease;
+}
+
+/* Active */
+.step-indicator__item.active .step-indicator__circle {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(194,65,12,0.18);
+}
+.step-indicator__item.active .step-indicator__label {
+  color: var(--color-primary);
+}
+
+/* Done */
+.step-indicator__item.done .step-indicator__circle {
+  border-color: #16A34A;
+  background: #16A34A;
+  color: #fff;
+}
+.step-indicator__item.done .step-indicator__label {
+  color: #16A34A;
+}
+
+/* Connector line */
+.step-indicator__line {
+  flex: 1;
+  height: 2px;
+  background: var(--color-border);
+  min-width: 32px;
+  margin-bottom: 28px; /* align with circles */
+  transition: background 200ms ease;
+}
+.step-indicator__line.done { background: #16A34A; }

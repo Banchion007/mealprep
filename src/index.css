@@ -1,0 +1,273 @@
+/* ===================================================
+   SAVEUR CATERING — Global Styles
+   Design tokens are sourced from ../style.css
+   which defines the Tailwind v4 theme with:
+     --primary   = dark indigo/purple
+     --secondary = orange
+     --sidebar   = same dark indigo (used for nav/footer)
+=================================================== */
+
+/* Pull in Tailwind v4 + all design tokens from style.css */
+@import "../style.css";
+
+/* ── Map site-wide color aliases to style.css tokens ── */
+:root {
+  /* Primary action color: dark indigo from style.css */
+  --color-primary:        var(--primary);                        /* oklch(0.2340 0.0787 282.6605) */
+  --color-primary-light:  oklch(0.4200 0.0900 282.66);           /* medium purple */
+  --color-primary-dark:   oklch(0.1300 0.0650 282.66);           /* very dark purple */
+
+  /* Heading / brand color: same indigo */
+  --color-secondary:      var(--primary);
+
+  /* Accent / highlight color: orange from style.css */
+  --color-accent:         var(--secondary);                      /* oklch(0.6228 0.2064 36.0369) */
+  --color-accent-light:   oklch(0.8133 0.0953 39.2061);          /* chart-5 from style.css */
+  --color-accent-dark:    oklch(0.52 0.2 36);
+
+  /* Backgrounds & surfaces */
+  --color-bg:             var(--background);                     /* white */
+  --color-bg-alt:         var(--muted);                          /* light gray */
+  --color-surface:        var(--card);                           /* near-white */
+
+  /* Borders & rings */
+  --color-border:         var(--border);                         /* light indigo-gray */
+
+  /* Text */
+  --color-text:           var(--foreground);                     /* near-black */
+  --color-text-muted:     var(--muted-foreground);               /* medium gray */
+  --color-text-light:     oklch(0.7080 0 0);                     /* lighter muted */
+
+  /* ── Pre-computed alpha variants (replaces hardcoded rgba) ── */
+  --primary-alpha-3:  oklch(0.234 0.0787 282.66 / 0.03);
+  --primary-alpha-6:  oklch(0.234 0.0787 282.66 / 0.06);
+  --primary-alpha-7:  oklch(0.234 0.0787 282.66 / 0.07);
+  --primary-alpha-9:  oklch(0.234 0.0787 282.66 / 0.09);
+  --primary-alpha-12: oklch(0.234 0.0787 282.66 / 0.12);
+  --primary-alpha-15: oklch(0.234 0.0787 282.66 / 0.15);
+  --primary-alpha-18: oklch(0.234 0.0787 282.66 / 0.18);
+  --primary-alpha-20: oklch(0.234 0.0787 282.66 / 0.20);
+  --primary-alpha-35: oklch(0.234 0.0787 282.66 / 0.35);
+
+  /* Tag Colors — semantic, kept as-is */
+  --tag-vegan:        #16A34A;
+  --tag-vegetarian:   #15803D;
+  --tag-keto:         #7C3AED;
+  --tag-gf:           #D97706;
+  --tag-dairy-free:   #0284C7;
+  --tag-spicy:        #DC2626;
+  --tag-halal:        #0D9488;
+  --tag-nut-free:     #B45309;
+
+  /* Typography — sourced from style.css font tokens */
+  --font-heading: var(--font-serif);   /* Merriweather */
+  --font-body:    var(--font-sans);    /* Montserrat */
+
+  /* Layout */
+  --section-py:    5rem;
+  --container-max: 1200px;
+
+  /* Radii — override @theme inline to keep our larger card scale */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.75rem;
+  --radius-lg:   1.25rem;
+  --radius-full: 9999px;
+
+  --transition: 200ms ease;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a  { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+input, textarea, select { font-family: inherit; }
+
+/* ── Utility ── */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+.section { padding-block: var(--section-py); }
+
+/* ── Typography ── */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  color: var(--color-secondary);
+}
+h1 { font-size: clamp(2.2rem, 5vw, 3.75rem); font-weight: 700; }
+h2 { font-size: clamp(1.75rem, 3.5vw, 2.75rem); font-weight: 600; }
+h3 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); font-weight: 600; }
+h4 { font-size: 1.15rem; font-weight: 600; }
+
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 600;
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
+}
+.section-sub {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  max-width: 560px;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all var(--transition);
+  border: 2px solid transparent;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--primary-alpha-35);
+}
+
+.navbar__cta.btn-primary,
+.hero__cta .btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.navbar__cta.btn-primary:hover,
+.hero__cta .btn-primary:hover {
+  background: var(--color-accent-dark);
+  border-color: var(--color-accent-dark);
+  box-shadow: 0 4px 16px oklch(0.6228 0.2064 36 / 0.35);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.btn-outline:hover {
+  background: var(--color-primary);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+.btn-ghost:hover { background: var(--color-bg-alt); color: var(--color-text); }
+
+.btn-lg { padding: 1rem 2.25rem; font-size: 1.05rem; }
+.btn-sm { padding: 0.5rem 1.1rem; font-size: 0.85rem; }
+
+/* ── Tags ── */
+.tag {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.tag-vegan      { background: var(--tag-vegan); }
+.tag-vegetarian { background: var(--tag-vegetarian); }
+.tag-keto       { background: var(--tag-keto); }
+.tag-gf         { background: var(--tag-gf); color: var(--color-text); }
+.tag-dairy-free { background: var(--tag-dairy-free); }
+.tag-spicy      { background: var(--tag-spicy); }
+.tag-halal      { background: var(--tag-halal); }
+.tag-nut-free   { background: var(--tag-nut-free); }
+
+/* ── Card ── */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+/* ── Form Elements ── */
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.form-label { font-size: 0.875rem; font-weight: 600; color: var(--color-secondary); }
+
+.form-input, .form-select, .form-textarea {
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px oklch(0.5746 0.1494 285.22 / 0.18);
+}
+.form-input.error, .form-select.error, .form-textarea.error { border-color: #DC2626; }
+.form-error  { font-size: 0.8rem; color: #DC2626; }
+.form-textarea { resize: vertical; min-height: 120px; }
+
+/* ── Scroll animation ── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* ── Divider ── */
+.divider {
+  width: 3rem;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: 2px;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Grid helpers ── */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+
+@media (max-width: 900px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  :root { --section-py: 3rem; }
+}

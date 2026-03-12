@@ -1,0 +1,99 @@
+/* ===================================================
+   Meal Prep Page Layout
+=================================================== */
+.mealprep-hero--compact {
+  min-height: 160px;
+  padding-block: 2.5rem;
+}
+.mealprep-hero--compact .page-hero__content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.mealprep-hero--compact h2 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.mealprep-change-plan {
+  background: rgba(255,251,245,0.12);
+  border-color: rgba(255,251,245,0.35);
+  color: rgba(255,251,245,0.85);
+  flex-shrink: 0;
+}
+.mealprep-change-plan:hover {
+  background: rgba(255,251,245,0.2);
+  color: #fff;
+}
+
+.mealprep-flow {
+  padding-block: 1rem 4rem;
+}
+
+/* Body: main content + sidebar */
+.mealprep-body {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.mealprep-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Shared page-hero import from Menu.css */
+.page-hero {
+  position: relative;
+  padding-block: 5rem 4rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 340px;
+}
+.page-hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.page-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(28,25,23,0.82) 0%, rgba(120,53,15,0.6) 100%);
+  z-index: 1;
+}
+.page-hero__content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Also import filter-btn for step 2 category tabs */
+.filter-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.filter-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.filter-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .mealprep-body {
+    flex-direction: column;
+  }
+}

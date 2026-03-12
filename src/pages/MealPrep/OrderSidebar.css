@@ -1,0 +1,158 @@
+/* ===================================================
+   Order Sidebar Styles
+=================================================== */
+.order-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.order-sidebar__inner {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  position: sticky;
+  top: 80px;
+}
+
+.order-sidebar__title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Plan */
+.sidebar-plan {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1rem;
+}
+.sidebar-plan__name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-secondary);
+}
+.sidebar-plan__price {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+.sidebar-plan__price span {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+/* Quota tracker */
+.sidebar-quota {
+  margin-bottom: 1rem;
+}
+.sidebar-quota__label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+.sidebar-quota__full { color: #16A34A; }
+
+/* Meals list */
+.sidebar-meals {
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sidebar-meal-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.sidebar-meal-img {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.sidebar-meal-info { flex: 1; min-width: 0; }
+.sidebar-meal-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-meal-meta {
+  font-size: 0.72rem;
+  color: var(--color-text-light);
+}
+.sidebar-meal-price {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* Empty */
+.sidebar-empty {
+  text-align: center;
+  padding: 1.5rem 0;
+  color: var(--color-text-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+/* Total */
+.sidebar-total {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.85rem;
+}
+.sidebar-total__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  padding: 0.25rem 0;
+}
+.sidebar-total__row--final {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--color-text);
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.65rem;
+  margin-top: 0.25rem;
+}
+.sidebar-total__row--final span:last-child { color: var(--color-primary); }
+.sidebar-total__note {
+  font-size: 0.72rem;
+  color: var(--color-text-light);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .order-sidebar {
+    width: 100%;
+    order: -1;
+  }
+  .order-sidebar__inner { position: static; }
+}
