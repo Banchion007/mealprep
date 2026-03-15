@@ -280,7 +280,7 @@ export default function Contact() {
                     <circle cx="12" cy="10" r="3" fill="#fff"/>
                   </svg>
                 </div>
-                <span>456 Flavour Ave, Austin TX</span>
+                <span>3803 Ward Neal Rd, Bells, TX 75414</span>
               </div>
             </div>
 

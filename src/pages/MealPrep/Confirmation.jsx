@@ -6,19 +6,14 @@ import { Link } from 'react-router-dom'
 import { MEALS } from './data'
 import './Confirmation.css'
 
-function addDays(date, days) {
-  const d = new Date(date)
-  d.setDate(d.getDate() + days)
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-}
-
 export default function Confirmation({ order, orderNo, onStartOver }) {
-  const { plan, selectedMeals, schedule } = order
-  const firstDelivery = addDays(new Date(), 3)
+  const { selectedMeals, schedule } = order
 
   const mealEntries = Object.entries(selectedMeals)
     .map(([id, qty]) => ({ meal: MEALS.find(m => m.id === id), qty }))
     .filter(e => e.meal)
+
+  const orderTotal = mealEntries.reduce((sum, { meal, qty }) => sum + meal.price * qty, 0)
 
   return (
     <div className="confirmation">
@@ -31,7 +26,7 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
         </div>
         <h1 className="confirmation__title">Order Confirmed!</h1>
         <p className="confirmation__sub">
-          Thank you for choosing Saveur. Your first delivery is on its way!
+          Thank you for choosing Humble Chef. We'll have your meals ready on delivery day!
         </p>
         <div className="confirmation__order-no">
           Order #{orderNo}
@@ -46,8 +41,8 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
             <div>
-              <p className="confirmation__delivery-label">First Delivery</p>
-              <p className="confirmation__delivery-val">{firstDelivery}</p>
+              <p className="confirmation__delivery-label">Delivery Date</p>
+              <p className="confirmation__delivery-val">{schedule.date}</p>
             </div>
           </div>
           <div className="confirmation__delivery-item">
@@ -72,12 +67,12 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
           </div>
           <div className="confirmation__delivery-item">
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+              <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
             <div>
-              <p className="confirmation__delivery-label">Weekly Total</p>
+              <p className="confirmation__delivery-label">Order Total</p>
               <p className="confirmation__delivery-val" style={{ color: 'var(--color-primary)' }}>
-                ${plan?.pricePerWeek.toFixed(2)}/week
+                ${orderTotal.toFixed(2)}
               </p>
             </div>
           </div>
@@ -85,9 +80,9 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
 
         {/* Summary card */}
         <div className="confirmation__summary">
-          <h2 className="confirmation__summary-title">Your {plan?.name} Plan Summary</h2>
+          <h2 className="confirmation__summary-title">Your Order</h2>
           <p className="confirmation__summary-sub">
-            {plan?.mealsPerWeek} meals/week · delivering {schedule.days.join(', ')}
+            {mealEntries.length} item{mealEntries.length !== 1 ? 's' : ''} · delivering {schedule.date}
           </p>
 
           <div className="confirmation__meals">
@@ -101,7 +96,7 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
                   </p>
                 </div>
                 <span className="confirmation__meal-price">
-                  ${(plan.pricePerMeal * qty).toFixed(2)}
+                  ${(meal.price * qty).toFixed(2)}
                 </span>
               </div>
             ))}
@@ -109,7 +104,7 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
 
           <div className="confirmation__actions">
             <button className="btn btn-outline" onClick={onStartOver}>
-              Start a New Order
+              Place Another Order
             </button>
             <Link to="/" className="btn btn-primary">
               Back to Home
@@ -122,10 +117,10 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
           <h3>What Happens Next?</h3>
           <div className="confirmation__next-steps">
             {[
-              { icon: '📧', title: 'Confirmation Email', desc: 'Check your inbox for a full order confirmation with tracking details.' },
-              { icon: '🍳', title: 'Meal Prep Begins', desc: 'Our chefs will start preparing your meals 24 hours before delivery.' },
-              { icon: '🚚', title: 'Fresh Delivery', desc: `Your first delivery arrives ${firstDelivery} in our eco-friendly insulated packaging.` },
-              { icon: '🔁', title: 'Weekly Renewals', desc: 'Your plan renews automatically every week. Manage it anytime in your account.' },
+              { icon: '📧', title: 'Confirmation Email', desc: 'Check your inbox for a full order confirmation with details.' },
+              { icon: '🍳', title: 'Meal Prep Begins', desc: 'Our chefs start preparing your meals 24 hours before delivery.' },
+              { icon: '🚚', title: 'Fresh Delivery', desc: `Your order arrives on ${schedule.date} in our eco-friendly insulated packaging.` },
+              { icon: '⭐', title: 'Leave a Review', desc: 'Let us know how your meals turned out. We love the feedback!' },
             ].map(s => (
               <div key={s.title} className="confirmation__next-step">
                 <div className="confirmation__next-step-icon">{s.icon}</div>

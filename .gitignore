@@ -6,3 +6,15 @@ dist
 *.log
 .DS_Store
 .claude
+.agent
+.codebuddy
+.codex
+.continue
+.cursor
+.gemini
+.kiro
+.opencode
+.qoder
+.roo
+.trae
+.windsurf

@@ -1,11 +1,10 @@
 /* ===================================================
-   Meal Prep Page — orchestrates the full ordering flow:
-   Plan Selection → Step 1 (Prefs) → Step 2 (Meals)
+   Meal Prep Page — on-demand ordering flow:
+   Step 1 (Prefs) → Step 2 (Meals)
    → Step 3 (Schedule) → Step 4 (Summary) → Confirmation
 =================================================== */
 import React, { useState, useCallback } from 'react'
-import { PLANS } from './data'
-import PlanSelection from './PlanSelection'
+import { MEALS } from './data'
 import StepIndicator from './StepIndicator'
 import Step1Preferences from './Step1Preferences'
 import Step2Meals from './Step2Meals'
@@ -13,22 +12,16 @@ import Step3Schedule from './Step3Schedule'
 import Step4Summary from './Step4Summary'
 import OrderSidebar from './OrderSidebar'
 import Confirmation from './Confirmation'
+import { supabase } from '../../lib/supabase'
 import './MealPrep.css'
 
-/* ── Phases ── */
-const PHASE_SELECT = 'select'
-const PHASE_STEPS  = 'steps'
-const PHASE_DONE   = 'done'
+const STEP_LABELS = ['Dietary Preferences', 'Meal Selection', 'Delivery Details', 'Order Summary']
 
-const STEP_LABELS = ['Dietary Preferences', 'Meal Selection', 'Delivery Schedule', 'Order Summary']
-
-/* ── Initial State ── */
 const INIT_ORDER = {
-  plan:          null,
   preferences:   [],
   selectedMeals: {},   // { mealId: count }
   schedule: {
-    days:        [],
+    date:        '',
     timeWindow:  '',
     address:     '',
     city:        '',
@@ -37,119 +30,108 @@ const INIT_ORDER = {
   },
 }
 
+/* Compute order total from selectedMeals */
+export function calcOrderTotal(selectedMeals) {
+  return Object.entries(selectedMeals).reduce((sum, [id, qty]) => {
+    const meal = MEALS.find(m => m.id === id)
+    return sum + (meal ? meal.price * qty : 0)
+  }, 0)
+}
+
 export default function MealPrep() {
-  const [phase,   setPhase]   = useState(PHASE_SELECT)
   const [step,    setStep]    = useState(0)
   const [order,   setOrder]   = useState(INIT_ORDER)
   const [orderNo, setOrderNo] = useState(null)
-
-  /* ── Helpers ── */
-  const totalMealsSelected = Object.values(order.selectedMeals).reduce((s, n) => s + n, 0)
-  const quota = order.plan?.mealsPerWeek ?? 0
+  const [isDone,  setIsDone]  = useState(false)
+  const [placing, setPlacing] = useState(false)
 
   const updateOrder = useCallback((patch) => {
     setOrder(prev => ({ ...prev, ...patch }))
   }, [])
 
-  // Select plan → enter step flow
-  const handleSelectPlan = (plan) => {
-    // Clear meals when switching plans
-    updateOrder({ plan, selectedMeals: {} })
-    setStep(0)
-    setPhase(PHASE_STEPS)
-  }
+  const handleBack = () => setStep(s => s - 1)
+  const handleNext = () => setStep(s => s + 1)
 
-  // Back from first step → return to plan selection
-  const handleBack = () => {
-    if (step === 0) {
-      setPhase(PHASE_SELECT)
-    } else {
-      setStep(s => s - 1)
+  const handlePlaceOrder = async (user) => {
+    setPlacing(true)
+    const num = `HC-${Date.now().toString().slice(-6)}`
+
+    const mealItems = Object.entries(order.selectedMeals)
+      .map(([id, qty]) => {
+        const meal = MEALS.find(m => m.id === id)
+        return meal ? { id, name: meal.name, qty, price: meal.price } : null
+      })
+      .filter(Boolean)
+
+    const total = calcOrderTotal(order.selectedMeals)
+
+    try {
+      const { error } = await supabase.from('orders').insert({
+        order_number:   num,
+        user_id:        user.id,
+        customer_name:  user.user_metadata?.full_name || user.email,
+        customer_email: user.email,
+        type:           'Meal Prep',
+        items:          mealItems,
+        total,
+        delivery_date:  order.schedule.date,
+        time_window:    order.schedule.timeWindow,
+        address:        `${order.schedule.address}, ${order.schedule.city}, ${order.schedule.state} ${order.schedule.zip}`,
+        preferences:    order.preferences,
+        status:         'Pending',
+      })
+      if (error) throw error
+    } catch (err) {
+      console.error('Failed to save order:', err)
     }
-  }
 
-  const handleNext = () => {
-    setStep(s => s + 1)
-  }
-
-  // Place order
-  const handlePlaceOrder = () => {
-    const num = `SAV-${Date.now().toString().slice(-6)}`
     setOrderNo(num)
-    setPhase(PHASE_DONE)
+    setPlacing(false)
+    setIsDone(true)
   }
 
-  // Start over
   const handleStartOver = () => {
     setOrder(INIT_ORDER)
     setStep(0)
     setOrderNo(null)
-    setPhase(PHASE_SELECT)
+    setIsDone(false)
   }
 
-  /* ── Render phases ── */
-  if (phase === PHASE_DONE) {
+  if (isDone) {
     return <Confirmation order={order} orderNo={orderNo} onStartOver={handleStartOver} />
   }
 
-  if (phase === PHASE_SELECT) {
-    return (
-      <div className="mealprep-page">
-        <section className="page-hero mealprep-hero">
-          <div className="page-hero__overlay" />
-          <img
-            src="https://placehold.co/1600x500/1E1B4B/EEF2FF?text=Weekly+Meal+Prep"
-            alt="Meal prep"
-            className="page-hero__bg"
-          />
-          <div className="container page-hero__content">
-            <p className="section-label" style={{ color: 'var(--color-accent-light)' }}>Meal Prep Plans</p>
-            <h1 style={{ color: '#fff', marginBottom: '0.75rem' }}>Eat Well, Every Week</h1>
-            <p style={{ color: 'rgba(255,251,245,0.8)', maxWidth: '520px', fontSize: '1.05rem' }}>
-              Chef-crafted, macro-balanced meals delivered to your door. Pick your plan and customise everything.
-            </p>
-          </div>
-        </section>
-        <PlanSelection plans={PLANS} onSelect={handleSelectPlan} />
-      </div>
-    )
-  }
+  const orderTotal       = calcOrderTotal(order.selectedMeals)
+  const totalMealsSelected = Object.values(order.selectedMeals).reduce((s, n) => s + n, 0)
 
-  /* ── Step flow ── */
   return (
     <div className="mealprep-page">
       <section className="page-hero mealprep-hero mealprep-hero--compact">
         <div className="page-hero__overlay" />
         <img
-          src="https://placehold.co/1600x300/1E1B4B/EEF2FF?text=Customize+Your+Plan"
-          alt="Customize plan"
+          src="https://placehold.co/1600x300/1E1B4B/EEF2FF?text=Order+Your+Meals"
+          alt="Order meals"
           className="page-hero__bg"
         />
         <div className="container page-hero__content">
-          <h2 style={{ color: '#fff' }}>
-            {order.plan?.name} Plan — {order.plan?.mealsPerWeek} meals/week
-          </h2>
-          <button
-            className="btn btn-ghost btn-sm mealprep-change-plan"
-            onClick={() => setPhase(PHASE_SELECT)}
-          >
-            Change Plan
-          </button>
+          <p className="section-label" style={{ color: 'var(--color-accent-light)' }}>Meal Prep</p>
+          <h1 style={{ color: '#fff', marginBottom: '0.5rem' }}>Build Your Order</h1>
+          <p style={{ color: 'rgba(255,251,245,0.8)', fontSize: '1rem' }}>
+            Pick your meals, choose a delivery date, and we'll handle the rest.
+          </p>
         </div>
       </section>
 
       <div className="container mealprep-flow">
-        {/* Step indicator */}
         <StepIndicator steps={STEP_LABELS} current={step} />
 
         <div className="mealprep-body">
-          {/* Main content */}
           <div className="mealprep-main">
             {step === 0 && (
               <Step1Preferences
                 preferences={order.preferences}
                 onChange={(prefs) => updateOrder({ preferences: prefs })}
-                onBack={handleBack}
+                onBack={null}
                 onNext={handleNext}
               />
             )}
@@ -157,7 +139,6 @@ export default function MealPrep() {
               <Step2Meals
                 selectedMeals={order.selectedMeals}
                 preferences={order.preferences}
-                quota={quota}
                 onChange={(meals) => updateOrder({ selectedMeals: meals })}
                 onBack={handleBack}
                 onNext={handleNext}
@@ -174,18 +155,18 @@ export default function MealPrep() {
             {step === 3 && (
               <Step4Summary
                 order={order}
+                orderTotal={orderTotal}
+                placing={placing}
                 onBack={handleBack}
                 onPlace={handlePlaceOrder}
               />
             )}
           </div>
 
-          {/* Sidebar — shown on steps 1–3 (not summary which has its own) */}
           {step < 3 && (
             <OrderSidebar
-              plan={order.plan}
               selectedMeals={order.selectedMeals}
-              quota={quota}
+              orderTotal={orderTotal}
               totalSelected={totalMealsSelected}
             />
           )}

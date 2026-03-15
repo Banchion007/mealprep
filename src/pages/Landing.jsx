@@ -110,6 +110,13 @@ function StarRating({ count = 5 }) {
 export default function Landing() {
   useScrollAnimation()
 
+  const handleOpenMenu = (e) => {
+    e.preventDefault()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    const trigger = document.querySelector('.menu-dropdown__trigger')
+    if (trigger) trigger.click()
+  }
+
   return (
     <div className="landing">
       {/* ── Hero ── */}
@@ -136,9 +143,9 @@ export default function Landing() {
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
             </Link>
-            <Link to="/menu" className="btn btn-outline btn-lg hero__btn-outline">
+            <a href="#menu" onClick={handleOpenMenu} className="btn btn-outline btn-lg hero__btn-outline">
               View Our Menu
-            </Link>
+            </a>
           </div>
         </div>
         {/* Scroll indicator */}
@@ -237,9 +244,9 @@ export default function Landing() {
             <Link to="/meal-prep" className="btn btn-lg" style={{ background: '#fff', color: 'var(--color-primary)', fontWeight: 700 }}>
               Build My Meal Plan
             </Link>
-            <Link to="/menu" className="btn btn-lg btn-outline" style={{ borderColor: 'rgba(255,255,255,0.5)', color: '#fff' }}>
+            <a href="#menu" onClick={handleOpenMenu} className="btn btn-lg btn-outline" style={{ borderColor: 'rgba(255,255,255,0.5)', color: '#fff' }}>
               See Full Menu
-            </Link>
+            </a>
           </div>
         </div>
       </section>

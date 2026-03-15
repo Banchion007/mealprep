@@ -1,21 +1,19 @@
 /* ===================================================
-   Step 4 — Order Summary
+   Step 4 — Order Summary (auth-gated)
 =================================================== */
 import React from 'react'
 import { MEALS, DIETARY_OPTIONS } from './data'
+import { useAuth } from '../../contexts/AuthContext'
 import './Steps.css'
 
-export default function Step4Summary({ order, onBack, onPlace }) {
-  const { plan, preferences, selectedMeals, schedule } = order
+export default function Step4Summary({ order, orderTotal, placing, onBack, onPlace }) {
+  const { user, setShowAuthModal } = useAuth()
+  const { preferences, selectedMeals, schedule } = order
 
-  // Build selected meal list
   const mealEntries = Object.entries(selectedMeals)
     .map(([id, qty]) => ({ meal: MEALS.find(m => m.id === id), qty }))
     .filter(e => e.meal)
 
-  const mealSubtotal  = plan ? plan.pricePerMeal * plan.mealsPerWeek : 0
-  const deliveryFee   = 0
-  const weeklyTotal   = mealSubtotal + deliveryFee
   const totalSelected = Object.values(selectedMeals).reduce((s, n) => s + n, 0)
 
   const prefLabels = preferences
@@ -32,15 +30,7 @@ export default function Step4Summary({ order, onBack, onPlace }) {
       <div className="summary-grid">
         {/* Left — details */}
         <div>
-          {/* Plan */}
-          <div className="summary-section">
-            <p className="summary-section__title">Plan</p>
-            <div className="summary-plan-chip">
-              {plan?.name} Plan · {plan?.mealsPerWeek} meals/week · ${plan?.pricePerWeek.toFixed(2)}/week
-            </div>
-          </div>
-
-          {/* Preferences */}
+          {/* Dietary preferences */}
           {prefLabels.length > 0 && (
             <div className="summary-section">
               <p className="summary-section__title">Dietary Preferences</p>
@@ -62,29 +52,27 @@ export default function Step4Summary({ order, onBack, onPlace }) {
 
           {/* Meals */}
           <div className="summary-section">
-            <p className="summary-section__title">
-              Selected Meals ({totalSelected} of {plan?.mealsPerWeek})
-            </p>
+            <p className="summary-section__title">Selected Meals ({totalSelected})</p>
             {mealEntries.map(({ meal, qty }) => (
               <div key={meal.id} className="summary-meal-row">
                 <img src={meal.img} alt={meal.name} className="summary-meal-img" />
                 <span className="summary-meal-name">{meal.name}</span>
-                <span className="summary-meal-qty">x{qty}</span>
+                <span className="summary-meal-qty">×{qty}</span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-primary)' }}>
-                  ${(plan.pricePerMeal * qty).toFixed(2)}
+                  ${(meal.price * qty).toFixed(2)}
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Schedule */}
+          {/* Delivery */}
           <div className="summary-section">
-            <p className="summary-section__title">Delivery Schedule</p>
+            <p className="summary-section__title">Delivery Details</p>
             <div className="summary-schedule-row">
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
               </svg>
-              <span>{schedule.days.join(', ')}</span>
+              <span>{schedule.date}</span>
             </div>
             <div className="summary-schedule-row">
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -103,18 +91,18 @@ export default function Step4Summary({ order, onBack, onPlace }) {
           </div>
         </div>
 
-        {/* Right — pricing */}
+        {/* Right — pricing + place order */}
         <div>
           <div className="pricing-card">
             <h3 className="pricing-card__title">Price Breakdown</h3>
 
-            <div className="pricing-row">
-              <span>{plan?.name} Plan ({plan?.mealsPerWeek} meals)</span>
-              <span>${mealSubtotal.toFixed(2)}</span>
-            </div>
-            <div className="pricing-row">
-              <span>${plan?.pricePerMeal.toFixed(2)} × {plan?.mealsPerWeek} meals</span>
-            </div>
+            {mealEntries.map(({ meal, qty }) => (
+              <div key={meal.id} className="pricing-row">
+                <span>{meal.name} ×{qty}</span>
+                <span>${(meal.price * qty).toFixed(2)}</span>
+              </div>
+            ))}
+
             <div className="pricing-row">
               <span>Delivery</span>
               <span style={{ color: '#16A34A', fontWeight: 700 }}>FREE</span>
@@ -124,24 +112,40 @@ export default function Step4Summary({ order, onBack, onPlace }) {
               <span>Calculated at checkout</span>
             </div>
             <div className="pricing-row pricing-row--total">
-              <span>Weekly Total</span>
-              <span>${weeklyTotal.toFixed(2)}</span>
-            </div>
-            <div className="pricing-row" style={{ color: 'var(--color-text-light)', fontSize: '0.78rem' }}>
-              <span>Billed weekly · Cancel anytime</span>
+              <span>Order Total</span>
+              <span>${orderTotal.toFixed(2)}</span>
             </div>
 
-            <button className="btn btn-primary btn-lg pricing-card__place-btn" onClick={onPlace}>
-              Place Order
-              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
+            {user ? (
+              <button
+                className="btn btn-primary btn-lg pricing-card__place-btn"
+                onClick={() => onPlace(user)}
+                disabled={placing}
+              >
+                {placing ? 'Placing Order…' : 'Place Order'}
+                {!placing && (
+                  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                )}
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary btn-lg pricing-card__place-btn"
+                onClick={() => setShowAuthModal(true)}
+              >
+                Sign In to Place Order
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+              </button>
+            )}
+
             <p className="pricing-card__note">
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               </svg>
-              Secure checkout · No commitment
+              {user ? 'Secure checkout · One-time order' : 'Sign in to complete your order'}
             </p>
           </div>
         </div>

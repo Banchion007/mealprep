@@ -3,6 +3,7 @@
 =================================================== */
 import React, { useState, useEffect, useRef } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import './Navbar.css'
 
 const NAV_LINKS = [
@@ -62,7 +63,7 @@ export default function Navbar() {
   const [scrolled,     setScrolled]     = useState(false)
   const [menuOpen,     setMenuOpen]     = useState(false)
   const location = useLocation()
-
+  const { user, isAdmin, signOut, setShowAuthModal } = useAuth()
   // Close mobile menu on route change
   useEffect(() => { setMenuOpen(false) }, [location])
 
@@ -103,6 +104,28 @@ export default function Navbar() {
           <Link to="/meal-prep" className="btn btn-primary btn-sm navbar__cta">
             Order Meals
           </Link>
+          <Link
+            to="/dashboard"
+            className="btn btn-outline btn-sm navbar__cta"
+            style={isAdmin ? undefined : { visibility: 'hidden', pointerEvents: 'none' }}
+            tabIndex={isAdmin ? undefined : -1}
+          >
+            Dashboard
+          </Link>
+          {user ? (
+            <div className="navbar__user">
+              <div className="navbar__user-avatar">
+                {(user.user_metadata?.full_name || user.email || '?')[0].toUpperCase()}
+              </div>
+              <button className="navbar__user-signout btn btn-ghost btn-sm" onClick={signOut}>
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <button className="btn btn-outline btn-sm" onClick={() => setShowAuthModal(true)}>
+              Sign In
+            </button>
+          )}
           {/* Hamburger */}
           <button
             className={`navbar__burger${menuOpen ? ' open' : ''}`}
@@ -135,6 +158,11 @@ export default function Navbar() {
         <Link to="/meal-prep" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
           Order Meals
         </Link>
+        {isAdmin && (
+          <Link to="/dashboard" className="btn btn-outline" style={{ marginTop: '0.5rem' }}>
+            Dashboard
+          </Link>
+        )}
       </div>
     </header>
   )

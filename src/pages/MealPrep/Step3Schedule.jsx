@@ -1,22 +1,22 @@
 /* ===================================================
-   Step 3 — Delivery Schedule
+   Step 3 — Delivery Details
 =================================================== */
 import React from 'react'
-import { DAYS, DELIVERY_WINDOWS } from './data'
+import { DELIVERY_WINDOWS } from './data'
 import './Steps.css'
+
+/* Minimum selectable date = tomorrow */
+function minDate() {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().split('T')[0]
+}
 
 export default function Step3Schedule({ schedule, onChange, onBack, onNext }) {
   const update = (field, value) => onChange({ ...schedule, [field]: value })
 
-  const toggleDay = (day) => {
-    const days = schedule.days.includes(day)
-      ? schedule.days.filter(d => d !== day)
-      : [...schedule.days, day]
-    update('days', days)
-  }
-
   const isValid =
-    schedule.days.length > 0 &&
+    schedule.date &&
     schedule.timeWindow &&
     schedule.address.trim() &&
     schedule.city.trim() &&
@@ -26,38 +26,28 @@ export default function Step3Schedule({ schedule, onChange, onBack, onNext }) {
   return (
     <div className="step-panel">
       <div className="step-panel__header">
-        <h2 className="step-panel__title">Delivery Schedule</h2>
+        <h2 className="step-panel__title">Delivery Details</h2>
         <p className="step-panel__sub">
-          Choose which days you'd like your meals delivered and your preferred time window.
+          Choose a delivery date, time window, and enter your address.
         </p>
       </div>
 
       <div className="schedule-grid">
-        {/* Delivery days */}
-        <div>
-          <p className="form-label" style={{ marginBottom: '0.75rem' }}>Delivery Days</p>
-          <div className="days-grid">
-            {DAYS.map(day => (
-              <button
-                key={day}
-                type="button"
-                className={`day-btn${schedule.days.includes(day) ? ' day-btn--active' : ''}`}
-                onClick={() => toggleDay(day)}
-              >
-                {day.slice(0, 3)}
-              </button>
-            ))}
-          </div>
-          {schedule.days.length > 0 && (
-            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.6rem' }}>
-              Selected: {schedule.days.join(', ')}
-            </p>
-          )}
+        {/* Delivery date */}
+        <div className="form-group">
+          <label className="form-label">Delivery Date</label>
+          <input
+            className="form-input"
+            type="date"
+            min={minDate()}
+            value={schedule.date}
+            onChange={e => update('date', e.target.value)}
+          />
         </div>
 
         {/* Time window */}
         <div className="form-group">
-          <label className="form-label">Preferred Delivery Window</label>
+          <label className="form-label">Preferred Time Window</label>
           <select
             className="form-select"
             value={schedule.timeWindow}
@@ -122,7 +112,7 @@ export default function Step3Schedule({ schedule, onChange, onBack, onNext }) {
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
           </svg>
-          <span>Please select at least one delivery day, a time window, and enter your full address.</span>
+          <span>Please select a delivery date, a time window, and enter your full address.</span>
         </div>
       )}
 

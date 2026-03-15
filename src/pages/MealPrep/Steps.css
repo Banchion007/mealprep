@@ -152,6 +152,46 @@
 .quota-fill.quota-full { background: #16A34A; }
 .quota-fill.quota-over { background: #DC2626; }
 
+/* Active dietary preference chips */
+.meals-active-prefs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.65rem 1rem;
+  background: var(--primary-alpha-6);
+  border: 1px solid var(--primary-alpha-20);
+  border-radius: var(--radius-md);
+}
+.meals-active-prefs__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Filter buttons (also used in meal-prep step 2) */
+.filter-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.filter-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
 .meals-cat-tabs {
   display: flex;
   gap: 0.5rem;
@@ -267,6 +307,11 @@
   justify-content: space-between;
   padding-top: 0.65rem;
   border-top: 1px solid var(--color-border);
+}
+.meal-card__price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary);
 }
 
 .counter {
