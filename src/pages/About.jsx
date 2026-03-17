@@ -55,7 +55,6 @@ const VALUES = [
   { icon: '🌱', title: 'Sustainability',   desc: 'We partner with local farms to minimize waste and support the community.' },
   { icon: '🎨', title: 'Creativity',       desc: 'Every menu is a canvas. We innovate constantly and never repeat ourselves.' },
   { icon: '♥',  title: 'Integrity',        desc: 'No shortcuts. Real ingredients, honest pricing, genuine care.' },
-  { icon: '🤝', title: 'Inclusivity',      desc: 'We celebrate all diets and cultures, creating menus that welcome everyone.' },
 ]
 
 export default function About() {

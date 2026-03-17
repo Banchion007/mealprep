@@ -1,177 +1,157 @@
 /* ===================================================
-   Meal Prep Page — on-demand ordering flow:
-   Step 1 (Prefs) → Step 2 (Meals)
-   → Step 3 (Schedule) → Step 4 (Summary) → Confirmation
+   MealPrep — Flow controller
+   Screens: start → menu → delivery → summary → done
 =================================================== */
-import React, { useState, useCallback } from 'react'
-import { MEALS } from './data'
-import StepIndicator from './StepIndicator'
-import Step1Preferences from './Step1Preferences'
-import Step2Meals from './Step2Meals'
-import Step3Schedule from './Step3Schedule'
-import Step4Summary from './Step4Summary'
-import OrderSidebar from './OrderSidebar'
-import Confirmation from './Confirmation'
-import { supabase } from '../../lib/supabase'
+import React, { useState, useEffect } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
+import { MenuProvider } from '../../contexts/MenuContext'
+import MealPrepStart    from './MealPrepStart'
+import MealPrepMenu     from './MealPrepMenu'
+import MealPrepDelivery from './MealPrepDelivery'
+import MealPrepSummary  from './MealPrepSummary'
+import Confirmation     from './Confirmation'
 import './MealPrep.css'
 
-const STEP_LABELS = ['Dietary Preferences', 'Meal Selection', 'Delivery Details', 'Order Summary']
+const SCREENS = ['start', 'menu', 'delivery', 'summary', 'done']
 
-const INIT_ORDER = {
-  preferences:   [],
-  selectedMeals: {},   // { mealId: count }
-  schedule: {
-    date:        '',
-    timeWindow:  '',
-    address:     '',
-    city:        '',
-    state:       '',
-    zip:         '',
-  },
-}
+const STEP_LABELS = [
+  { key: 'menu',     label: 'Menu' },
+  { key: 'delivery', label: 'Delivery' },
+  { key: 'summary',  label: 'Payment' },
+]
 
-/* Compute order total from selectedMeals */
-export function calcOrderTotal(selectedMeals) {
-  return Object.entries(selectedMeals).reduce((sum, [id, qty]) => {
-    const meal = MEALS.find(m => m.id === id)
-    return sum + (meal ? meal.price * qty : 0)
-  }, 0)
+const INIT_DELIVERY = {
+  address:    { street: '', city: '', state: '', zip: '' },
+  date:       '',
+  timeWindow: '',
 }
 
 export default function MealPrep() {
-  const [step,    setStep]    = useState(0)
-  const [order,   setOrder]   = useState(INIT_ORDER)
-  const [orderNo, setOrderNo] = useState(null)
-  const [isDone,  setIsDone]  = useState(false)
-  const [placing, setPlacing] = useState(false)
+  const { user, setShowAuthModal } = useAuth()
+  const [screen,        setScreen]        = useState('start')
+  const [selectedMeals, setSelectedMeals] = useState({})
+  const [delivery,      setDelivery]      = useState(INIT_DELIVERY)
+  const [orderNo,       setOrderNo]       = useState(null)
+  const [orderTotal,    setOrderTotal]    = useState(0)
 
-  const updateOrder = useCallback((patch) => {
-    setOrder(prev => ({ ...prev, ...patch }))
-  }, [])
-
-  const handleBack = () => setStep(s => s - 1)
-  const handleNext = () => setStep(s => s + 1)
-
-  const handlePlaceOrder = async (user) => {
-    setPlacing(true)
-    const num = `HC-${Date.now().toString().slice(-6)}`
-
-    const mealItems = Object.entries(order.selectedMeals)
-      .map(([id, qty]) => {
-        const meal = MEALS.find(m => m.id === id)
-        return meal ? { id, name: meal.name, qty, price: meal.price } : null
-      })
-      .filter(Boolean)
-
-    const total = calcOrderTotal(order.selectedMeals)
-
-    try {
-      const { error } = await supabase.from('orders').insert({
-        order_number:   num,
-        user_id:        user.id,
-        customer_name:  user.user_metadata?.full_name || user.email,
-        customer_email: user.email,
-        type:           'Meal Prep',
-        items:          mealItems,
-        total,
-        delivery_date:  order.schedule.date,
-        time_window:    order.schedule.timeWindow,
-        address:        `${order.schedule.address}, ${order.schedule.city}, ${order.schedule.state} ${order.schedule.zip}`,
-        preferences:    order.preferences,
-        status:         'Pending',
-      })
-      if (error) throw error
-    } catch (err) {
-      console.error('Failed to save order:', err)
+  // If user signs in while at start screen, auto-advance to menu
+  useEffect(() => {
+    if (user && screen === 'start') {
+      // Don't auto-advance; wait for explicit button click
     }
+  }, [user])
 
+  const handleStart = () => {
+    if (!user) {
+      setShowAuthModal(true)
+      return
+    }
+    setScreen('menu')
+  }
+
+  // After auth modal closes with a user logged in
+  useEffect(() => {
+    if (user && screen === 'start') {
+      // Still let them click the button; don't force-advance
+    }
+  }, [user, screen])
+
+  const handleDone = (num, total) => {
     setOrderNo(num)
-    setPlacing(false)
-    setIsDone(true)
+    setOrderTotal(total)
+    setScreen('done')
   }
 
   const handleStartOver = () => {
-    setOrder(INIT_ORDER)
-    setStep(0)
+    setSelectedMeals({})
+    setDelivery(INIT_DELIVERY)
     setOrderNo(null)
-    setIsDone(false)
+    setOrderTotal(0)
+    setScreen('start')
   }
 
-  if (isDone) {
-    return <Confirmation order={order} orderNo={orderNo} onStartOver={handleStartOver} />
+  if (screen === 'start') {
+    return <MealPrepStart onStart={handleStart} />
   }
 
-  const orderTotal       = calcOrderTotal(order.selectedMeals)
-  const totalMealsSelected = Object.values(order.selectedMeals).reduce((s, n) => s + n, 0)
+  const currentStepIdx = STEP_LABELS.findIndex(s => s.key === screen)
 
   return (
-    <div className="mealprep-page">
-      <section className="page-hero mealprep-hero mealprep-hero--compact">
-        <div className="page-hero__overlay" />
-        <img
-          src="https://placehold.co/1600x300/1E1B4B/EEF2FF?text=Order+Your+Meals"
-          alt="Order meals"
-          className="page-hero__bg"
+    <MenuProvider>
+      {screen === 'done' ? (
+        <Confirmation
+          order={{ selectedMeals, schedule: delivery }}
+          orderNo={orderNo}
+          orderTotal={orderTotal}
+          onStartOver={handleStartOver}
         />
-        <div className="container page-hero__content">
-          <p className="section-label" style={{ color: 'var(--color-accent-light)' }}>Meal Prep</p>
-          <h1 style={{ color: '#fff', marginBottom: '0.5rem' }}>Build Your Order</h1>
-          <p style={{ color: 'rgba(255,251,245,0.8)', fontSize: '1rem' }}>
-            Pick your meals, choose a delivery date, and we'll handle the rest.
-          </p>
-        </div>
-      </section>
+      ) : (
+        <div className="mp-flow">
+          {/* Progress bar */}
+          <div className="mp-progress-bar">
+            <div className="mp-progress-bar__inner">
+              <button
+                className="mp-progress-bar__back"
+                onClick={() => setScreen(screen === 'menu' ? 'start' : screen === 'delivery' ? 'menu' : 'delivery')}
+                aria-label="Go back"
+              >
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+              </button>
 
-      <div className="container mealprep-flow">
-        <StepIndicator steps={STEP_LABELS} current={step} />
+              <div className="mp-steps">
+                {STEP_LABELS.map((s, i) => (
+                  <React.Fragment key={s.key}>
+                    <div className={`mp-step${i < currentStepIdx ? ' mp-step--done' : i === currentStepIdx ? ' mp-step--active' : ''}`}>
+                      <div className="mp-step__dot">
+                        {i < currentStepIdx ? (
+                          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        ) : (
+                          <span>{i + 1}</span>
+                        )}
+                      </div>
+                      <span className="mp-step__label">{s.label}</span>
+                    </div>
+                    {i < STEP_LABELS.length - 1 && (
+                      <div className={`mp-step__line${i < currentStepIdx ? ' mp-step__line--done' : ''}`} />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
 
-        <div className="mealprep-body">
-          <div className="mealprep-main">
-            {step === 0 && (
-              <Step1Preferences
-                preferences={order.preferences}
-                onChange={(prefs) => updateOrder({ preferences: prefs })}
-                onBack={null}
-                onNext={handleNext}
-              />
-            )}
-            {step === 1 && (
-              <Step2Meals
-                selectedMeals={order.selectedMeals}
-                preferences={order.preferences}
-                onChange={(meals) => updateOrder({ selectedMeals: meals })}
-                onBack={handleBack}
-                onNext={handleNext}
-              />
-            )}
-            {step === 2 && (
-              <Step3Schedule
-                schedule={order.schedule}
-                onChange={(sched) => updateOrder({ schedule: sched })}
-                onBack={handleBack}
-                onNext={handleNext}
-              />
-            )}
-            {step === 3 && (
-              <Step4Summary
-                order={order}
-                orderTotal={orderTotal}
-                placing={placing}
-                onBack={handleBack}
-                onPlace={handlePlaceOrder}
-              />
-            )}
+              <div className="mp-progress-bar__spacer" />
+            </div>
           </div>
 
-          {step < 3 && (
-            <OrderSidebar
-              selectedMeals={order.selectedMeals}
-              orderTotal={orderTotal}
-              totalSelected={totalMealsSelected}
+          {/* Screen content */}
+          {screen === 'menu' && (
+            <MealPrepMenu
+              selectedMeals={selectedMeals}
+              onChange={setSelectedMeals}
+              onNext={() => setScreen('delivery')}
+            />
+          )}
+          {screen === 'delivery' && (
+            <MealPrepDelivery
+              delivery={delivery}
+              onChange={setDelivery}
+              onBack={() => setScreen('menu')}
+              onNext={() => setScreen('summary')}
+            />
+          )}
+          {screen === 'summary' && (
+            <MealPrepSummary
+              selectedMeals={selectedMeals}
+              delivery={delivery}
+              onBack={() => setScreen('delivery')}
+              onDone={handleDone}
             />
           )}
         </div>
-      </div>
-    </div>
+      )}
+    </MenuProvider>
   )
 }

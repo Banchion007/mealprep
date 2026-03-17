@@ -26,7 +26,17 @@ const EMPTY_RECIPE = {
   allergenTags: [],
   ingredients: [{ name: '', qty: '', unit: 'cup', category: 'Pantry' }],
   instructions: '',
+  price: '',
+  calories: '',
+  protein: '',
+  carbs: '',
+  fat: '',
+  img: '',
+  desc: '',
+  dietaryTags: [],
 }
+
+const DIETARY_TAG_OPTIONS = ['Vegan','Vegetarian','Keto','Gluten-Free','Dairy-Free','Nut-Free','Halal','Spicy']
 
 /* ── TagChipsInput: free-text multi-tag input ── */
 function TagChipsInput({ value, onChange, placeholder }) {
@@ -90,6 +100,12 @@ function RecipeModal({ initial, onSave, onClose }) {
     set('allergenTags', form.allergenTags.includes(a)
       ? form.allergenTags.filter(x => x !== a)
       : [...form.allergenTags, a]
+    )
+
+  const toggleDietaryTag = (t) =>
+    set('dietaryTags', (form.dietaryTags || []).includes(t)
+      ? (form.dietaryTags || []).filter(x => x !== t)
+      : [...(form.dietaryTags || []), t]
     )
 
   const handleSave = () => {
@@ -222,6 +238,110 @@ function RecipeModal({ initial, onSave, onClose }) {
               rows={5}
             />
           </div>
+
+          {/* Customer Menu Details */}
+          <div className="form-group">
+            <label className="form-label" style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-secondary)' }}>Customer Menu Details</label>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Image URL</label>
+            <input
+              className="form-input"
+              type="url"
+              value={form.img || ''}
+              onChange={e => set('img', e.target.value)}
+              placeholder="https://... (leave blank for placeholder)"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Short Description</label>
+            <textarea
+              className="form-textarea"
+              value={form.desc || ''}
+              onChange={e => set('desc', e.target.value)}
+              placeholder="1-2 sentence description shown on menu card…"
+              rows={2}
+            />
+          </div>
+
+          <div className="modal-row-2">
+            <div className="form-group">
+              <label className="form-label">Price ($)</label>
+              <input
+                className="form-input"
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.price || ''}
+                onChange={e => set('price', e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Calories</label>
+              <input
+                className="form-input"
+                type="number"
+                min="0"
+                value={form.calories || ''}
+                onChange={e => set('calories', e.target.value)}
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div className="modal-row-3">
+            <div className="form-group">
+              <label className="form-label">Protein (g)</label>
+              <input
+                className="form-input"
+                type="number"
+                min="0"
+                value={form.protein || ''}
+                onChange={e => set('protein', e.target.value)}
+                placeholder="0"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Carbs (g)</label>
+              <input
+                className="form-input"
+                type="number"
+                min="0"
+                value={form.carbs || ''}
+                onChange={e => set('carbs', e.target.value)}
+                placeholder="0"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Fat (g)</label>
+              <input
+                className="form-input"
+                type="number"
+                min="0"
+                value={form.fat || ''}
+                onChange={e => set('fat', e.target.value)}
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Dietary Tags</label>
+            <div className="allergen-grid">
+              {DIETARY_TAG_OPTIONS.map(t => (
+                <label
+                  key={t}
+                  className={`allergen-checkbox${(form.dietaryTags || []).includes(t) ? ' allergen-checkbox--selected' : ''}`}
+                >
+                  <input type="checkbox" checked={(form.dietaryTags || []).includes(t)} onChange={() => toggleDietaryTag(t)} />
+                  {t}
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="modal__footer">
@@ -249,7 +369,10 @@ function RecipeCard({ recipe, onEdit, onDelete }) {
   return (
     <div className="recipe-card">
       <div className="recipe-card__header">
-        <h3 className="recipe-card__name">{recipe.name}</h3>
+        <h3 className="recipe-card__name">
+          {recipe.name}
+          {recipe.price ? <span style={{ color: 'var(--color-accent)', fontWeight: 700, marginLeft: '0.5rem' }}>${parseFloat(recipe.price).toFixed(2)}</span> : null}
+        </h3>
         <div className="recipe-card__actions">
           <button className="recipe-card__icon-btn" onClick={handleShare} title="Share">
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

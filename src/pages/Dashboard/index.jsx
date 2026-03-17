@@ -6,9 +6,10 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import DashboardSidebar from './DashboardSidebar'
 import Overview     from './Overview'
 import Orders       from './Orders'
-import Subscribers  from './Subscribers'
+import Customers    from './Customers'
 import Recipes      from './Recipes'
 import GroceryList  from './GroceryList'
+import WeeklyMenuBuilder from './WeeklyMenuBuilder'
 import { seedMockData } from './mockData'
 import { useAuth } from '../../contexts/AuthContext'
 import './Dashboard.css'
@@ -56,9 +57,10 @@ export default function DashboardLayout() {
         <Routes>
           <Route index           element={<Overview />} />
           <Route path="orders"       element={<Orders />} />
-          <Route path="subscribers"  element={<Subscribers />} />
+          <Route path="customers"    element={<Customers />} />
           <Route path="recipes"      element={<Recipes />} />
           <Route path="grocery-list" element={<GroceryList />} />
+          <Route path="weekly-menu" element={<WeeklyMenuBuilder />} />
           <Route path="*"            element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>

@@ -1,6 +1,6 @@
 /* ===================================================
    Mock Data — seeds localStorage for demo purposes
-   Keys: hc_orders, hc_subscribers, hc_recipes
+   Keys: hc_orders, hc_subscribers, hc_customers, hc_recipes
    Seeded once; clear hc_seeded to reset.
 =================================================== */
 
@@ -23,7 +23,7 @@ const MEAL_NAMES = [
 ]
 
 const PLANS = ['Basic', 'Standard', 'Premium']
-const DIET_OPTIONS = ['Vegan', 'Vegetarian', 'Keto', 'Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Halal']
+const DIET_OPTIONS = ['Vegan', 'Vegetarian', 'Keto', 'Gluten-Free', 'Dairy-Free', 'Nut-Free']
 
 // Fixed status distribution for realistic demo data
 const STATUS_POOL = [
@@ -125,6 +125,85 @@ function genSubscribers() {
   })
 }
 
+/* Deterministic phone number from a name string */
+function nameToPhone(name) {
+  let h = 0
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffff
+  const area = 200 + (h % 700)
+  const mid  = 200 + ((h >>  4) % 700)
+  const end  = 1000 + ((h >> 8) % 8999)
+  return `(${area}) ${mid}-${end}`
+}
+
+function genCustomers(orders) {
+  const map = {}
+  orders.forEach(order => {
+    const key = order.customer
+    if (!map[key]) {
+      map[key] = {
+        id:    `CUS-${String(Object.keys(map).length + 101).padStart(3, '0')}`,
+        name:  key,
+        email: `${key.toLowerCase().replace(/\s+/g, '.')}@email.com`,
+        phone: nameToPhone(key),
+        orders: [],
+        tags:  [],
+        notes: [],
+      }
+    }
+    map[key].orders.push({
+      id:           order.id,
+      type:         order.type,
+      total:        order.total,
+      status:       order.status,
+      createdAt:    order.createdAt,
+      deliveryDate: order.deliveryDate,
+      meals:        order.meals,
+      mealCount:    order.mealCount,
+    })
+  })
+
+  return Object.values(map).map(c => {
+    // Sort orders newest-first
+    c.orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+
+    const totalSpent     = parseFloat(c.orders.reduce((s, o) => s + o.total, 0).toFixed(2))
+    const totalOrders    = c.orders.length
+    const avgOrderValue  = parseFloat((totalSpent / totalOrders).toFixed(2))
+    const lastOrderDate  = c.orders[0].createdAt
+    const joinDate       = c.orders[c.orders.length - 1].createdAt
+
+    const daysSinceLast  = Math.floor((Date.now() - new Date(lastOrderDate + 'T12:00:00')) / 86400000)
+    const hasEvent       = c.orders.some(o => o.type === 'Catering Event')
+    const avgMeals       = c.orders.reduce((s, o) => s + o.mealCount, 0) / totalOrders
+
+    // Derive status
+    let status = 'Active'
+    if (totalOrders === 1 && daysSinceLast > 10) status = 'New'
+    else if (daysSinceLast > 21) status = 'Inactive'
+    else if (daysSinceLast > 14) status = 'At Risk'
+
+    // Derive initial tags
+    const tags = []
+    if (totalSpent > 250)    tags.push('VIP')
+    else if (totalOrders > 3) tags.push('Regular')
+    else if (totalOrders === 1) tags.push('New Customer')
+    if (hasEvent)            tags.push('Event Client')
+    if (avgMeals > 8)        tags.push('Bulk Buyer')
+    if (totalSpent > 150 && !tags.includes('VIP')) tags.push('High Value')
+
+    return {
+      ...c,
+      totalSpent,
+      totalOrders,
+      avgOrderValue,
+      lastOrderDate,
+      joinDate,
+      status,
+      tags,
+    }
+  })
+}
+
 export const SAMPLE_RECIPES = [
   {
     id: 'r001',
@@ -144,6 +223,10 @@ export const SAMPLE_RECIPES = [
       { name: 'Garlic cloves', qty: 3, unit: 'cloves', category: 'Produce' },
     ],
     instructions: 'Preheat oven to 400°F. Mix breadcrumbs with dill, garlic, and olive oil. Brush salmon with mustard, press herb crust on top. Bake 18–20 minutes until cooked through. Serve with lemon wedges.',
+    price: 18.99, calories: 520, protein: 44, carbs: 22, fat: 22,
+    img: 'https://placehold.co/360x240/1E1B4B/EEF2FF?text=Herb+Salmon',
+    desc: 'Pan-seared salmon fillet with roasted asparagus and lemon-caper butter sauce.',
+    dietaryTags: ['Gluten-Free', 'Dairy-Free'],
   },
   {
     id: 'r002',
@@ -166,6 +249,10 @@ export const SAMPLE_RECIPES = [
       { name: 'Fresh thyme', qty: 1, unit: 'tsp', category: 'Produce' },
     ],
     instructions: 'Pound chicken to even thickness, dredge in flour. Pan-fry in oil until golden; set aside. Sauté mushrooms and garlic in butter, deglaze with marsala. Add broth and cream; simmer 5 min. Return chicken and cook through.',
+    price: 16.99, calories: 580, protein: 40, carbs: 35, fat: 24,
+    img: 'https://placehold.co/360x240/1E1B4B/EEF2FF?text=Chicken+Marsala',
+    desc: 'Tender chicken in a rich Marsala wine sauce with sautéed cremini mushrooms.',
+    dietaryTags: [],
   },
   {
     id: 'r003',
@@ -188,6 +275,10 @@ export const SAMPLE_RECIPES = [
       { name: 'Sesame seeds', qty: 1, unit: 'tbsp', category: 'Pantry' },
     ],
     instructions: 'Cook rice. Roast chickpeas and cubed sweet potato at 400°F for 25 min. Make tahini dressing with lemon and soy sauce. Assemble bowls with rice, roasted items, fresh veggies, and dressing.',
+    price: 12.99, calories: 440, protein: 18, carbs: 62, fat: 14,
+    img: 'https://placehold.co/360x240/312E81/EEF2FF?text=Buddha+Bowl',
+    desc: 'Roasted chickpeas, sweet potato, kale, and house tahini dressing over farro.',
+    dietaryTags: ['Vegan', 'Gluten-Free'],
   },
   {
     id: 'r004',
@@ -207,6 +298,10 @@ export const SAMPLE_RECIPES = [
       { name: 'Almonds', qty: 1, unit: 'tbsp', category: 'Pantry' },
     ],
     instructions: 'Combine oats, yogurt, milk, chia seeds, and honey in a jar. Stir well. Refrigerate overnight. Top with berries and almonds before serving.',
+    price: 8.99, calories: 310, protein: 18, carbs: 42, fat: 6,
+    img: 'https://placehold.co/360x240/EEF2FF/1E1B4B?text=Overnight+Oats',
+    desc: 'Creamy oats layered with Greek yogurt, mixed berries, and local honey. Meal-prepped overnight.',
+    dietaryTags: ['Vegetarian'],
   },
   {
     id: 'r005',
@@ -229,6 +324,10 @@ export const SAMPLE_RECIPES = [
       { name: 'Fresh cilantro', qty: 0.25, unit: 'cup', category: 'Produce' },
     ],
     instructions: 'Cook rice. Brown turkey with taco seasoning. Warm beans and corn. Assemble bowls with rice, turkey, beans, corn, salsa. Top with cheese, sour cream, and cilantro.',
+    price: 13.99, calories: 480, protein: 38, carbs: 40, fat: 14,
+    img: 'https://placehold.co/360x240/EA580C/FFF?text=Turkey+Bowl',
+    desc: 'Seasoned ground turkey over brown rice with black beans, corn, and fresh salsa.',
+    dietaryTags: ['Gluten-Free'],
   },
   {
     id: 'r006',
@@ -251,6 +350,10 @@ export const SAMPLE_RECIPES = [
       { name: 'Italian seasoning', qty: 1, unit: 'tsp', category: 'Pantry' },
     ],
     instructions: 'Roast vegetables at 425°F for 25–30 min. Cook pasta al dente. Toss pasta with roasted vegetables, olive oil, garlic, and parmesan. Top with fresh basil.',
+    price: 14.99, calories: 520, protein: 18, carbs: 72, fat: 16,
+    img: 'https://placehold.co/360x240/312E81/EEF2FF?text=Veggie+Pasta',
+    desc: 'Roasted seasonal vegetables tossed with penne, parmesan, and fresh basil.',
+    dietaryTags: ['Vegetarian'],
   },
   {
     id: 'r007',
@@ -274,6 +377,10 @@ export const SAMPLE_RECIPES = [
       { name: 'Olive oil', qty: 3, unit: 'tbsp', category: 'Pantry' },
     ],
     instructions: 'Marinate chicken in lemon, oregano, olive oil for 30 min. Grill or bake until cooked. Cook quinoa. Make tzatziki with yogurt and cucumber. Assemble bowls.',
+    price: 14.99, calories: 510, protein: 42, carbs: 48, fat: 14,
+    img: 'https://placehold.co/360x240/312E81/EEF2FF?text=Greek+Bowl',
+    desc: 'Herb-marinated chicken over quinoa with cucumber, olives, feta, and tzatziki.',
+    dietaryTags: ['Gluten-Free'],
   },
   {
     id: 'r008',
@@ -294,14 +401,22 @@ export const SAMPLE_RECIPES = [
       { name: 'Maple syrup', qty: 2, unit: 'tbsp', category: 'Pantry' },
     ],
     instructions: 'Mash bananas. Mix with eggs, flour, protein powder, baking powder, and cinnamon. Cook on non-stick pan over medium heat until bubbles form. Flip and cook until golden. Serve with yogurt and maple syrup.',
+    price: 9.99, calories: 380, protein: 28, carbs: 48, fat: 8,
+    img: 'https://placehold.co/360x240/EEF2FF/1E1B4B?text=Protein+Pancakes',
+    desc: 'Fluffy banana pancakes packed with protein, served with Greek yogurt and maple syrup.',
+    dietaryTags: ['Vegetarian'],
   },
 ]
 
 export function seedMockData() {
   if (localStorage.getItem('hc_seeded') === '1') return
-  localStorage.setItem('hc_orders', JSON.stringify(genOrders()))
-  localStorage.setItem('hc_subscribers', JSON.stringify(genSubscribers()))
-  localStorage.setItem('hc_recipes', JSON.stringify(SAMPLE_RECIPES))
+  const orders      = genOrders()
+  const subscribers = genSubscribers()
+  const customers   = genCustomers(orders)
+  localStorage.setItem('hc_orders',      JSON.stringify(orders))
+  localStorage.setItem('hc_subscribers', JSON.stringify(subscribers))
+  localStorage.setItem('hc_customers',   JSON.stringify(customers))
+  localStorage.setItem('hc_recipes',     JSON.stringify(SAMPLE_RECIPES))
   localStorage.setItem('hc_seeded', '1')
 }
 
@@ -309,6 +424,7 @@ export function resetMockData() {
   localStorage.removeItem('hc_seeded')
   localStorage.removeItem('hc_orders')
   localStorage.removeItem('hc_subscribers')
+  localStorage.removeItem('hc_customers')
   localStorage.removeItem('hc_recipes')
   localStorage.removeItem('hc_grocery_calendar')
   seedMockData()

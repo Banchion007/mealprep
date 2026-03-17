@@ -41,6 +41,13 @@ const INFO_ITEMS = [
   }
 ]
 
+const FAQ_ITEMS = [
+  { q: 'What is your minimum guest count?', a: 'For full-service catering we typically work with events of 20 or more guests. For drop-off catering and meal prep there is no minimum — we\'re happy to serve individuals and small groups.' },
+  { q: 'Do you offer tastings?', a: 'Yes. We offer tastings for wedding and large events. Contact us to schedule a tasting — we\'ll prepare a selection of items from your proposed menu so you can choose with confidence.' },
+  { q: 'Can you accommodate allergies?', a: 'Absolutely. We take allergies and dietary restrictions seriously. Share your requirements in your message and we\'ll tailor the menu accordingly and flag any allergens in your order.' },
+  { q: 'How far in advance should I book?', a: 'We recommend booking at least 2–4 weeks ahead for events, and 1 week for meal prep. For large or peak-season events, 6–8 weeks is ideal. Last-minute requests are considered when our schedule allows.' },
+]
+
 const INIT = {
   name: '', email: '', phone: '', eventType: '',
   eventDate: '', guestCount: '', message: '',
@@ -69,6 +76,7 @@ export default function Contact() {
   const [errors,    setErrors]    = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [loading,   setLoading]   = useState(false)
+  const [faqOpen,   setFaqOpen]   = useState(null)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -93,22 +101,15 @@ export default function Contact() {
 
   return (
     <div className="contact-page">
-      {/* Hero */}
-      <section className="page-hero contact-hero">
-        <div className="page-hero__overlay" />
-        <img
-          src="https://placehold.co/1600x500/1E1B4B/EEF2FF?text=Contact+Us"
-          alt="Contact Saveur"
-          className="page-hero__bg"
-        />
-        <div className="container page-hero__content fade-up">
-          <p className="section-label" style={{ color: 'var(--color-accent-light)' }}>Let's Talk</p>
-          <h1 style={{ color: '#fff', marginBottom: '0.75rem' }}>Contact Us</h1>
-          <p style={{ color: 'rgba(255,251,245,0.8)', maxWidth: '480px', fontSize: '1.05rem' }}>
+      <div className="contact-page-header">
+        <div className="container">
+          <p className="section-label">Let's Talk</p>
+          <h1 className="contact-page-header__title">Contact Us</h1>
+          <p className="contact-page-header__sub">
             Have an event in mind, or want to start a meal prep plan? Reach out — we'd love to hear from you.
           </p>
         </div>
-      </section>
+      </div>
 
       <section className="section contact-section">
         <div className="container contact-inner">
@@ -284,20 +285,25 @@ export default function Contact() {
               </div>
             </div>
 
-            {/* FAQ chips */}
+            {/* FAQ accordion */}
             <div className="contact-faq">
               <p className="contact-faq__label">Common Questions</p>
-              {[
-                'What is your minimum guest count?',
-                'Do you offer tastings?',
-                'Can you accommodate allergies?',
-                'How far in advance should I book?',
-              ].map(q => (
-                <div key={q} className="contact-faq__item">
-                  <svg width="14" height="14" fill="none" stroke="var(--color-primary)" strokeWidth="2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                  <span>{q}</span>
+              {FAQ_ITEMS.map((item, i) => (
+                <div key={item.q} className="contact-faq__item">
+                  <button
+                    type="button"
+                    className="contact-faq__trigger"
+                    onClick={() => setFaqOpen(faqOpen === i ? null : i)}
+                    aria-expanded={faqOpen === i}
+                  >
+                    <span className="contact-faq__q">{item.q}</span>
+                    <svg className={`contact-faq__chevron${faqOpen === i ? ' open' : ''}`} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  </button>
+                  {faqOpen === i && (
+                    <div className="contact-faq__answer">{item.a}</div>
+                  )}
                 </div>
               ))}
               <p className="contact-faq__note">Ask us anything in your message — we'll answer every question.</p>

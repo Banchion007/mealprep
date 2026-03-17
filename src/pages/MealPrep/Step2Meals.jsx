@@ -11,7 +11,6 @@ const TAG_CLASS = {
   'Keto':        'tag-keto',
   'Gluten-Free': 'tag-gf',
   'Dairy-Free':  'tag-dairy-free',
-  'Halal':       'tag-halal',
   'Nut-Free':    'tag-nut-free',
 }
 
@@ -22,7 +21,6 @@ const DIET_TAG_MAP = {
   'gluten-free': 'Gluten-Free',
   'dairy-free':  'Dairy-Free',
   'nut-free':    'Nut-Free',
-  'halal':       'Halal',
 }
 
 const CATEGORIES = ['All', 'Breakfast', 'Lunch', 'Dinner']

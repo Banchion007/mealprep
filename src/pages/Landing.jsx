@@ -91,7 +91,6 @@ const TESTIMONIALS = [
 const STATS = [
   { value: '500+', label: 'Events Catered' },
   { value: '12K+', label: 'Meals Prepped' },
-  { value: '98%', label: 'Client Satisfaction' },
   { value: '8+', label: 'Years of Excellence' },
 ]
 
@@ -128,8 +127,7 @@ export default function Landing() {
           className="hero__bg"
         />
         <div className="container hero__content">
-          <p className="hero__label fade-up">Austin's Premier Catering Service</p>
-          <h1 className="hero__headline fade-up">
+          <h1 className="hero__headline display-heading fade-up">
             Exceptional Food,<br />
             <em>Crafted for You</em>
           </h1>
@@ -148,6 +146,7 @@ export default function Landing() {
             </a>
           </div>
         </div>
+
         {/* Scroll indicator */}
         <div className="hero__scroll">
           <span>Scroll to explore</span>
@@ -180,12 +179,6 @@ export default function Landing() {
               alt="Chef preparing food"
               className="intro__img"
             />
-            <div className="intro__badge">
-              <svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-              <span>Farm to Table</span>
-            </div>
           </div>
 
           <div className="intro__text">
@@ -262,11 +255,7 @@ export default function Landing() {
           <div className="testimonials__grid">
             {TESTIMONIALS.map(t => (
               <div key={t.name} className="testimonial-card fade-up">
-                <div className="testimonial-card__quote">
-                  <svg width="32" height="32" viewBox="0 0 32 32" fill="var(--color-primary)" opacity="0.15">
-                    <path d="M0 18.667V32h13.333V18.667H4.444C4.444 13.333 8 9.333 13.333 8V2.667C5.556 4 0 10.667 0 18.667zm18.667 0V32H32V18.667h-8.889C23.111 13.333 26.667 9.333 32 8V2.667C24.222 4 18.667 10.667 18.667 18.667z"/>
-                  </svg>
-                </div>
+                <div className="testimonial-card__quote">"</div>
                 <p className="testimonial-card__text">"{t.text}"</p>
                 <div className="testimonial-card__author">
                   <img src={t.avatar} alt={t.name} className="testimonial-card__avatar" />

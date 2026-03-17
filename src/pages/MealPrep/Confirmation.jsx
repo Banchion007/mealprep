@@ -3,17 +3,76 @@
 =================================================== */
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { MEALS } from './data'
+import { DELIVERY_WINDOWS } from './data'
+import { useMenu } from '../../contexts/MenuContext'
 import './Confirmation.css'
 
-export default function Confirmation({ order, orderNo, onStartOver }) {
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+function formatDate(dateKey) {
+  if (!dateKey) return '—'
+  const d = new Date(dateKey + 'T12:00:00')
+  const weekday = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]
+  return `${weekday}, ${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
+}
+
+const NEXT_STEPS = [
+  {
+    title: 'Confirmation Email',
+    desc: 'Check your inbox for a full order confirmation with details.',
+    icon: (
+      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+    ),
+  },
+  {
+    title: 'Meal Prep Begins',
+    desc: 'Our chefs start preparing your meals 24 hours before delivery.',
+    icon: (
+      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+      </svg>
+    ),
+  },
+  {
+    title: 'Fresh Delivery',
+    desc: 'Your meals arrive in eco-friendly insulated packaging, ready to heat and eat.',
+    icon: (
+      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+      </svg>
+    ),
+  },
+  {
+    title: 'Leave a Review',
+    desc: 'Let us know how your meals turned out. We love the feedback!',
+    icon: (
+      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    ),
+  },
+]
+
+export default function Confirmation({ order, orderNo, orderTotal, onStartOver }) {
+  const { meals } = useMenu()
   const { selectedMeals, schedule } = order
 
   const mealEntries = Object.entries(selectedMeals)
-    .map(([id, qty]) => ({ meal: MEALS.find(m => m.id === id), qty }))
+    .map(([id, qty]) => ({ meal: meals.find(m => m.id === id), qty }))
     .filter(e => e.meal)
 
-  const orderTotal = mealEntries.reduce((sum, { meal, qty }) => sum + meal.price * qty, 0)
+  const total = orderTotal ?? mealEntries.reduce((sum, { meal, qty }) => sum + meal.price * qty, 0)
+
+  const addr = schedule.address || {}
+  const addressStr = addr.street
+    ? `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`
+    : schedule.address || '—'
+
+  const timeLabel = DELIVERY_WINDOWS.find(w => w.id === schedule.timeWindow)?.time
+    || schedule.timeWindow || '—'
 
   return (
     <div className="confirmation">
@@ -28,9 +87,7 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
         <p className="confirmation__sub">
           Thank you for choosing Humble Chef. We'll have your meals ready on delivery day!
         </p>
-        <div className="confirmation__order-no">
-          Order #{orderNo}
-        </div>
+        <div className="confirmation__order-no">Order #{orderNo}</div>
       </div>
 
       <div className="container confirmation__body">
@@ -42,7 +99,7 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
             </svg>
             <div>
               <p className="confirmation__delivery-label">Delivery Date</p>
-              <p className="confirmation__delivery-val">{schedule.date}</p>
+              <p className="confirmation__delivery-val">{formatDate(schedule.date)}</p>
             </div>
           </div>
           <div className="confirmation__delivery-item">
@@ -51,7 +108,7 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
             </svg>
             <div>
               <p className="confirmation__delivery-label">Time Window</p>
-              <p className="confirmation__delivery-val">{schedule.timeWindow}</p>
+              <p className="confirmation__delivery-val">{timeLabel}</p>
             </div>
           </div>
           <div className="confirmation__delivery-item">
@@ -60,9 +117,7 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
             </svg>
             <div>
               <p className="confirmation__delivery-label">Delivery Address</p>
-              <p className="confirmation__delivery-val">
-                {schedule.address}, {schedule.city} {schedule.state}
-              </p>
+              <p className="confirmation__delivery-val">{addressStr}</p>
             </div>
           </div>
           <div className="confirmation__delivery-item">
@@ -72,17 +127,17 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
             <div>
               <p className="confirmation__delivery-label">Order Total</p>
               <p className="confirmation__delivery-val" style={{ color: 'var(--color-primary)' }}>
-                ${orderTotal.toFixed(2)}
+                ${total.toFixed(2)}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Summary card */}
+        {/* Meal summary */}
         <div className="confirmation__summary">
           <h2 className="confirmation__summary-title">Your Order</h2>
           <p className="confirmation__summary-sub">
-            {mealEntries.length} item{mealEntries.length !== 1 ? 's' : ''} · delivering {schedule.date}
+            {mealEntries.length} item{mealEntries.length !== 1 ? 's' : ''} · delivering {formatDate(schedule.date)}
           </p>
 
           <div className="confirmation__meals">
@@ -116,12 +171,7 @@ export default function Confirmation({ order, orderNo, onStartOver }) {
         <div className="confirmation__next">
           <h3>What Happens Next?</h3>
           <div className="confirmation__next-steps">
-            {[
-              { icon: '📧', title: 'Confirmation Email', desc: 'Check your inbox for a full order confirmation with details.' },
-              { icon: '🍳', title: 'Meal Prep Begins', desc: 'Our chefs start preparing your meals 24 hours before delivery.' },
-              { icon: '🚚', title: 'Fresh Delivery', desc: `Your order arrives on ${schedule.date} in our eco-friendly insulated packaging.` },
-              { icon: '⭐', title: 'Leave a Review', desc: 'Let us know how your meals turned out. We love the feedback!' },
-            ].map(s => (
+            {NEXT_STEPS.map(s => (
               <div key={s.title} className="confirmation__next-step">
                 <div className="confirmation__next-step-icon">{s.icon}</div>
                 <div>

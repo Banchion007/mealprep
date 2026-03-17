@@ -11,7 +11,7 @@ import './Menu.css'
 const MENU_ITEMS = [
   /* Appetizers */
   { id: 1,  category: 'Appetizers', name: 'Bruschetta Trio',          price: 12.00, img: 'https://placehold.co/400x280/EEF2FF/1E1B4B?text=Bruschetta',       desc: 'Toasted ciabatta topped with roasted tomatoes, whipped ricotta, and balsamic glaze.', tags: ['Vegetarian'] },
-  { id: 2,  category: 'Appetizers', name: 'Spiced Lamb Kofta',        price: 14.00, img: 'https://placehold.co/400x280/EEF2FF/1E1B4B?text=Lamb+Kofta',        desc: 'Grilled ground lamb skewers with harissa yogurt dipping sauce.', tags: ['Spicy', 'Gluten-Free', 'Halal'] },
+  { id: 2,  category: 'Appetizers', name: 'Spiced Lamb Kofta',        price: 14.00, img: 'https://placehold.co/400x280/EEF2FF/1E1B4B?text=Lamb+Kofta',        desc: 'Grilled ground lamb skewers with harissa yogurt dipping sauce.', tags: ['Spicy', 'Gluten-Free'] },
   { id: 3,  category: 'Appetizers', name: 'Mushroom Crostini',        price: 11.00, img: 'https://placehold.co/400x280/EEF2FF/1E1B4B?text=Crostini',          desc: 'Wild mushroom medley on crispy sourdough with truffle oil and fresh herbs.', tags: ['Vegan'] },
   { id: 4,  category: 'Appetizers', name: 'Shrimp Cocktail',          price: 16.00, img: 'https://placehold.co/400x280/EEF2FF/1E1B4B?text=Shrimp+Cocktail',   desc: 'Chilled jumbo shrimp with house-made cocktail sauce and lemon wedges.', tags: ['Gluten-Free', 'Dairy-Free'] },
   /* Mains */
@@ -35,7 +35,7 @@ const MENU_ITEMS = [
 
 const CATEGORIES = ['All', 'Appetizers', 'Mains', 'Sides', 'Desserts']
 
-const DIETARY_FILTERS = ['Vegan', 'Vegetarian', 'Gluten-Free', 'Dairy-Free', 'Spicy', 'Halal', 'Nut-Free']
+const DIETARY_FILTERS = ['Vegan', 'Vegetarian', 'Gluten-Free', 'Dairy-Free', 'Spicy', 'Nut-Free']
 
 const TAG_CLASS = {
   'Vegan':       'tag-vegan',
@@ -43,7 +43,6 @@ const TAG_CLASS = {
   'Gluten-Free': 'tag-gf',
   'Dairy-Free':  'tag-dairy-free',
   'Spicy':       'tag-spicy',
-  'Halal':       'tag-halal',
   'Nut-Free':    'tag-nut-free',
   'Keto':        'tag-keto',
 }
