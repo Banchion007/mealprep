@@ -12,6 +12,7 @@ import { DELIVERY_WINDOWS } from './data'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMenu } from '../../contexts/MenuContext'
 import { supabase } from '../../lib/supabase'
+import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
@@ -219,6 +220,7 @@ export default function MealPrepSummary({ selectedMeals, delivery, onBack, onDon
   const { user } = useAuth()
   const { meals } = useMenu()
   const [saveOrder, setSaveOrder] = useState(true)
+  useScrollAnimation('.fade-up', meals.length)
 
   const subtotal     = calcTotal(selectedMeals, meals)
   const tax          = subtotal * 0.0825
@@ -236,7 +238,7 @@ export default function MealPrepSummary({ selectedMeals, delivery, onBack, onDon
 
   return (
     <div className="mp-summary">
-      <div className="mp-summary__header">
+      <div className="mp-summary__header fade-up">
         <button className="mp-back-btn" onClick={onBack}>
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -247,7 +249,7 @@ export default function MealPrepSummary({ selectedMeals, delivery, onBack, onDon
         <p className="mp-summary__sub">Check your order before placing it.</p>
       </div>
 
-      <div className="mp-summary__body">
+      <div className="mp-summary__body fade-up">
         {/* Left — order details */}
         <div className="mp-summary__left">
           {/* Meals */}

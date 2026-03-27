@@ -115,6 +115,10 @@
   line-height: 1.8;
   font-weight: 400;
 }
+.hero__sub strong {
+  font-weight: 700;
+  color: #fff;
+}
 
 .hero__cta {
   display: flex;
@@ -123,15 +127,17 @@
   align-items: center;
 }
 
-.hero__btn-outline {
+.hero__cta .btn.btn-outline.hero__btn-outline {
   border-color: #fff;
   color: #fff;
   background: transparent;
+  box-shadow: none;
 }
-.hero__btn-outline:hover {
+.hero__cta .btn.btn-outline.hero__btn-outline:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: #fff;
   color: #fff;
+  box-shadow: none;
   transform: translateY(-2px);
 }
 
@@ -394,7 +400,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 2rem 1.75rem;
-  transition: box-shadow 300ms ease, transform 300ms ease, border-color 300ms ease;
+  transition: box-shadow 300ms ease, border-color 300ms ease;
   position: relative;
   overflow: hidden;
 }
@@ -413,7 +419,6 @@
 .feature-card:hover::before { transform: scaleX(1); }
 .feature-card:hover {
   box-shadow: 0 12px 40px oklch(0.234 0.0787 282.66 / 0.12);
-  transform: translateY(-4px);
   border-color: var(--color-primary-light);
 }
 
@@ -526,11 +531,10 @@
   border-radius: var(--radius-lg);
   padding: 2rem;
   position: relative;
-  transition: box-shadow 300ms ease, transform 300ms ease;
+  transition: box-shadow 300ms ease;
 }
 .testimonial-card:hover {
   box-shadow: 0 12px 40px oklch(0.234 0.0787 282.66 / 0.10);
-  transform: translateY(-3px);
 }
 
 /* Giant decorative quote mark */

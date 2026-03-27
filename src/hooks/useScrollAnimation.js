@@ -4,7 +4,7 @@
 =================================================== */
 import { useEffect } from 'react'
 
-export function useScrollAnimation(selector = '.fade-up') {
+export function useScrollAnimation(selector = '.fade-up', watch = undefined) {
   useEffect(() => {
     const els = document.querySelectorAll(selector)
     if (!els.length) return
@@ -23,5 +23,5 @@ export function useScrollAnimation(selector = '.fade-up') {
 
     els.forEach(el => observer.observe(el))
     return () => observer.disconnect()
-  }, [selector])
+  }, [selector, watch])
 }

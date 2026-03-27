@@ -85,21 +85,23 @@
   max-width: 272px;
 }
 
-.footer__socials { display: flex; gap: 0.65rem; }
-
-.footer__social-icon {
-  display: flex;
+.footer__social-bar {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 320px;
+  padding: 0.7rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
   background: oklch(1 0 0 / 0.08);
   border: 1px solid oklch(1 0 0 / 0.12);
-  color: oklch(1 0 0 / 0.65);
+  color: oklch(1 0 0 / 0.75);
+  font-size: 0.875rem;
+  font-weight: 600;
   transition: background 220ms ease, color 220ms ease, border-color 220ms ease, transform 220ms ease;
 }
-.footer__social-icon:hover {
+.footer__social-bar:hover {
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: #fff;

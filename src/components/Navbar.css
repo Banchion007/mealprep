@@ -79,12 +79,11 @@
 
 .navbar__cta { display: flex; }
 
-/* User auth state */
-.navbar__user {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+/* User auth state — dropdown */
+.navbar__user-menu-wrap {
+  position: relative;
 }
+
 .navbar__user-avatar {
   width: 32px;
   height: 32px;
@@ -98,9 +97,90 @@
   justify-content: center;
   flex-shrink: 0;
   box-shadow: 0 2px 8px var(--primary-alpha-20);
+  border: none;
+  cursor: pointer;
+  transition: opacity 200ms ease, box-shadow 200ms ease;
 }
-.navbar__user-signout {
-  font-size: 0.8rem;
+.navbar__user-avatar:hover {
+  opacity: 0.88;
+  box-shadow: 0 3px 12px var(--primary-alpha-20);
+}
+.navbar__user-avatar:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.navbar__user-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: oklch(1 0 0 / 0.96);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 8px 32px oklch(0.234 0.0787 282.66 / 0.12),
+    0 2px 8px oklch(0.234 0.0787 282.66 / 0.06),
+    inset 0 1px 0 oklch(1 0 0 / 0.9);
+  min-width: 220px;
+  padding: 0.5rem;
+  z-index: 200;
+  animation: menu-drop 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: top right;
+}
+
+.navbar__user-dropdown__header {
+  padding: 0.55rem 0.9rem 0.65rem;
+}
+.navbar__user-dropdown__name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.navbar__user-dropdown__email {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar__user-dropdown__divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 0.25rem 0;
+}
+
+.navbar__user-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: calc(var(--radius-md) - 2px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+  transition: background 200ms ease, color 200ms ease;
+  white-space: nowrap;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+.navbar__user-dropdown__item:hover {
+  background: var(--primary-alpha-7);
+  color: var(--color-primary);
+}
+.navbar__user-dropdown__item--danger:hover {
+  background: #FEE2E2;
+  color: #B91C1C;
 }
 
 /* Burger */

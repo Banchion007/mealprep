@@ -2,9 +2,10 @@
    MealPrepDelivery — Address + Mon–Sat date + time window
 =================================================== */
 import React, { useState, useEffect } from 'react'
-import { DELIVERY_WINDOWS } from './data'
+import { MEALS, DELIVERY_WINDOWS } from './data'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
+import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 
 const WINDOW_ICONS = {
   morning:   (
@@ -58,7 +59,13 @@ function formatDateDisplay(d) {
 
 const INIT_ADDRESS = { street: '', city: '', state: '', zip: '' }
 
-export default function MealPrepDelivery({ delivery, onChange, onBack, onNext }) {
+export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChange, onBack, onNext }) {
+  useScrollAnimation()
+  const cartCount = Object.values(selectedMeals).reduce((s, n) => s + n, 0)
+  const cartTotal = Object.entries(selectedMeals).reduce((sum, [id, qty]) => {
+    const m = MEALS.find(m => m.id === id)
+    return sum + (m ? m.price * qty : 0)
+  }, 0)
   const { user } = useAuth()
   const [address,    setAddress]    = useState(delivery.address    || INIT_ADDRESS)
   const [dateKey,    setDateKey]    = useState(delivery.date       || '')
@@ -121,18 +128,28 @@ export default function MealPrepDelivery({ delivery, onChange, onBack, onNext })
 
   return (
     <div className="mp-delivery">
-      <div className="mp-delivery__header">
+      <div className="mp-delivery__header fade-up">
         <button className="mp-back-btn" onClick={onBack}>
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
           Back to Menu
         </button>
+        {cartCount > 0 && (
+          <div className="mp-delivery__cart-banner">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <span><strong>{cartCount}</strong> meal{cartCount !== 1 ? 's' : ''}</span>
+            <span className="mp-delivery__cart-sep">·</span>
+            <span className="mp-delivery__cart-total">${cartTotal.toFixed(2)}</span>
+          </div>
+        )}
         <h1 className="mp-delivery__title">Delivery Details</h1>
         <p className="mp-delivery__sub">Where and when should we deliver your meals?</p>
       </div>
 
-      <div className="mp-delivery__body">
+      <div className="mp-delivery__body fade-up">
         {/* Date picker */}
         <div className="mp-delivery__section">
           <h3 className="mp-delivery__section-title">

@@ -8,8 +8,10 @@ import Footer         from './components/Footer'
 import Landing        from './pages/Landing'
 import About          from './pages/About'
 import Contact        from './pages/Contact'
+import Menu           from './pages/Menu'
 import MealPrep       from './pages/MealPrep/index'
 import DashboardLayout from './pages/Dashboard/index'
+import Account         from './pages/Account'
 import { AuthProvider } from './contexts/AuthContext'
 
 /* Scroll to top on route change */
@@ -32,7 +34,9 @@ function Layout() {
           <Route path="/"             element={<Landing />} />
           <Route path="/about"        element={<About />} />
           <Route path="/contact"      element={<Contact />} />
+          <Route path="/menu"         element={<Menu />} />
           <Route path="/meal-prep"    element={<MealPrep />} />
+          <Route path="/account"      element={<Account />} />
           <Route path="/dashboard/*"  element={<DashboardLayout />} />
           {/* Catch-all → home */}
           <Route path="*"             element={<Landing />} />

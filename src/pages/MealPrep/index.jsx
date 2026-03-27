@@ -70,15 +70,13 @@ export default function MealPrep() {
     setScreen('start')
   }
 
-  if (screen === 'start') {
-    return <MealPrepStart onStart={handleStart} />
-  }
-
   const currentStepIdx = STEP_LABELS.findIndex(s => s.key === screen)
 
   return (
     <MenuProvider>
-      {screen === 'done' ? (
+      {screen === 'start' ? (
+        <MealPrepStart onStart={handleStart} />
+      ) : screen === 'done' ? (
         <Confirmation
           order={{ selectedMeals, schedule: delivery }}
           orderNo={orderNo}
@@ -137,6 +135,7 @@ export default function MealPrep() {
           {screen === 'delivery' && (
             <MealPrepDelivery
               delivery={delivery}
+              selectedMeals={selectedMeals}
               onChange={setDelivery}
               onBack={() => setScreen('menu')}
               onNext={() => setScreen('summary')}

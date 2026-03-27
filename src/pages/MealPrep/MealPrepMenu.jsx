@@ -4,6 +4,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { TIERS, TIER_DESC, DIETARY_OPTIONS } from './data'
 import { useMenu } from '../../contexts/MenuContext'
+import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 
 const TAG_CLASS = {
   'Vegan':       'tag-vegan',
@@ -133,6 +134,8 @@ export default function MealPrepMenu({ selectedMeals, onChange, onNext }) {
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
+
+  useScrollAnimation('.fade-up', `${menuLoading}-${meals.length}`)
 
   const totalCount = Object.values(selectedMeals).reduce((s, n) => s + n, 0)
   const totalCost  = Object.entries(selectedMeals).reduce((sum, [id, qty]) => {
@@ -269,12 +272,12 @@ export default function MealPrepMenu({ selectedMeals, onChange, onNext }) {
 
       {/* Loading / empty state */}
       {menuLoading && (
-        <div className="mp-menu-loading">
+        <div className="mp-menu-loading fade-up">
           <span className="dash-auth-spinner" />
         </div>
       )}
       {!menuLoading && meals.length === 0 && (
-        <div className="mp-menu-empty">
+        <div className="mp-menu-empty fade-up">
           <p>The menu for this week hasn't been published yet.</p>
           <span>Check back soon!</span>
         </div>
@@ -282,7 +285,7 @@ export default function MealPrepMenu({ selectedMeals, onChange, onNext }) {
 
       {/* No results */}
       {!menuLoading && totalResults === 0 && meals.length > 0 && (
-        <div className="mp-no-results">
+        <div className="mp-no-results fade-up">
           <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
           </svg>
@@ -294,7 +297,7 @@ export default function MealPrepMenu({ selectedMeals, onChange, onNext }) {
       )}
 
       {/* Tier rows */}
-      <div className="mp-tiers">
+      <div className="mp-tiers fade-up">
         {TIERS.map(tier => (
           <TierRow
             key={tier}

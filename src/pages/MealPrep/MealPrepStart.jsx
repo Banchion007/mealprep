@@ -3,6 +3,8 @@
 =================================================== */
 import React from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useMenu } from '../../contexts/MenuContext'
+import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 
 const HOW_IT_WORKS = [
   {
@@ -22,13 +24,15 @@ const HOW_IT_WORKS = [
   },
 ]
 
-const HIGHLIGHTS = [
-  { value: '15+', label: 'Chef-crafted meals' },
+const HIGHLIGHTS_TAIL = [
   { value: '6-day', label: 'Delivery Mon–Sat' },
 ]
 
 export default function MealPrepStart({ onStart }) {
+  useScrollAnimation()
   const { user, setShowAuthModal } = useAuth()
+  const { meals, loading: menuLoading } = useMenu()
+  const mealCountLabel = menuLoading ? '…' : String(meals.length)
 
   const handleStartClick = () => {
     if (user) {
@@ -49,17 +53,17 @@ export default function MealPrepStart({ onStart }) {
           className="mp-start__hero-bg"
         />
         <div className="mp-start__hero-content">
-          <p className="mp-start__hero-label">Weekly Meal Prep · Austin, TX</p>
-          <h1 className="mp-start__hero-headline">
+          <p className="mp-start__hero-label fade-up">Weekly Meal Prep · Austin, TX</p>
+          <h1 className="mp-start__hero-headline fade-up">
             Your Week,<br />
             <em>Fuelled by Chefs.</em>
           </h1>
-          <p className="mp-start__hero-sub">
+          <p className="mp-start__hero-sub fade-up">
             Chef-crafted, macro-balanced meals — picked by you, delivered to your door.
             Fresh every time. Never frozen.
           </p>
 
-          <div className="mp-start__hero-actions">
+          <div className="mp-start__hero-actions fade-up">
             <button className="btn btn-lg mp-start__cta" onClick={handleStartClick}>
               {user ? 'Start Your Order' : 'Sign In to Order'}
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -77,8 +81,12 @@ export default function MealPrepStart({ onStart }) {
           </div>
 
           {/* Highlight stats */}
-          <div className="mp-start__highlights">
-            {HIGHLIGHTS.map(h => (
+          <div className="mp-start__highlights fade-up">
+            <div className="mp-start__highlight">
+              <span className="mp-start__highlight-value">{mealCountLabel}</span>
+              <span className="mp-start__highlight-label mp-start__highlight-label--title">Chef-Crafted Meals this Week</span>
+            </div>
+            {HIGHLIGHTS_TAIL.map(h => (
               <div key={h.label} className="mp-start__highlight">
                 <span className="mp-start__highlight-value">{h.value}</span>
                 <span className="mp-start__highlight-label">{h.label}</span>
@@ -91,13 +99,13 @@ export default function MealPrepStart({ onStart }) {
       {/* How it works */}
       <div className="mp-start__how">
         <div className="mp-start__how-inner">
-          <div className="mp-start__how-header">
+          <div className="mp-start__how-header fade-up">
             <p className="section-label">Simple Process</p>
             <h2 className="section-title">How It Works</h2>
           </div>
           <div className="mp-start__steps">
             {HOW_IT_WORKS.map((s, i) => (
-              <div key={s.step} className="mp-start__step">
+              <div key={s.step} className="mp-start__step fade-up">
                 <div className="mp-start__step-num">{s.step}</div>
                 <h3 className="mp-start__step-title">{s.title}</h3>
                 <p className="mp-start__step-desc">{s.desc}</p>
@@ -111,7 +119,7 @@ export default function MealPrepStart({ onStart }) {
               </div>
             ))}
           </div>
-          <div className="mp-start__how-cta">
+          <div className="mp-start__how-cta fade-up">
             <button className="btn btn-primary btn-lg" onClick={handleStartClick}>
               {user ? 'Browse the Menu' : 'Get Started — Sign In'}
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

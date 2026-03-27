@@ -1,7 +1,8 @@
 /* ===================================================
    Orders — paginated orders table with filters
 =================================================== */
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
 
 const PER_PAGE = 10
 
@@ -65,8 +66,49 @@ function exportCSV(orders) {
   a.click(); URL.revokeObjectURL(url)
 }
 
+/* Normalize a Supabase order row to the mock data shape */
+function normalizeSupabaseOrder(o) {
+  const items = Array.isArray(o.items) ? o.items : []
+  return {
+    id:           o.order_number || o.id,
+    customer:     o.customer_name || o.customer_email || 'Unknown',
+    type:         o.type || 'Meal Prep',
+    mealCount:    items.length || 1,
+    meals:        items.map(i => `${i.name || i.id}${i.qty > 1 ? ` ×${i.qty}` : ''}`),
+    deliveryDate: o.delivery_date || '—',
+    status:       o.status || 'Confirmed',
+    total:        parseFloat(o.total) || 0,
+    createdAt:    (o.created_at || '').split('T')[0],
+    notes:        '',
+  }
+}
+
 export default function Orders() {
-  const allOrders = useMemo(() => JSON.parse(localStorage.getItem('hc_orders') || '[]'), [])
+  const mockOrders = useMemo(() => JSON.parse(localStorage.getItem('hc_orders') || '[]'), [])
+  const [realOrders, setRealOrders] = useState(null) // null = not fetched yet
+
+  useEffect(() => {
+    supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (error || !data?.length) {
+          setRealOrders([])
+        } else {
+          setRealOrders(data.map(normalizeSupabaseOrder))
+        }
+      })
+  }, [])
+
+  // While fetching, show mock; once real data arrives, prefer it but merge in mocks without overlap
+  const allOrders = useMemo(() => {
+    if (!realOrders) return mockOrders
+    if (!realOrders.length) return mockOrders
+    const realIds = new Set(realOrders.map(o => o.id))
+    const uniqueMocks = mockOrders.filter(o => !realIds.has(o.id))
+    return [...realOrders, ...uniqueMocks]
+  }, [realOrders, mockOrders])
 
   const [status,    setStatus]    = useState('All')
   const [type,      setType]      = useState('All')

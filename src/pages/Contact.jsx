@@ -42,7 +42,7 @@ const INFO_ITEMS = [
 ]
 
 const FAQ_ITEMS = [
-  { q: 'What is your minimum guest count?', a: 'For full-service catering we typically work with events of 20 or more guests. For drop-off catering and meal prep there is no minimum — we\'re happy to serve individuals and small groups.' },
+  { q: 'What is your minimum guest count?', a: 'We do not set a minimum guest count for any service — full-service, drop-off, or meal prep. We gladly cater intimate gatherings and individuals alongside large events; share your expected head count so we can tailor the menu and logistics to fit your occasion.' },
   { q: 'Do you offer tastings?', a: 'Yes. We offer tastings for wedding and large events. Contact us to schedule a tasting — we\'ll prepare a selection of items from your proposed menu so you can choose with confidence.' },
   { q: 'Can you accommodate allergies?', a: 'Absolutely. We take allergies and dietary restrictions seriously. Share your requirements in your message and we\'ll tailor the menu accordingly and flag any allergens in your order.' },
   { q: 'How far in advance should I book?', a: 'We recommend booking at least 2–4 weeks ahead for events, and 1 week for meal prep. For large or peak-season events, 6–8 weeks is ideal. Last-minute requests are considered when our schedule allows.' },
@@ -271,7 +271,7 @@ export default function Contact() {
             <div className="map-placeholder">
               <img
                 src="https://placehold.co/600x300/EEF2FF/1E1B4B?text=Google+Maps+Placeholder"
-                alt="Map of Saveur Catering location"
+                alt="Map of Humble Chef location"
                 className="map-img"
               />
               <div className="map-overlay">

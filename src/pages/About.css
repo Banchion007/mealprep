@@ -89,10 +89,45 @@
 /* ── Values ── */
 .values-section { background: var(--color-bg-alt); }
 .values-header { text-align: center; }
+.values-header__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.85fr);
+  gap: 2.5rem 3rem;
+  align-items: start;
+  margin-bottom: 2.5rem;
+  text-align: left;
+}
+.values-header__body {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+.values-header__body .values-header__sub {
+  margin: 0 0 1rem;
+  text-align: left;
+  line-height: 1.65;
+}
+.values-header__body .values-header__sub:last-child {
+  margin-bottom: 0;
+}
+.values-header__figure {
+  margin: 0;
+}
+.values-header__image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
 
 .values-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
@@ -102,9 +137,9 @@
   border-radius: var(--radius-lg);
   padding: 1.75rem 1.5rem;
   text-align: center;
-  transition: box-shadow var(--transition), transform var(--transition);
+  transition: box-shadow var(--transition);
 }
-.value-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.value-card:hover { box-shadow: var(--shadow-md); }
 
 .value-card__icon {
   font-size: 2rem;
@@ -139,9 +174,9 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: box-shadow var(--transition), transform var(--transition);
+  transition: box-shadow var(--transition);
 }
-.team-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.team-card:hover { box-shadow: var(--shadow-md); }
 
 .team-card__img-wrap { overflow: hidden; }
 .team-card__img {
@@ -209,6 +244,10 @@
 @media (max-width: 1024px) {
   .values-grid { grid-template-columns: repeat(2, 1fr); }
   .team-grid   { grid-template-columns: repeat(2, 1fr); }
+  .values-header__row {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 }
 @media (max-width: 768px) {
   .story-inner { grid-template-columns: 1fr; gap: 2.5rem; }

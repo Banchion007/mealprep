@@ -4,6 +4,7 @@
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import TiltedCard from '../components/TiltedCard'
 import './Landing.css'
 
 /* ---- Data ---- */
@@ -70,14 +71,14 @@ const TESTIMONIALS = [
     role: 'Event Planner',
     avatar: 'https://placehold.co/80x80/1E1B4B/EEF2FF?text=SM',
     stars: 5,
-    text: "Saveur transformed our corporate gala into a culinary experience our guests still talk about. The food was exceptional, the presentation was stunning, and the team was an absolute pleasure to work with.",
+    text: "Humble Chef transformed our corporate gala into a culinary experience our guests still talk about. The food was exceptional, the presentation was stunning, and the team was an absolute pleasure to work with.",
   },
   {
     name: 'Marcus Torres',
     role: 'Weekly Meal Prep Customer',
     avatar: 'https://placehold.co/80x80/312E81/EEF2FF?text=MT',
     stars: 5,
-    text: "I've tried every meal prep service out there. Saveur is in a different league. The flavors are restaurant-quality and the macros are always spot-on. My keto journey has never been this delicious.",
+    text: "I've tried every meal prep service out there. Humble Chef is in a different league. The flavors are restaurant-quality and the macros are always spot-on. My keto journey has never been this delicious.",
   },
   {
     name: 'Priya Kapoor',
@@ -90,8 +91,8 @@ const TESTIMONIALS = [
 
 const STATS = [
   { value: '500+', label: 'Events Catered' },
-  { value: '12K+', label: 'Meals Prepped' },
-  { value: '8+', label: 'Years of Excellence' },
+  { value: '100k+', label: 'Meals Served' },
+  { value: '30+', label: 'Years of Excellence' },
 ]
 
 function StarRating({ count = 5 }) {
@@ -132,7 +133,8 @@ export default function Landing() {
             <em>Crafted for You</em>
           </h1>
           <p className="hero__sub fade-up">
-            From intimate gatherings to grand galas, and weekly meal prep that fuels your lifestyle — Saveur delivers restaurant-quality food right to your door.
+            With every event, every plate, and every conversation, our goal is the same: to serve you with{' '}
+            <strong>a love for food and a heart for people.</strong>
           </p>
           <div className="hero__cta fade-up">
             <Link to="/meal-prep" className="btn btn-primary btn-lg">
@@ -183,13 +185,14 @@ export default function Landing() {
 
           <div className="intro__text">
             <p className="section-label fade-up">Our Story</p>
-            <h2 className="section-title fade-up">Food is More Than a Meal — It's a Memory</h2>
+            <h2 className="section-title fade-up">
+              Food is More Than a Meal
+              <br />
+              - It&apos;s a Ministry
+            </h2>
             <div className="divider fade-up" />
-            <p className="fade-up" style={{ color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
-              Founded in 2016, Saveur Catering began as a weekend passion project in a small Austin kitchen. Chef Elena Russo had one belief: that people deserve food that's as nourishing as it is delicious.
-            </p>
             <p className="fade-up" style={{ color: 'var(--color-text-muted)', marginBottom: '1.75rem' }}>
-              Today, we serve hundreds of events and thousands of meal prep subscribers each month — holding true to that same vision. Every ingredient is thoughtfully sourced, every recipe carefully developed, and every order delivered with care.
+              Humble Chef Catering exists at the intersection of excellent food and genuine care for people. Rooted in our calling as bi-vocational ministers, we choose to work with our hands—just as Paul, Priscilla, and Aquila did—so that every meal we prepare helps support our families and fuels a broader, Kingdom-focused, community-oriented mission. For us, food is one of the most tangible ways to love and serve our neighbors, create space for connection, and quietly reflect the generosity and hospitality of Christ.
             </p>
             <div className="intro__pills fade-up">
               {['Locally Sourced', 'Chef-Crafted', 'Nutrition-Focused', 'Allergen-Aware'].map(p => (
@@ -207,17 +210,19 @@ export default function Landing() {
       <section className="section features">
         <div className="container">
           <div className="features__header fade-up">
-            <p className="section-label">Why Choose Saveur</p>
-            <h2 className="section-title">The Saveur Difference</h2>
+            <p className="section-label">Why Choose Humble Chef</p>
+            <h2 className="section-title">The Humble Chef Difference</h2>
             <p className="section-sub">We don't just feed people — we create experiences worth remembering.</p>
           </div>
           <div className="features__grid">
             {FEATURES.map(f => (
-              <div key={f.title} className="feature-card fade-up">
-                <div className="feature-card__icon">{f.icon}</div>
-                <h3 className="feature-card__title">{f.title}</h3>
-                <p className="feature-card__desc">{f.desc}</p>
-              </div>
+              <TiltedCard key={f.title} className="fade-up">
+                <div className="feature-card">
+                  <div className="feature-card__icon">{f.icon}</div>
+                  <h3 className="feature-card__title">{f.title}</h3>
+                  <p className="feature-card__desc">{f.desc}</p>
+                </div>
+              </TiltedCard>
             ))}
           </div>
         </div>
@@ -254,18 +259,20 @@ export default function Landing() {
           </div>
           <div className="testimonials__grid">
             {TESTIMONIALS.map(t => (
-              <div key={t.name} className="testimonial-card fade-up">
-                <div className="testimonial-card__quote">"</div>
-                <p className="testimonial-card__text">"{t.text}"</p>
-                <div className="testimonial-card__author">
-                  <img src={t.avatar} alt={t.name} className="testimonial-card__avatar" />
-                  <div>
-                    <StarRating count={t.stars} />
-                    <p className="testimonial-card__name">{t.name}</p>
-                    <p className="testimonial-card__role">{t.role}</p>
+              <TiltedCard key={t.name} className="fade-up">
+                <div className="testimonial-card">
+                  <div className="testimonial-card__quote">"</div>
+                  <p className="testimonial-card__text">"{t.text}"</p>
+                  <div className="testimonial-card__author">
+                    <img src={t.avatar} alt={t.name} className="testimonial-card__avatar" />
+                    <div>
+                      <StarRating count={t.stars} />
+                      <p className="testimonial-card__name">{t.name}</p>
+                      <p className="testimonial-card__role">{t.role}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </TiltedCard>
             ))}
           </div>
         </div>

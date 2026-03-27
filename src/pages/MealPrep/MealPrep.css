@@ -382,6 +382,11 @@
   text-transform: uppercase;
   color: oklch(1 0 0 / 0.5);
 }
+.mp-start__highlight-label--title {
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 0.72rem;
+}
 
 /* How It Works */
 .mp-start__how {
@@ -998,6 +1003,28 @@
 }
 
 .mp-delivery__header { margin-bottom: 2rem; }
+
+.mp-delivery__cart-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-full);
+  background: var(--primary-alpha-9);
+  border: 1.5px solid var(--primary-alpha-20);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-top: 0.75rem;
+}
+.mp-delivery__cart-sep {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+.mp-delivery__cart-total {
+  font-weight: 800;
+}
+
 .mp-delivery__title {
   font-family: var(--font-heading);
   font-size: 1.75rem;
