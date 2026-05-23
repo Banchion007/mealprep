@@ -6,6 +6,18 @@ import { Link } from 'react-router-dom'
 import './Footer.css'
 
 const FACEBOOK_URL = 'https://www.facebook.com/thehumblechefbj/'
+const PRIVACY_PDF_URL = '/HumbleChef-Privacy-Policy.pdf'
+const TERMS_PDF_URL = '/HumbleChef-Terms-and-Conditions.pdf'
+const TERMS_DOWNLOAD_NAME = 'Website Terms and Conditions.pdf'
+const PRIVACY_DOWNLOAD_NAME = 'Website Privacy Policy.pdf'
+
+const SERVICES = [
+  'Corporate Catering',
+  'Wedding Catering',
+  'Weekly Meal Prep',
+  'Private Events',
+  'Drop-Off Catering',
+]
 
 export default function Footer() {
   const handleOpenMenu = (e) => {
@@ -56,12 +68,10 @@ export default function Footer() {
         {/* Services */}
         <div className="footer__col">
           <h4 className="footer__col-title">Services</h4>
-          <nav className="footer__nav">
-            <a href="#">Corporate Catering</a>
-            <a href="#">Wedding Catering</a>
-            <a href="#">Weekly Meal Prep</a>
-            <a href="#">Private Events</a>
-            <a href="#">Drop-Off Catering</a>
+          <nav className="footer__nav footer__nav--static" aria-label="Services">
+            {SERVICES.map((label) => (
+              <span key={label} className="footer__nav-label">{label}</span>
+            ))}
           </nav>
         </div>
 
@@ -95,9 +105,12 @@ export default function Footer() {
         <div className="container footer__bottom-inner">
           <p>&copy; {new Date().getFullYear()} Humble Chef. All rights reserved.</p>
           <div className="footer__bottom-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Accessibility</a>
+            <a href={PRIVACY_PDF_URL} download={PRIVACY_DOWNLOAD_NAME}>
+              Privacy Policy
+            </a>
+            <a href={TERMS_PDF_URL} download={TERMS_DOWNLOAD_NAME}>
+              Terms of Service
+            </a>
           </div>
         </div>
       </div>

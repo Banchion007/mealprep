@@ -148,6 +148,14 @@
 }
 .footer__nav a:hover::before { width: 0.6rem; }
 
+.footer__nav--static .footer__nav-label {
+  font-size: 0.875rem;
+  color: oklch(1 0 0 / 0.65);
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Contact column */
 .footer__contact {
   display: flex;

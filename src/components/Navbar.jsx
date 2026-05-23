@@ -85,6 +85,7 @@ const MENU_PDF_URL = '/HumbleChefMenu.pdf'
 function MenuDropdown() {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
+  const { mealPrepEnabled } = useMealPrepSetting()
 
   // Close on outside click
   useEffect(() => {
@@ -109,7 +110,7 @@ function MenuDropdown() {
       {open && (
         <div className="menu-dropdown__panel">
           <Link
-            to="/menu"
+            to={mealPrepEnabled ? '/menu' : '/under-construction'}
             className="menu-dropdown__item"
             onClick={() => setOpen(false)}
           >
@@ -237,7 +238,10 @@ export default function Navbar() {
             {label}
           </NavLink>
         ))}
-        <Link to="/menu" className="navbar__mobile-link">
+        <Link
+          to={mealPrepEnabled ? '/menu' : '/under-construction'}
+          className="navbar__mobile-link"
+        >
           View Meal Prep Menu
         </Link>
         <a href={MENU_PDF_URL} download className="navbar__mobile-link">
