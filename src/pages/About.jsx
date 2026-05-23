@@ -1,13 +1,14 @@
 /* ===================================================
    About Page — story, team, mission, gallery
 =================================================== */
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { useAuth } from '../contexts/AuthContext'
 import TiltedCard from '../components/TiltedCard'
 import GalleryModal from '../components/GalleryModal'
 import GalleryViewer from '../components/GalleryViewer'
+import getGalleryImages from '../utils/galleryLoader'
 import './About.css'
 
 /** Set to true when team bios and photos are ready. */
@@ -60,7 +61,7 @@ const GALLERY_CARDS = [
   { id: 'desserts', title: 'Desserts' },
 ]
 
-const GALLERY_PLACEHOLDERS = {
+const GALLERY_FALLBACKS = {
   'catering-events': 'https://placehold.co/600x400/EEF2FF/1E1B4B?text=Catering+Events',
   'chefs-at-work': 'https://placehold.co/400x400/EA580C/FFF?text=Chefs+at+Work',
   'fresh-ingredients': 'https://placehold.co/400x400/312E81/EEF2FF?text=Fresh+Ingredients',
@@ -75,8 +76,21 @@ export default function About() {
   useScrollAnimation()
   const { isAdmin } = useAuth()
   const [openGallery, setOpenGallery] = useState(null)
+  const [galleryImages, setGalleryImages] = useState({})
+
+  useEffect(() => {
+    getGalleryImages().then(setGalleryImages).catch(err => {
+      console.warn('Gallery loading error:', err)
+      setGalleryImages({})
+    })
+  }, [])
 
   const currentGallery = GALLERY_CARDS.find(g => g.id === openGallery)
+
+  const getGalleryImage = (galleryId) => {
+    const images = galleryImages[galleryId]
+    return images?.[0]?.src || GALLERY_FALLBACKS[galleryId]
+  }
 
   return (
     <div className="about-page">
@@ -84,7 +98,8 @@ export default function About() {
       <section className="page-hero about-hero">
         <div className="page-hero__overlay" />
         <img
-          src="https://placehold.co/1600x500/1E1B4B/EEF2FF?text=Our+Story"
+          src="/heroes/about.svg"
+          onError={e => { e.currentTarget.style.display = 'none' }}
           alt="About Humble Chef"
           className="page-hero__bg"
         />
@@ -92,7 +107,7 @@ export default function About() {
           <p className="section-label" style={{ color: 'var(--color-accent-light)' }}>About Humble Chef</p>
           <h1 style={{ color: '#fff', marginBottom: '0.75rem' }}>Who We Are</h1>
           <p style={{ color: 'rgba(255,251,245,0.8)', maxWidth: '520px', fontSize: '1.05rem' }}>
-            A team of passionate chefs, nutritionists, and food lovers dedicated to making every meal exceptional.
+            A team of passionate chefs and food lovers dedicated to making every meal exceptional.
           </p>
         </div>
       </section>
@@ -133,7 +148,7 @@ export default function About() {
             <div className="values-header__row">
               <div className="values-header__body">
                 <p className="section-sub values-header__sub">
-                  I started baking in my mom&apos;s kitchen when I was just 9 years old, and that early love for food never left me. At 15, I got my first job in a pizza parlor, and from ages 18 to 23 I worked every part of a busy family dining restaurant — from busboy to prep cook, line cook, waiter, and crew leader. By 25, I moved into management, where I had the opportunity to serve with The Old Spaghetti Factory, The Sacramento Hilton Hotel, Aramark, Sodexo, and at places like USAA, E-Trade, Johnson & Johnson, Hewlett Packard, and several senior retirement facilities around Sacramento, California. From 2001 to 2011, I also provided catering support for our church and local soccer club. After moving to Texas in 2011, I started Humble Chef to bring that same heart for hospitality, hard work, and dependable service to every meal and event we serve.
+                  I started baking in my mom&apos;s kitchen when I was just 9 years old, and that early love for food never left me. At 15, I got my first job in a pizza parlor, and from ages 18 to 23 I worked every part of a busy family dining restaurant. From busboy to prep cook, line cook, waiter, and crew leader. By 25, I moved into management, where I had the opportunity to serve with The Old Spaghetti Factory, The Sacramento Hilton Hotel, Aramark, Sodexo, and at places like USAA, E-Trade, Johnson & Johnson, Hewlett Packard, and several senior retirement facilities around Sacramento, California. From 2001 to 2011, I also provided catering support for our church and local soccer club. After moving to Texas in 2011, I started Humble Chef to bring that same heart for hospitality, hard work, and dependable service to every meal and event we serve.
                 </p>
               </div>
               <figure className="values-header__figure">
@@ -192,7 +207,7 @@ export default function About() {
                 onClick={() => setOpenGallery(card.id)}
                 aria-label={`Open ${card.title} gallery`}
               >
-                <img src={GALLERY_PLACEHOLDERS[card.id]} alt={card.title} />
+                <img src={getGalleryImage(card.id)} alt={card.title} />
                 <div className="gallery-item__overlay">
                   <span className="gallery-item__label">{card.title}</span>
                 </div>

@@ -17,13 +17,13 @@
 
 ### 1. Run migrations
 
-In Supabase Dashboard → SQL Editor, run migrations in order:
+Applied on remote project `yzyeyrphjkqmjuoyyooc` via migration `security_hardening_and_site_settings`.
+
+Local files for reference:
 
 1. `supabase/migrations/menu_items_table.sql`
 2. `supabase/migrations/recipes_table.sql`
-3. `supabase/migrations/20260321120000_security_rls_and_schema.sql`
-
-Or: `supabase db push` (CLI linked to project).
+3. `supabase/migrations/20260321120000_security_rls_and_schema.sql` (uses `site_settings` for global meal-prep toggle)
 
 ### 2. Promote admin users
 

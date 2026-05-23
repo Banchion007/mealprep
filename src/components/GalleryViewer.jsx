@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import getGalleryImages from '../utils/galleryLoader'
 import './GalleryViewer.css'
 
 export default function GalleryViewer({ isOpen, onClose, galleryId, galleryTitle }) {
@@ -16,6 +17,23 @@ export default function GalleryViewer({ isOpen, onClose, galleryId, galleryTitle
   const loadGalleryItems = async () => {
     try {
       setLoading(true)
+
+      // Try to load from public gallery folder first
+      const allGalleries = await getGalleryImages()
+      const publicImages = allGalleries[galleryId]
+
+      if (publicImages && publicImages.length > 0) {
+        const galleryItems = publicImages.map(img => ({
+          name: img.name,
+          url: img.src,
+          isVideo: img.name.match(/\.(mp4|webm|mov)$/i),
+        }))
+        setItems(galleryItems)
+        setCurrentIndex(0)
+        return
+      }
+
+      // Fall back to Supabase storage
       const { data, error: err } = await supabase
         .storage
         .from('gallery-uploads')

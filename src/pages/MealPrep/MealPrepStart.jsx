@@ -48,7 +48,8 @@ export default function MealPrepStart({ onStart }) {
       <div className="mp-start__hero">
         <div className="mp-start__hero-overlay" />
         <img
-          src="https://placehold.co/1600x900/1E1B4B/EEF2FF?text=Chef-Crafted+Meals"
+          src="/heroes/meal-prep.svg"
+          onError={e => { e.currentTarget.style.display = 'none' }}
           alt="Chef crafted meals"
           className="mp-start__hero-bg"
         />

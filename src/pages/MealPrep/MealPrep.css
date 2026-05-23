@@ -227,6 +227,44 @@
   align-items: center;
   overflow: hidden;
 }
+
+/* Floating indigo blob — decorative fallback */
+.mp-start__hero::before {
+  content: '';
+  position: absolute;
+  top: 5%;
+  left: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(
+    ellipse at center,
+    oklch(0.45 0.15 282.66 / 0.25) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(80px);
+}
+
+/* Floating orange blob — decorative fallback */
+.mp-start__hero::after {
+  content: '';
+  position: absolute;
+  bottom: -5%;
+  right: 5%;
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(
+    ellipse at center,
+    oklch(0.62 0.20 36 / 0.20) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(100px);
+}
 .mp-start__hero-bg {
   position: absolute;
   inset: 0;
@@ -241,12 +279,6 @@
 .mp-start__hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    oklch(0.13 0.065 282.66 / 0.93) 0%,
-    oklch(0.17 0.06 282.66 / 0.78) 50%,
-    oklch(0.62 0.20 36 / 0.35) 100%
-  );
   z-index: 1;
 }
 /* Grain texture overlay */

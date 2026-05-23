@@ -71,7 +71,8 @@ export default function Menu() {
       <section className="page-hero menu-hero">
         <div className="page-hero__overlay" />
         <img
-          src="https://placehold.co/1600x500/1E1B4B/EEF2FF?text=Our+Menu"
+          src="/heroes/menu.svg"
+          onError={e => { e.currentTarget.style.display = 'none' }}
           alt="Menu banner"
           className="page-hero__bg"
         />

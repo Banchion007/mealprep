@@ -3,6 +3,7 @@
 =================================================== */
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useMealPrepSetting } from '../hooks/useMealPrepSetting'
 import './Footer.css'
 
 const FACEBOOK_URL = 'https://www.facebook.com/thehumblechefbj/'
@@ -20,6 +21,8 @@ const SERVICES = [
 ]
 
 export default function Footer() {
+  const { mealPrepEnabled } = useMealPrepSetting()
+
   const handleOpenMenu = (e) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -59,7 +62,7 @@ export default function Footer() {
           <nav className="footer__nav">
             <Link to="/">Home</Link>
             <a href="#menu" onClick={handleOpenMenu}>Our Menu</a>
-            <Link to="/meal-prep">Meal Prep</Link>
+            <Link to={mealPrepEnabled ? '/meal-prep' : '/under-construction'}>Meal Prep</Link>
             <Link to="/about">About Us</Link>
             <Link to="/contact">Contact</Link>
           </nav>

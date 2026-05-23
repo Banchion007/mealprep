@@ -25,7 +25,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Fresh Ingredients',
-    desc: 'Sourced daily from local farms and trusted suppliers — never frozen, always vibrant.',
+    desc: 'Sourced daily from local farms and trusted suppliers. Never frozen, always vibrant.',
   },
   {
     icon: (
@@ -34,7 +34,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Custom Menus',
-    desc: 'Tailored to your event, dietary needs, and personal taste — no two menus alike.',
+    desc: 'Tailored to your event, dietary needs, and personal taste. No two menus are alike.',
   },
   {
     icon: (
@@ -52,7 +52,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Made with Love',
-    desc: 'Passion and care in every plate — quality you can taste and remember.',
+    desc: 'Passion and care in every plate. Quality you can taste and remember.',
   },
   {
     icon: (
@@ -60,8 +60,8 @@ const FEATURES = [
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
       </svg>
     ),
-    title: 'Macro-Tracked',
-    desc: 'Meal prep plans include full nutritional info so you hit your health goals effortlessly.',
+    title: 'Nutrition-Focused',
+    desc: 'Balanced meals with quality ingredients, and food you can feel good about.',
   },
 ]
 
@@ -69,35 +69,30 @@ const TESTIMONIALS = [
   {
     name: 'Tia S',
     role: 'Kings Trail Cowboy Church',
-    avatar: 'https://placehold.co/80x80/1E1B4B/EEF2FF?text=TS',
     stars: 5,
     text: 'We used Humble Chef for our Annual Christmas Leadership Party. I have been planning parties for 9 years at various locations and this caterer was the best. The food was perfect and well executed. It is hard to get food out for 70 people and it be 100% spot on! You can not go wrong using Humble Chef!',
   },
   {
     name: 'Tanya E',
     role: 'Baby showers & wedding celebrations',
-    avatar: 'https://placehold.co/80x80/312E81/EEF2FF?text=TE',
     stars: 5,
     text: 'Humble Chef has catered several personal events, including baby showers and weddings celebrations, and the experience has consistently exceeded expectations. The quality of food has been excellent, and the service provided has been reliable and professional. I highly recommend Humble Chef when planning your next event.',
   },
   {
     name: 'Trudy Bangs',
     role: 'Christian Ambassadors',
-    avatar: 'https://placehold.co/80x80/4338CA/EEF2FF?text=TB',
     stars: 5,
     text: 'Chef Brian is a man of excellence and everything he does reveals that. At our last retreat, he prepared lunches and dinner which were not only delicious but the presentation was inviting, beautifully presented. It was a joy to work with him.',
   },
   {
     name: 'Michelle Graefen',
     role: 'Hope is Rising',
-    avatar: 'https://placehold.co/80x80/EA580C/FFF?text=MG',
     stars: 5,
     text: "We highly recommend Humble Chef! Chef Brian is a talented and gifted chef with a true heart for both great food and ministry. He is a blessing to everyone who has the opportunity to enjoy his cooking or work alongside him. His support truly makes our ministry work so much easier, and we're incredibly grateful for all he brings to the table. We are already looking forward to working with him again at our Fall Advance!",
   },
   {
     name: 'The Millers',
     role: 'Newly Weds',
-    avatar: 'https://placehold.co/80x80/1E1B4B/FFF?text=TM',
     stars: 5,
     text: 'Humble Chef was an amazing caterer! We had them do our wedding and they provided us with beautiful service and delicious food! Brian and his team were very easy to communicate with and open to helping us create the menu of our dreams! We could not suggest them more!',
   },
@@ -173,7 +168,6 @@ function TestimonialCard({ t }) {
         </button>
       )}
       <div className="testimonial-card__author">
-        <img src={t.avatar} alt={t.name} className="testimonial-card__avatar" />
         <div>
           <StarRating count={t.stars} />
           <p className="testimonial-card__name">{t.name}</p>
@@ -233,7 +227,8 @@ export default function Landing() {
       <section className="hero">
         <div className="hero__overlay" />
         <img
-          src="https://placehold.co/1600x900/1E1B4B/EEF2FF?text=Premium+Catering+%26+Meal+Prep"
+          src="/heroes/landing.svg"
+          onError={e => { e.currentTarget.style.display = 'none' }}
           alt="Beautifully arranged catering spread"
           className="hero__bg"
         />
@@ -301,17 +296,14 @@ export default function Landing() {
               - It&apos;s a Ministry
             </h2>
             <div className="divider fade-up" />
-            <p className="fade-up" style={{ color: 'var(--color-text-muted)', marginBottom: '1.75rem' }}>
-              Humble Chef Catering exists at the intersection of excellent food and genuine care for people. Rooted in our calling as bi-vocational ministers, we choose to work with our hands—just as Paul, Priscilla, and Aquila did—so that every meal we prepare helps support our families and fuels a broader, Kingdom-focused, community-oriented mission. For us, food is one of the most tangible ways to love and serve our neighbors, create space for connection, and quietly reflect the generosity and hospitality of Christ.
-            </p>
+            <Link to="/about" className="btn btn-primary btn-lg fade-up intro__about-btn">
+              Learn more about Humble Chef
+            </Link>
             <div className="intro__pills fade-up">
               {['Locally Sourced', 'Chef-Crafted', 'Nutrition-Focused', 'Allergen-Aware'].map(p => (
                 <span key={p} className="intro__pill">{p}</span>
               ))}
             </div>
-            <Link to="/about" className="btn btn-outline fade-up" style={{ marginTop: '1.75rem' }}>
-              Meet the Team
-            </Link>
           </div>
         </div>
       </section>
@@ -322,7 +314,7 @@ export default function Landing() {
           <div className="features__header fade-up">
             <p className="section-label">Why Choose Humble Chef</p>
             <h2 className="section-title">The Humble Chef Difference</h2>
-            <p className="section-sub">We don't just feed people — we create experiences worth remembering.</p>
+            <p className="section-sub">We don't just feed people, we create experiences worth remembering.</p>
           </div>
           <div className="features__grid">
             {FEATURES.map(f => (
@@ -365,7 +357,7 @@ export default function Landing() {
           <div className="testimonials__header fade-up">
             <p className="section-label">Testimonials</p>
             <h2 className="section-title">Loved by Our Clients</h2>
-            <p className="section-sub">Don't take our word for it — hear from the people who matter most.</p>
+            <p className="section-sub">Don't take our word for it, hear from the people who matter most.</p>
           </div>
           <div className="testimonials__carousel">
             <div className="testimonials__nav">

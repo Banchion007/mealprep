@@ -1,9 +1,11 @@
 /* ===================================================
    Contact Page — form with validation + company info
 =================================================== */
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { sendEmailViaResend } from '../lib/resendEmail'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import './Contact.css'
 
 const EVENT_TYPES = [
@@ -78,6 +80,8 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false)
   const [loading,   setLoading]   = useState(false)
   const [faqOpen,   setFaqOpen]   = useState(null)
+  const mapRef = useRef(null)
+  const mapInstance = useRef(null)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -115,17 +119,43 @@ export default function Contact() {
     }
   }
 
+  useEffect(() => {
+    if (!mapRef.current || mapInstance.current) return
+    const lat = 33.620553724044996, lng = -96.49843654649993
+    mapInstance.current = L.map(mapRef.current).setView([lat, lng], 14)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(mapInstance.current)
+    L.marker([lat, lng]).addTo(mapInstance.current)
+      .bindPopup('Humble Chef<br/>3803 Ward Neal Rd<br/>Bells, TX 75414')
+      .openPopup()
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.remove()
+        mapInstance.current = null
+      }
+    }
+  }, [])
+
   return (
     <div className="contact-page">
-      <div className="contact-page-header">
-        <div className="container">
-          <p className="section-label">Let's Talk</p>
-          <h1 className="contact-page-header__title">Contact Us</h1>
-          <p className="contact-page-header__sub">
-            Have an event in mind, or want to start a meal prep plan? Reach out — we'd love to hear from you.
+      <section className="page-hero contact-hero">
+        <div className="page-hero__overlay" />
+        <img
+          src="/heroes/contact.svg"
+          onError={e => { e.currentTarget.style.display = 'none' }}
+          alt="Get in touch with Humble Chef"
+          className="page-hero__bg"
+        />
+        <div className="container page-hero__content fade-up">
+          <p className="section-label" style={{ color: 'var(--color-accent-light)' }}>Let's Talk</p>
+          <h1 className="contact-hero__title">Contact Us</h1>
+          <p className="contact-hero__sub">
+            Have an event in mind, or want to start a meal prep plan? Reach out, we'd love to hear from you!
           </p>
         </div>
-      </div>
+      </section>
 
       <section className="section contact-section">
         <div className="container contact-inner">
@@ -290,23 +320,9 @@ export default function Contact() {
               </div>
             </div>
 
-            {/* Google Maps placeholder */}
-            <div className="map-placeholder">
-              <img
-                src="https://placehold.co/600x300/EEF2FF/1E1B4B?text=Google+Maps+Placeholder"
-                alt="Map of Humble Chef location"
-                className="map-img"
-              />
-              <div className="map-overlay">
-                <div className="map-pin">
-                  <svg width="16" height="16" fill="var(--color-primary)" viewBox="0 0 24 24">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3" fill="#fff"/>
-                  </svg>
-                </div>
-                <span>3803 Ward Neal Rd, Bells, TX 75414</span>
-              </div>
-            </div>
+            {/* Leaflet Map */}
+            <div id="map" ref={mapRef} className="leaflet-map" />
+
 
             {/* FAQ accordion */}
             <div className="contact-faq">
@@ -329,7 +345,7 @@ export default function Contact() {
                   )}
                 </div>
               ))}
-              <p className="contact-faq__note">Ask us anything in your message — we'll answer every question.</p>
+              <p className="contact-faq__note">Ask us anything in your message, and we'll answer any question.</p>
             </div>
           </div>
         </div>

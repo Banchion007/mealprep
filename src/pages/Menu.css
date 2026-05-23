@@ -21,8 +21,55 @@
 .page-hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, oklch(0.145 0 0 / 0.82) 0%, oklch(0.234 0.0787 282.66 / 0.60) 100%);
   z-index: 1;
+}
+
+/* Grain texture overlay */
+.page-hero__overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Floating indigo blob — decorative fallback */
+.page-hero::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: 10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    ellipse at center,
+    oklch(0.40 0.12 282.66 / 0.20) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(80px);
+}
+
+/* Floating orange blob — decorative fallback */
+.page-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(
+    ellipse at center,
+    oklch(0.60 0.18 36 / 0.15) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(100px);
 }
 .page-hero__content {
   position: relative;
