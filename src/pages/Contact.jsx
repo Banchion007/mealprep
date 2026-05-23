@@ -94,23 +94,16 @@ export default function Contact() {
     }
     setLoading(true)
     try {
-      const html = `
-        <div style="font-family: sans-serif; max-width: 600px;">
-          <h2>New Contact Form Submission</h2>
-          <p><strong>Name:</strong> ${fields.name}</p>
-          <p><strong>Email:</strong> ${fields.email}</p>
-          <p><strong>Phone:</strong> ${fields.phone}</p>
-          <p><strong>Event Type:</strong> ${fields.eventType}</p>
-          <p><strong>Event Date:</strong> ${fields.eventDate}</p>
-          <p><strong>Guest Count:</strong> ${fields.guestCount}</p>
-          <p><strong>Message:</strong></p>
-          <p>${fields.message.replace(/\n/g, '<br>')}</p>
-        </div>
-      `
       await sendEmailViaResend({
-        to: 'humblechefbrian@gmail.com',
+        name: fields.name,
+        email: fields.email,
+        phone: fields.phone,
+        eventType: fields.eventType,
+        eventDate: fields.eventDate,
+        guestCount: fields.guestCount,
+        message: fields.message,
+        replyTo: fields.email,
         subject: `Contact Form: ${fields.eventType} from ${fields.name}`,
-        html,
       })
       setLoading(false)
       setSubmitted(true)

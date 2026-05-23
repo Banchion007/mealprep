@@ -22,7 +22,6 @@ export function useMenuItems() {
       const { data, error: fetchError } = await supabase
         .from('menu_items')
         .select('*')
-        .eq('user_id', user.id)
         .order('tier', { ascending: true })
         .order('created_at', { ascending: false })
 
@@ -78,7 +77,6 @@ export function useMenuItems() {
           .from('menu_items')
           .delete()
           .eq('id', id)
-          .eq('user_id', user.id)
 
         if (deleteError) throw deleteError
         await fetchItems()
@@ -105,7 +103,6 @@ export function useMenuItems() {
             updated_at: new Date().toISOString(),
           })
           .eq('id', id)
-          .eq('user_id', user.id)
 
         if (updateError) throw updateError
         await fetchItems()

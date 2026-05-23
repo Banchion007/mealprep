@@ -1,0 +1,7 @@
+# https://supabase.com/docs/guides/functions/function-configuration
+
+[functions.send-email]
+verify_jwt = false
+
+[functions.create-payment-intent]
+verify_jwt = true

@@ -23,6 +23,7 @@ CREATE INDEX IF NOT EXISTS recipes_created_at_idx ON recipes(created_at DESC);
 ALTER TABLE recipes ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policy: Users can only see/edit their own recipes
+DROP POLICY IF EXISTS "Users can manage their own recipes" ON recipes;
 CREATE POLICY "Users can manage their own recipes"
   ON recipes
   FOR ALL

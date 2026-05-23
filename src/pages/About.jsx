@@ -1,13 +1,13 @@
 /* ===================================================
    About Page — story, team, mission, gallery
 =================================================== */
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import { useAuth } from '../contexts/AuthContext'
 import TiltedCard from '../components/TiltedCard'
 import GalleryModal from '../components/GalleryModal'
 import GalleryViewer from '../components/GalleryViewer'
-import { supabase } from '../lib/supabase'
 import './About.css'
 
 /** Set to true when team bios and photos are ready. */
@@ -73,20 +73,10 @@ const VALUES_MISSION_IMAGE = '/image.png'
 
 export default function About() {
   useScrollAnimation()
+  const { isAdmin } = useAuth()
   const [openGallery, setOpenGallery] = useState(null)
-  const [currentUser, setCurrentUser] = useState(null)
 
   const currentGallery = GALLERY_CARDS.find(g => g.id === openGallery)
-  const isAdminUser = currentUser?.email === 'grghyperlink.007@gmail.com'
-
-  useEffect(() => {
-    if (!SHOW_GALLERY_SECTION) return
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUser(user)
-    }
-    getUser()
-  }, [])
 
   return (
     <div className="about-page">
@@ -212,7 +202,7 @@ export default function About() {
         </div>
       </section>}
 
-      {SHOW_GALLERY_SECTION && (isAdminUser ? (
+      {SHOW_GALLERY_SECTION && (isAdmin ? (
         <GalleryModal
           isOpen={openGallery !== null}
           onClose={() => setOpenGallery(null)}

@@ -53,7 +53,7 @@ const CARD_ELEMENT_OPTIONS = {
 }
 
 /* ── Inner payment form (must be inside <Elements>) ── */
-function PaymentForm({ total, mealItems, delivery, user, saveOrder, onDone }) {
+function PaymentForm({ total, mealItems, delivery, user, saveOrder, onDone, onSignIn }) {
   const stripe   = useStripe()
   const elements = useElements()
 
@@ -67,6 +67,11 @@ function PaymentForm({ total, mealItems, delivery, user, saveOrder, onDone }) {
 
   const handlePlaceOrder = async () => {
     if (!stripe || !elements) return
+    if (!user) {
+      setPayError('Please sign in to place an order.')
+      onSignIn?.()
+      return
+    }
 
     // Validate name
     if (!cardName.trim()) {
@@ -83,7 +88,9 @@ function PaymentForm({ total, mealItems, delivery, user, saveOrder, onDone }) {
         body: { amount: total },
       })
       if (fnError || !data?.clientSecret) {
-        throw new Error(fnError?.message || 'Could not reach payment server')
+        const msg = fnError?.message || data?.error || 'Could not reach payment server'
+        if (msg.toLowerCase().includes('auth')) onSignIn?.()
+        throw new Error(msg)
       }
 
       // 2. Confirm the card payment in the browser (card never touches your server)
@@ -217,7 +224,7 @@ function PaymentForm({ total, mealItems, delivery, user, saveOrder, onDone }) {
 
 /* ── Main summary component ── */
 export default function MealPrepSummary({ selectedMeals, delivery, onBack, onDone }) {
-  const { user } = useAuth()
+  const { user, setShowAuthModal } = useAuth()
   const { meals } = useMenu()
   const [saveOrder, setSaveOrder] = useState(true)
   useScrollAnimation('.fade-up', meals.length)
@@ -351,6 +358,14 @@ export default function MealPrepSummary({ selectedMeals, delivery, onBack, onDon
             </div>
 
             {/* Stripe Elements wrapper */}
+            {!user && (
+              <p className="mp-pay-error" style={{ marginBottom: '1rem' }}>
+                Sign in to complete checkout.{' '}
+                <button type="button" className="btn btn-outline btn-sm" onClick={() => setShowAuthModal(true)}>
+                  Sign in
+                </button>
+              </p>
+            )}
             <Elements stripe={stripePromise}>
               <PaymentForm
                 total={total}
@@ -358,8 +373,8 @@ export default function MealPrepSummary({ selectedMeals, delivery, onBack, onDon
                 delivery={delivery}
                 user={user}
                 saveOrder={saveOrder}
-                meals={meals}
                 onDone={onDone}
+                onSignIn={() => setShowAuthModal(true)}
               />
             </Elements>
           </div>

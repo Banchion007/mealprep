@@ -13,13 +13,16 @@ export function MenuProvider({ children }) {
       .from('weekly_menu')
       .select('meals')
       .eq('status', 'published')
-      .single()
-      .then(({ data }) => {
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) {
+          console.warn('[MenuContext] weekly_menu:', error.message)
+          return
+        }
         if (data?.meals?.length > 0) {
           setMeals(data.meals)
         }
       })
-      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 

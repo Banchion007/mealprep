@@ -13,15 +13,12 @@ The "A Glimpse Behind the Scenes" gallery on the About page allows admins to upl
 5. Make it **Public** (enable public access so images/videos can be viewed)
 6. Click **Create bucket**
 
-### 2. Configure Policies (Optional)
+### 2. Apply storage policies
 
-If you want more control over who can upload:
+Run migration `supabase/migrations/20260321120000_security_rls_and_schema.sql` (includes gallery policies):
 
-1. Click on the `gallery-uploads` bucket
-2. Go to **Policies** tab
-3. Add policies for authenticated users if desired
-
-For a simple setup, the default public access is fine.
+- **Public read** — anyone can view images
+- **Admin upload/delete only** — requires `app_metadata.role = "admin"` (see `docs/SUPABASE_SECURITY.md`)
 
 ### 3. Test It Out
 

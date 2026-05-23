@@ -10,12 +10,8 @@ import Customers    from './Customers'
 import WeeklyMenuBuilder from './WeeklyMenuBuilder'
 import { seedMockData } from './mockData'
 import { useAuth } from '../../contexts/AuthContext'
+import { isAdminUser } from '../../lib/admin'
 import './Dashboard.css'
-
-/* ── Admin allowlist (set VITE_ADMIN_EMAILS in .env.local) ── */
-const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || '')
-  .split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
-const isAdmin = (user) => user && ADMIN_EMAILS.includes(user.email?.toLowerCase())
 
 export default function DashboardLayout() {
   const { user, loading } = useAuth()
@@ -32,7 +28,7 @@ export default function DashboardLayout() {
       </div>
     )
   }
-  if (!user || !isAdmin(user)) return <Navigate to="/" replace />
+  if (!user || !isAdminUser(user)) return <Navigate to="/" replace />
 
   const closeSidebar = () => setMobileOpen(false)
 
