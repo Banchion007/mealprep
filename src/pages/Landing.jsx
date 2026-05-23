@@ -1,7 +1,7 @@
 /* ===================================================
    Landing Page — Hero, Intro, Features, Testimonials
 =================================================== */
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import TiltedCard from '../components/TiltedCard'
@@ -52,7 +52,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Made with Love',
-    desc: 'Every dish reflects our commitment to quality, care, and an unforgettable experience.',
+    desc: 'Passion and care in every plate — quality you can taste and remember.',
   },
   {
     icon: (
@@ -67,32 +67,46 @@ const FEATURES = [
 
 const TESTIMONIALS = [
   {
-    name: 'Sarah Mitchell',
-    role: 'Event Planner',
-    avatar: 'https://placehold.co/80x80/1E1B4B/EEF2FF?text=SM',
+    name: 'Tia S',
+    role: 'Kings Trail Cowboy Church',
+    avatar: 'https://placehold.co/80x80/1E1B4B/EEF2FF?text=TS',
     stars: 5,
-    text: "Humble Chef transformed our corporate gala into a culinary experience our guests still talk about. The food was exceptional, the presentation was stunning, and the team was an absolute pleasure to work with.",
+    text: 'We used Humble Chef for our Annual Christmas Leadership Party. I have been planning parties for 9 years at various locations and this caterer was the best. The food was perfect and well executed. It is hard to get food out for 70 people and it be 100% spot on! You can not go wrong using Humble Chef!',
   },
   {
-    name: 'Marcus Torres',
-    role: 'Weekly Meal Prep Customer',
-    avatar: 'https://placehold.co/80x80/312E81/EEF2FF?text=MT',
+    name: 'Tanya E',
+    role: 'Baby showers & wedding celebrations',
+    avatar: 'https://placehold.co/80x80/312E81/EEF2FF?text=TE',
     stars: 5,
-    text: "I've tried every meal prep service out there. Humble Chef is in a different league. The flavors are restaurant-quality and the macros are always spot-on. My keto journey has never been this delicious.",
+    text: 'Humble Chef has catered several personal events, including baby showers and weddings celebrations, and the experience has consistently exceeded expectations. The quality of food has been excellent, and the service provided has been reliable and professional. I highly recommend Humble Chef when planning your next event.',
   },
   {
-    name: 'Priya Kapoor',
-    role: 'Wedding Client',
-    avatar: 'https://placehold.co/80x80/EA580C/FFF?text=PK',
+    name: 'Trudy Bangs',
+    role: 'Christian Ambassadors',
+    avatar: 'https://placehold.co/80x80/4338CA/EEF2FF?text=TB',
     stars: 5,
-    text: "They catered our 200-person wedding flawlessly. From the appetizers to the dessert table, everything was perfect. They accommodated every dietary restriction without compromising taste.",
+    text: 'Chef Brian is a man of excellence and everything he does reveals that. At our last retreat, he prepared lunches and dinner which were not only delicious but the presentation was inviting, beautifully presented. It was a joy to work with him.',
+  },
+  {
+    name: 'Michelle Graefen',
+    role: 'Hope is Rising',
+    avatar: 'https://placehold.co/80x80/EA580C/FFF?text=MG',
+    stars: 5,
+    text: "We highly recommend Humble Chef! Chef Brian is a talented and gifted chef with a true heart for both great food and ministry. He is a blessing to everyone who has the opportunity to enjoy his cooking or work alongside him. His support truly makes our ministry work so much easier, and we're incredibly grateful for all he brings to the table. We are already looking forward to working with him again at our Fall Advance!",
+  },
+  {
+    name: 'The Millers',
+    role: 'Newly Weds',
+    avatar: 'https://placehold.co/80x80/1E1B4B/FFF?text=TM',
+    stars: 5,
+    text: 'Humble Chef was an amazing caterer! We had them do our wedding and they provided us with beautiful service and delicious food! Brian and his team were very easy to communicate with and open to helping us create the menu of our dreams! We could not suggest them more!',
   },
 ]
 
 const STATS = [
   { value: '500+', label: 'Events Catered' },
   { value: '100k+', label: 'Meals Served' },
-  { value: '30+', label: 'Years of Excellence' },
+  { value: '15+', label: 'Years of Excellence' },
 ]
 
 function StarRating({ count = 5 }) {
@@ -107,8 +121,104 @@ function StarRating({ count = 5 }) {
   )
 }
 
+function TestimonialCard({ t }) {
+  const [expanded, setExpanded] = useState(false)
+  const textRef = useRef(null)
+  const [showToggle, setShowToggle] = useState(false)
+  const [hClosed, setHClosed] = useState(72)
+  const [hOpen, setHOpen] = useState(400)
+
+  const measureHeights = useCallback(() => {
+    const el = textRef.current
+    if (!el) return
+    const lh = parseFloat(getComputedStyle(el).lineHeight)
+    const closed = Number.isFinite(lh) && lh > 0 ? Math.ceil(lh * 3) : 72
+    setHClosed(closed)
+    const full = el.scrollHeight
+    setHOpen(full)
+    setShowToggle(full > closed + 6)
+  }, [t.text])
+
+  useLayoutEffect(() => {
+    measureHeights()
+  }, [measureHeights])
+
+  useEffect(() => {
+    const el = textRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => measureHeights())
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [measureHeights])
+
+  return (
+    <div className="testimonial-card">
+      <div className="testimonial-card__quote">"</div>
+      <div
+        className={`testimonial-card__text-shell${expanded ? ' testimonial-card__text-shell--open' : ''}`}
+        style={{ maxHeight: expanded ? `${hOpen}px` : `${hClosed}px` }}
+      >
+        <p ref={textRef} className="testimonial-card__text">
+          {t.text}
+        </p>
+      </div>
+      {showToggle && (
+        <button
+          type="button"
+          className="testimonial-card__toggle"
+          onClick={() => setExpanded((e) => !e)}
+          aria-expanded={expanded}
+        >
+          {expanded ? 'See less' : 'See more'}
+        </button>
+      )}
+      <div className="testimonial-card__author">
+        <img src={t.avatar} alt={t.name} className="testimonial-card__avatar" />
+        <div>
+          <StarRating count={t.stars} />
+          <p className="testimonial-card__name">{t.name}</p>
+          <p className="testimonial-card__role">{t.role}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Landing() {
   useScrollAnimation()
+  const testimonialsScrollRef = useRef(null)
+  const [canScrollPrev, setCanScrollPrev] = useState(false)
+  const [canScrollNext, setCanScrollNext] = useState(true)
+
+  const updateScrollButtons = useCallback(() => {
+    const el = testimonialsScrollRef.current
+    if (!el) return
+    const { scrollLeft, scrollWidth, clientWidth } = el
+    setCanScrollPrev(scrollLeft > 4)
+    setCanScrollNext(scrollLeft < scrollWidth - clientWidth - 4)
+  }, [])
+
+  useEffect(() => {
+    const el = testimonialsScrollRef.current
+    if (!el) return
+    updateScrollButtons()
+    el.addEventListener('scroll', updateScrollButtons, { passive: true })
+    const ro = new ResizeObserver(updateScrollButtons)
+    ro.observe(el)
+    return () => {
+      el.removeEventListener('scroll', updateScrollButtons)
+      ro.disconnect()
+    }
+  }, [updateScrollButtons])
+
+  const scrollTestimonials = (dir) => {
+    const el = testimonialsScrollRef.current
+    if (!el) return
+    const item = el.querySelector('.testimonials__item')
+    const gap = parseFloat(getComputedStyle(el).gap) || 24
+    const step = (item?.offsetWidth ?? 320) + gap
+    el.scrollBy({ left: dir * step, behavior: 'smooth' })
+  }
 
   const handleOpenMenu = (e) => {
     e.preventDefault()
@@ -257,23 +367,45 @@ export default function Landing() {
             <h2 className="section-title">Loved by Our Clients</h2>
             <p className="section-sub">Don't take our word for it — hear from the people who matter most.</p>
           </div>
-          <div className="testimonials__grid">
-            {TESTIMONIALS.map(t => (
-              <TiltedCard key={t.name} className="fade-up">
-                <div className="testimonial-card">
-                  <div className="testimonial-card__quote">"</div>
-                  <p className="testimonial-card__text">"{t.text}"</p>
-                  <div className="testimonial-card__author">
-                    <img src={t.avatar} alt={t.name} className="testimonial-card__avatar" />
-                    <div>
-                      <StarRating count={t.stars} />
-                      <p className="testimonial-card__name">{t.name}</p>
-                      <p className="testimonial-card__role">{t.role}</p>
-                    </div>
-                  </div>
+          <div className="testimonials__carousel">
+            <div className="testimonials__nav">
+              <button
+                type="button"
+                className="testimonials__arrow"
+                onClick={() => scrollTestimonials(-1)}
+                disabled={!canScrollPrev}
+                aria-label="Previous testimonials"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+            </div>
+            <div
+              className="testimonials__scroll"
+              ref={testimonialsScrollRef}
+            >
+              {TESTIMONIALS.map(t => (
+                <div className="testimonials__item" key={t.name}>
+                  <TiltedCard className="fade-up">
+                    <TestimonialCard t={t} />
+                  </TiltedCard>
                 </div>
-              </TiltedCard>
-            ))}
+              ))}
+            </div>
+            <div className="testimonials__nav">
+              <button
+                type="button"
+                className="testimonials__arrow"
+                onClick={() => scrollTestimonials(1)}
+                disabled={!canScrollNext}
+                aria-label="Next testimonials"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </section>

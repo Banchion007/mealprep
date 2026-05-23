@@ -2,8 +2,9 @@
    Navbar — sticky top navigation with mobile menu
 =================================================== */
 import React, { useState, useEffect, useRef } from 'react'
-import { NavLink, Link, useLocation } from 'react-router-dom'
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useMealPrepSetting } from '../hooks/useMealPrepSetting'
 import './Navbar.css'
 
 function UserMenu({ user, isAdmin, signOut }) {
@@ -115,7 +116,7 @@ function MenuDropdown() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
             </svg>
-            Browse Menu
+            View Meal Prep Menu
           </Link>
           <a
             href={MENU_PDF_URL}
@@ -126,7 +127,7 @@ function MenuDropdown() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 16V4M6 10l6 6 6-6"/><path d="M4 20h16"/>
             </svg>
-            Download PDF
+            View Catering Menu
           </a>
         </div>
       )}
@@ -137,8 +138,19 @@ function MenuDropdown() {
 export default function Navbar() {
   const [scrolled,     setScrolled]     = useState(false)
   const [menuOpen,     setMenuOpen]     = useState(false)
+  const { mealPrepEnabled, loading } = useMealPrepSetting()
   const location = useLocation()
+  const navigate = useNavigate()
   const { user, isAdmin, signOut, setShowAuthModal } = useAuth()
+
+  const handleMealPrepClick = () => {
+    if (mealPrepEnabled) {
+      navigate('/meal-prep')
+    } else {
+      navigate('/under-construction')
+    }
+  }
+
   // Close mobile menu on route change
   useEffect(() => { setMenuOpen(false) }, [location])
 
@@ -159,7 +171,7 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <nav className="navbar__links" aria-label="Main navigation">
-          {NAV_LINKS.map(({ to, label }) => (
+          {NAV_LINKS.filter(({ to }) => to !== '/meal-prep' || mealPrepEnabled).map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -176,9 +188,14 @@ export default function Navbar() {
 
         {/* CTA */}
         <div className="navbar__actions">
-          <Link to="/meal-prep" className="btn btn-primary btn-sm navbar__cta">
-            Order Meals
-          </Link>
+          {!loading && (
+            <button
+              onClick={handleMealPrepClick}
+              className="btn btn-primary btn-sm navbar__cta"
+            >
+              Order Meals
+            </button>
+          )}
           <Link
             to="/dashboard"
             className="btn btn-outline btn-sm navbar__cta"
@@ -208,7 +225,7 @@ export default function Navbar() {
 
       {/* Mobile drawer */}
       <div className={`navbar__mobile${menuOpen ? ' navbar__mobile--open' : ''}`}>
-        {NAV_LINKS.map(({ to, label }) => (
+        {NAV_LINKS.filter(({ to }) => to !== '/meal-prep' || mealPrepEnabled).map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -221,19 +238,25 @@ export default function Navbar() {
           </NavLink>
         ))}
         <Link to="/menu" className="navbar__mobile-link">
-          Browse Menu
+          View Meal Prep Menu
         </Link>
         <a href={MENU_PDF_URL} download className="navbar__mobile-link">
-          Download Menu PDF
+          View Catering Menu
         </a>
         {user && (
           <Link to="/account" className="navbar__mobile-link">
             My Account
           </Link>
         )}
-        <Link to="/meal-prep" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
-          Order Meals
-        </Link>
+        {!loading && (
+          <button
+            onClick={handleMealPrepClick}
+            className="btn btn-primary"
+            style={{ marginTop: '0.5rem', width: '100%' }}
+          >
+            Order Meals
+          </button>
+        )}
         {isAdmin && (
           <Link to="/dashboard" className="btn btn-outline" style={{ marginTop: '0.5rem' }}>
             Dashboard

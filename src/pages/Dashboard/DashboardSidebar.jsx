@@ -4,6 +4,7 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { resetMockData } from './mockData'
+import { useMealPrepSetting } from '../../hooks/useMealPrepSetting'
 
 const NAV = [
   {
@@ -40,15 +41,6 @@ const NAV = [
     ),
   },
   {
-    to: '/dashboard/recipes',
-    label: 'Recipe Library',
-    icon: (
-      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-      </svg>
-    ),
-  },
-  {
     to: '/dashboard/weekly-menu',
     label: 'Weekly Menu',
     icon: (
@@ -61,19 +53,11 @@ const NAV = [
       </svg>
     ),
   },
-  {
-    to: '/dashboard/grocery-list',
-    label: 'Grocery List',
-    icon: (
-      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
-      </svg>
-    ),
-  },
 ]
 
 export default function DashboardSidebar({ mobileOpen, onClose }) {
+  const { mealPrepEnabled, toggleMealPrep, loading } = useMealPrepSetting()
+
   const handleReset = () => {
     if (window.confirm('Reset all demo data? This will regenerate orders, subscribers, and recipes.')) {
       resetMockData()
@@ -110,6 +94,21 @@ export default function DashboardSidebar({ mobileOpen, onClose }) {
 
       {/* Footer */}
       <div className="dash-sidebar__footer">
+        <div className="dash-sidebar__toggle">
+          <label className="dash-sidebar__toggle-label">
+            <input
+              type="checkbox"
+              checked={mealPrepEnabled}
+              onChange={toggleMealPrep}
+              disabled={loading}
+              className="dash-sidebar__toggle-input"
+              aria-label="Toggle Meal Prep feature"
+            />
+            <span className="dash-sidebar__toggle-slider" />
+            <span className="dash-sidebar__toggle-text">Meal Prep: {mealPrepEnabled ? 'On' : 'Off'}</span>
+          </label>
+        </div>
+
         <NavLink
           to="/"
           className="dash-sidebar__link"
@@ -121,6 +120,19 @@ export default function DashboardSidebar({ mobileOpen, onClose }) {
           </svg>
           Back to Site
         </NavLink>
+        <a
+          href="https://cater-mate-copy-06660da6.base44.app/Main"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="dash-sidebar__link"
+          style={{ fontSize: '0.8rem' }}
+        >
+          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M10 5H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7m-9-10h7a2 2 0 0 1 2 2v7"/>
+            <line x1="14" y1="4" x2="21" y2="11"/><line x1="21" y1="4" x2="21" y2="11"/><line x1="14" y1="4" x2="21" y2="4"/>
+          </svg>
+          CaterMate
+        </a>
         <button className="dash-sidebar__reset-btn" onClick={handleReset}>
           <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.43"/>

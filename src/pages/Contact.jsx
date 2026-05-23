@@ -3,6 +3,7 @@
 =================================================== */
 import React, { useState } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import { sendEmailViaResend } from '../lib/resendEmail'
 import './Contact.css'
 
 const EVENT_TYPES = [
@@ -84,7 +85,7 @@ export default function Contact() {
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const errs = validate(fields)
     if (Object.keys(errs).length) {
@@ -92,11 +93,33 @@ export default function Contact() {
       return
     }
     setLoading(true)
-    // Simulate async submission
-    setTimeout(() => {
+    try {
+      const html = `
+        <div style="font-family: sans-serif; max-width: 600px;">
+          <h2>New Contact Form Submission</h2>
+          <p><strong>Name:</strong> ${fields.name}</p>
+          <p><strong>Email:</strong> ${fields.email}</p>
+          <p><strong>Phone:</strong> ${fields.phone}</p>
+          <p><strong>Event Type:</strong> ${fields.eventType}</p>
+          <p><strong>Event Date:</strong> ${fields.eventDate}</p>
+          <p><strong>Guest Count:</strong> ${fields.guestCount}</p>
+          <p><strong>Message:</strong></p>
+          <p>${fields.message.replace(/\n/g, '<br>')}</p>
+        </div>
+      `
+      await sendEmailViaResend({
+        to: 'humblechefbrian@gmail.com',
+        subject: `Contact Form: ${fields.eventType} from ${fields.name}`,
+        html,
+      })
       setLoading(false)
       setSubmitted(true)
-    }, 1200)
+      setFields(INIT)
+    } catch (error) {
+      console.error('Email send failed:', error)
+      setLoading(false)
+      setErrors({ submit: 'Failed to send message. Please try again.' })
+    }
   }
 
   return (
@@ -138,6 +161,7 @@ export default function Contact() {
               <>
                 <h2 className="contact-form-title">Send Us a Message</h2>
                 <p className="contact-form-sub">All fields are required. We respond within 24 hours.</p>
+                {errors.submit && <p className="form-error form-error--submit">{errors.submit}</p>}
                 <form className="contact-form" onSubmit={handleSubmit} noValidate>
                   <div className="form-row">
                     <div className="form-group">
@@ -260,7 +284,13 @@ export default function Contact() {
                     <div className="contact-info-item__icon">{item.icon}</div>
                     <div>
                       <p className="contact-info-item__label">{item.label}</p>
-                      <p className="contact-info-item__value">{item.value}</p>
+                      {item.label === 'Email' ? (
+                        <a href={`mailto:${item.value}`} className="contact-info-item__value contact-email-link">
+                          {item.value}
+                        </a>
+                      ) : (
+                        <p className="contact-info-item__value">{item.value}</p>
+                      )}
                     </div>
                   </div>
                 ))}

@@ -1,11 +1,19 @@
 /* ===================================================
    About Page — story, team, mission, gallery
 =================================================== */
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import TiltedCard from '../components/TiltedCard'
+import GalleryModal from '../components/GalleryModal'
+import GalleryViewer from '../components/GalleryViewer'
+import { supabase } from '../lib/supabase'
 import './About.css'
+
+/** Set to true when team bios and photos are ready. */
+const SHOW_TEAM_SECTION = false
+/** Set to true when gallery images are uploaded. */
+const SHOW_GALLERY_SECTION = false
 
 const TEAM = [
   {
@@ -35,47 +43,50 @@ const TEAM = [
 ]
 
 const MILESTONES = [
-  { year: '2016', event: 'Founded in a small Austin kitchen by Chef Elena Russo.' },
-  { year: '2017', event: 'First corporate catering contract — 500-person tech conference.' },
-  { year: '2018', event: 'Launched weekly meal prep subscription service.' },
-  { year: '2020', event: 'Expanded kitchen facility; hired full culinary team of 12.' },
-  { year: '2022', event: 'Named Austin\'s #1 Caterer by Austin Eater Magazine.' },
-  { year: '2024', event: 'Reached 5,000 active weekly meal prep subscribers.' },
+  { year: '9yo', event: "I started baking in my mom's kitchen when I was just 9 years old" },
+  { year: '15yo', event: 'I got my first job in a pizza parlor' },
+  { year: '18-23', event: 'I worked every part of a busy family dining restaurant — from busboy to prep cook, line cook, waiter, and crew leader' },
+  { year: '25', event: 'I moved into management, where I had the opportunity to serve with The Old Spaghetti Factory, The Sacramento Hilton Hotel, Aramark, Sodexo, and at places like USAA, E-Trade, Johnson & Johnson, Hewlett Packard, and several senior retirement facilities around Sacramento, California' },
+  { year: '32', event: 'I also provided catering support for our church and local soccer club' },
+  { year: '42', event: 'After moving to Texas in 2011, I started Humble Chef to bring that same heart for hospitality, hard work, and dependable service to every meal and event we serve.' },
 ]
 
-const GALLERY_IMGS = [
-  { src: 'https://placehold.co/600x400/EEF2FF/1E1B4B?text=Catering+Event',  alt: 'Catering event setup', wide: true },
-  { src: 'https://placehold.co/400x400/EA580C/FFF?text=Chef+at+Work',       alt: 'Chef at work' },
-  { src: 'https://placehold.co/400x400/312E81/EEF2FF?text=Fresh+Ingredients',  alt: 'Fresh ingredients' },
-  { src: 'https://placehold.co/600x400/1E1B4B/EEF2FF?text=Meal+Prep+Line',  alt: 'Meal prep production', wide: true },
-  { src: 'https://placehold.co/400x400/312E81/EEF2FF?text=Plated+Dish',        alt: 'Plated dish' },
-  { src: 'https://placehold.co/400x400/EEF2FF/EA580C?text=Desserts',        alt: 'Dessert spread' },
+const GALLERY_CARDS = [
+  { id: 'catering-events', title: 'Catering Events', wide: true },
+  { id: 'chefs-at-work', title: 'Chefs at Work' },
+  { id: 'fresh-ingredients', title: 'Fresh Ingredients' },
+  { id: 'meal-prep-line', title: 'Meal Prep Line', wide: true },
+  { id: 'plated-dishes', title: 'Plated Dishes', wide: true },
+  { id: 'desserts', title: 'Desserts' },
 ]
 
-const VALUES = [
-  {
-    icon: '❤️',
-    title: 'Love & Service',
-    desc: 'Food is one of the most tangible ways to love and serve people. Every event, meal, and conversation is a chance to care for neighbors and create space for connection.',
-  },
-  {
-    icon: '🤲',
-    title: 'Faithful, Hands-On Work',
-    desc: 'As bi-vocational ministers, we work with our hands—like Paul, Priscilla, and Aquila—modeling non-dependent leadership instead of relying on a ministry salary alone. Honest labor supports our families and our calling.',
-  },
-  {
-    icon: '✨',
-    title: 'Kingdom & Community',
-    desc: 'Our labor fuels a broader Kingdom-focused, community-oriented mission. We aim to quietly reflect the generosity and hospitality of Christ in how we cook, serve, and show up.',
-  },
-]
+const GALLERY_PLACEHOLDERS = {
+  'catering-events': 'https://placehold.co/600x400/EEF2FF/1E1B4B?text=Catering+Events',
+  'chefs-at-work': 'https://placehold.co/400x400/EA580C/FFF?text=Chefs+at+Work',
+  'fresh-ingredients': 'https://placehold.co/400x400/312E81/EEF2FF?text=Fresh+Ingredients',
+  'meal-prep-line': 'https://placehold.co/600x400/1E1B4B/EEF2FF?text=Meal+Prep+Line',
+  'plated-dishes': 'https://placehold.co/400x400/312E81/EEF2FF?text=Plated+Dishes',
+  'desserts': 'https://placehold.co/400x400/EEF2FF/EA580C?text=Desserts',
+}
 
-/** Replace with your asset, e.g. `/images/mission.jpg` from `public`. */
-const VALUES_MISSION_IMAGE =
-  'https://placehold.co/640x480/f5f0eb/1E1B4B?text=Your+image'
+const VALUES_MISSION_IMAGE = '/image.png'
 
 export default function About() {
   useScrollAnimation()
+  const [openGallery, setOpenGallery] = useState(null)
+  const [currentUser, setCurrentUser] = useState(null)
+
+  const currentGallery = GALLERY_CARDS.find(g => g.id === openGallery)
+  const isAdminUser = currentUser?.email === 'grghyperlink.007@gmail.com'
+
+  useEffect(() => {
+    if (!SHOW_GALLERY_SECTION) return
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setCurrentUser(user)
+    }
+    getUser()
+  }, [])
 
   return (
     <div className="about-page">
@@ -101,25 +112,19 @@ export default function About() {
         <div className="container story-inner">
           <div className="story-text fade-up">
             <p className="section-label">Our Story</p>
-            <h2 className="section-title">From Passion Project to Austin Institution</h2>
+            <h2 className="section-title">Food is More Than a Meal</h2>
+            <p className="story-kicker">It&apos;s a Ministry</p>
             <div className="divider" />
-            <p style={{ color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
-              It started with a simple conviction: people deserve food that's both extraordinary and nourishing. In 2016, Chef Elena Russo left a Michelin-starred restaurant to start Humble Chef in her home kitchen. With a portable cooler and a borrowed van, she catered her first event for 40 guests.
-            </p>
             <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
-              Word spread quickly. By 2018, demand outpaced capacity, and Humble Chef moved into a proper commercial kitchen. Today, our team of 30 serves hundreds of events and thousands of weekly meal prep subscribers across Austin and the surrounding region.
+              We do what we do because food is one of the most tangible ways to love and serve people. Humble Chef Catering is owned and operated by bi-vocational ministers who, like Paul, Priscilla and Aquila, and others in Scripture, chose to work with their hands and model non-dependent leadership rather than rely on a ministry salary. Our labor of love for food and people not only helps support our own families, it also fuels a broader Kingdom-focused, community-oriented mission. Every event, every meal, and every interaction is an opportunity to care for our neighbors, create space for connection, and quietly reflect the generosity and hospitality of Christ.
             </p>
-            <blockquote className="story-quote">
-              "I cook to make people feel seen. A great meal says: you matter, this moment matters."
-              <cite>— Chef Elena Russo</cite>
-            </blockquote>
           </div>
 
           {/* Timeline */}
           <div className="timeline fade-up">
             <h3 className="timeline__title">Our Journey</h3>
-            {MILESTONES.map(m => (
-              <div key={m.year} className="timeline__item">
+            {MILESTONES.map((m, i) => (
+              <div key={i} className="timeline__item">
                 <div className="timeline__year">{m.year}</div>
                 <div className="timeline__dot" />
                 <div className="timeline__event">{m.event}</div>
@@ -138,45 +143,28 @@ export default function About() {
             <div className="values-header__row">
               <div className="values-header__body">
                 <p className="section-sub values-header__sub">
-                  We do what we do because food is one of the most tangible ways to love and serve people. Humble Chef Catering is owned and operated by bi-vocational ministers who, like Paul, Priscilla and Aquila, and others in Scripture, chose to work with their hands and model non-dependent leadership rather than rely on a ministry salary.
-                </p>
-                <p className="section-sub values-header__sub">
-                  Our labor of love for food and people not only helps support our own families, it also fuels a broader Kingdom-focused, community-oriented mission.
-                </p>
-                <p className="section-sub values-header__sub">
-                  Every event, every meal, and every interaction is an opportunity to care for our neighbors, create space for connection, and quietly reflect the generosity and hospitality of Christ.
+                  I started baking in my mom&apos;s kitchen when I was just 9 years old, and that early love for food never left me. At 15, I got my first job in a pizza parlor, and from ages 18 to 23 I worked every part of a busy family dining restaurant — from busboy to prep cook, line cook, waiter, and crew leader. By 25, I moved into management, where I had the opportunity to serve with The Old Spaghetti Factory, The Sacramento Hilton Hotel, Aramark, Sodexo, and at places like USAA, E-Trade, Johnson & Johnson, Hewlett Packard, and several senior retirement facilities around Sacramento, California. From 2001 to 2011, I also provided catering support for our church and local soccer club. After moving to Texas in 2011, I started Humble Chef to bring that same heart for hospitality, hard work, and dependable service to every meal and event we serve.
                 </p>
               </div>
               <figure className="values-header__figure">
                 <img
                   src={VALUES_MISSION_IMAGE}
-                  alt=""
+                  alt="Brian and Gabriel Gardner, Executive Chef and Sous Chef"
                   className="values-header__image"
                 />
               </figure>
             </div>
           </div>
-          <div className="values-grid">
-            {VALUES.map(v => (
-              <TiltedCard key={v.title} className="fade-up">
-                <div className="value-card">
-                  <div className="value-card__icon">{v.icon}</div>
-                  <h3 className="value-card__title">{v.title}</h3>
-                  <p className="value-card__desc">{v.desc}</p>
-                </div>
-              </TiltedCard>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* Team */}
-      <section className="section team-section">
+      {/* Team — set SHOW_TEAM_SECTION to true to restore */}
+      {SHOW_TEAM_SECTION && <section className="section team-section">
         <div className="container">
           <div className="team-header fade-up">
             <p className="section-label">The People Behind the Food</p>
             <h2 className="section-title">Meet the Team</h2>
-            <p className="section-sub">
+            <p className="section-sub team-header__sub">
               Every dish begins with the dedicated individuals who put their heart into it.
             </p>
           </div>
@@ -197,24 +185,48 @@ export default function About() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
-      {/* Gallery */}
-      <section className="section gallery-section">
+      {/* Gallery — set SHOW_GALLERY_SECTION to true to restore */}
+      {SHOW_GALLERY_SECTION && <section className="section gallery-section">
         <div className="container">
           <div className="gallery-header fade-up">
             <p className="section-label">In Our Kitchen</p>
             <h2 className="section-title">A Glimpse Behind the Scenes</h2>
           </div>
           <div className="gallery-grid">
-            {GALLERY_IMGS.map((img, i) => (
-              <div key={i} className={`gallery-item fade-up${img.wide ? ' gallery-item--wide' : ''}`}>
-                <img src={img.src} alt={img.alt} />
-              </div>
+            {GALLERY_CARDS.map((card) => (
+              <button
+                key={card.id}
+                className={`gallery-item gallery-item--clickable fade-up${card.wide ? ' gallery-item--wide' : ''}`}
+                onClick={() => setOpenGallery(card.id)}
+                aria-label={`Open ${card.title} gallery`}
+              >
+                <img src={GALLERY_PLACEHOLDERS[card.id]} alt={card.title} />
+                <div className="gallery-item__overlay">
+                  <span className="gallery-item__label">{card.title}</span>
+                </div>
+              </button>
             ))}
           </div>
         </div>
-      </section>
+      </section>}
+
+      {SHOW_GALLERY_SECTION && (isAdminUser ? (
+        <GalleryModal
+          isOpen={openGallery !== null}
+          onClose={() => setOpenGallery(null)}
+          galleryId={openGallery}
+          galleryTitle={currentGallery?.title}
+        />
+      ) : (
+        <GalleryViewer
+          isOpen={openGallery !== null}
+          onClose={() => setOpenGallery(null)}
+          galleryId={openGallery}
+          galleryTitle={currentGallery?.title}
+        />
+      ))}
 
       {/* Bottom CTA */}
       <section className="section about-cta fade-up">

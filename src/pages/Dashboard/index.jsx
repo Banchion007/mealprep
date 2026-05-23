@@ -7,8 +7,6 @@ import DashboardSidebar from './DashboardSidebar'
 import Overview     from './Overview'
 import Orders       from './Orders'
 import Customers    from './Customers'
-import Recipes      from './Recipes'
-import GroceryList  from './GroceryList'
 import WeeklyMenuBuilder from './WeeklyMenuBuilder'
 import { seedMockData } from './mockData'
 import { useAuth } from '../../contexts/AuthContext'
@@ -58,8 +56,6 @@ export default function DashboardLayout() {
           <Route index           element={<Overview />} />
           <Route path="orders"       element={<Orders />} />
           <Route path="customers"    element={<Customers />} />
-          <Route path="recipes"      element={<Recipes />} />
-          <Route path="grocery-list" element={<GroceryList />} />
           <Route path="weekly-menu" element={<WeeklyMenuBuilder />} />
           <Route path="*"            element={<Navigate to="/dashboard" replace />} />
         </Routes>

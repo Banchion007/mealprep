@@ -61,6 +61,15 @@
   flex-direction: column;
   gap: 1.1rem;
 }
+.form-error--submit {
+  color: var(--color-danger, #d32f2f);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(211, 47, 47, 0.08);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-danger, #d32f2f);
+}
 
 .form-row {
   display: grid;
@@ -187,6 +196,15 @@
   font-size: 0.9rem;
   color: var(--color-text);
   font-weight: 500;
+}
+.contact-email-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+.contact-email-link:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
 }
 
 /* Map placeholder */

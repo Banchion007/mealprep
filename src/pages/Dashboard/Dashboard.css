@@ -128,6 +128,65 @@
   color: #fff;
 }
 
+/* ── Meal Prep Toggle ── */
+.dash-sidebar__toggle {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.dash-sidebar__toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  padding: 0 0.75rem;
+}
+
+.dash-sidebar__toggle-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 36px;
+  height: 20px;
+  background: oklch(1 0 0 / 0.25);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background var(--transition);
+}
+
+.dash-sidebar__toggle-input::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: left var(--transition);
+}
+
+.dash-sidebar__toggle-input:checked {
+  background: oklch(0.6 0.15 120);
+}
+
+.dash-sidebar__toggle-input:checked::before {
+  left: 18px;
+}
+
+.dash-sidebar__toggle-slider {
+  display: none;
+}
+
+.dash-sidebar__toggle-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: oklch(1 0 0 / 0.75);
+}
+
 /* ── Section wrapper ── */
 .dash-section {
   background: var(--color-surface);
