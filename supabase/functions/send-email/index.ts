@@ -1,6 +1,22 @@
 import { Resend } from 'npm:resend@6'
-import { corsHeaders } from '../_shared/cors.ts'
-import { clampString, escapeHtml } from '../_shared/sanitize.ts'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function clampString(value: unknown, maxLen: number): string {
+  return String(value ?? '').trim().slice(0, maxLen)
+}
 
 const MAX_HTML_LEN = 12_000
 
@@ -60,7 +76,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const { data, error } = await resend.emails.send({
-      from: contactFrom,
+      from: `Humble Chef Brian <${contactFrom}>`,
       to: contactTo,
       subject,
       html,
@@ -70,6 +86,7 @@ Deno.serve(async (req: Request) => {
     })
 
     if (error) {
+      console.error('Resend API error:', error)
       return new Response(JSON.stringify({ error: error.message }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

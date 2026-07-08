@@ -99,9 +99,9 @@ const TESTIMONIALS = [
 ]
 
 const STATS = [
-  { value: '500+', label: 'Events Catered' },
+  { value: '100+', label: 'Events Catered' },
   { value: '100k+', label: 'Meals Served' },
-  { value: '15+', label: 'Years of Excellence' },
+  { value: '40+', label: 'Years of Excellence' },
 ]
 
 function StarRating({ count = 5 }) {
@@ -183,6 +183,8 @@ export default function Landing() {
   const testimonialsScrollRef = useRef(null)
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(true)
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true)
+  const scrollIndicatorRef = useRef(null)
 
   const updateScrollButtons = useCallback(() => {
     const el = testimonialsScrollRef.current
@@ -221,6 +223,19 @@ export default function Landing() {
     if (trigger) trigger.click()
   }
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const hero = document.querySelector('.hero')
+      if (!hero) return
+      const heroHeight = hero.offsetHeight
+      const scrollY = window.scrollY
+      setShowScrollIndicator(scrollY < heroHeight * 0.5)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <div className="landing">
       {/* ── Hero ── */}
@@ -255,7 +270,15 @@ export default function Landing() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="hero__scroll">
+        <div
+          ref={scrollIndicatorRef}
+          className="hero__scroll"
+          style={{
+            opacity: showScrollIndicator ? 1 : 0,
+            pointerEvents: showScrollIndicator ? 'auto' : 'none',
+            transition: 'opacity 500ms ease-out'
+          }}
+        >
           <span>Scroll to explore</span>
           <div className="hero__scroll-icon">
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -300,7 +323,7 @@ export default function Landing() {
               Learn more about Humble Chef
             </Link>
             <div className="intro__pills fade-up">
-              {['Locally Sourced', 'Chef-Crafted', 'Nutrition-Focused', 'Allergen-Aware'].map(p => (
+              {['Locally Sourced', 'Chef-Crafted', 'Nutrition-Focused', 'Allergen-Aware', 'Gluten-Free Options', 'Client Focused', 'Prompt Service'].map(p => (
                 <span key={p} className="intro__pill">{p}</span>
               ))}
             </div>
