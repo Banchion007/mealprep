@@ -304,11 +304,14 @@ export default function Landing() {
       <section className="section intro">
         <div className="container intro__inner">
           <div className="intro__image fade-up">
-            <img
-              src="https://placehold.co/600x500/EEF2FF/1E1B4B?text=Our+Story"
-              alt="Chef preparing food"
-              className="intro__img"
-            />
+            <figure className="intro__figure">
+              <img
+                src="/our-story.png"
+                alt="Brian and Gabriel Gardner, Executive Chef and Sous Chef"
+                className="intro__img"
+              />
+              <figcaption className="intro__caption">Our Story</figcaption>
+            </figure>
           </div>
 
           <div className="intro__text">
