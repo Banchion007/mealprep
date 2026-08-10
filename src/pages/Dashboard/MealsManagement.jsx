@@ -15,6 +15,7 @@ function MealForm({ meal, onSave, onCancel, saving }) {
     description: '',
     tier: 'Essentials',
     price: '',
+    quantity_available: '',
     category: 'Lunch',
     calories: '',
     protein: '',
@@ -155,6 +156,19 @@ function MealForm({ meal, onSave, onCancel, saving }) {
                 placeholder="12.99"
                 min="0"
                 step="0.01"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Quantity Available</label>
+              <input
+                className="form-input"
+                type="number"
+                name="quantity_available"
+                value={formData.quantity_available}
+                onChange={handleChange}
+                placeholder="e.g., 10, 25, 50"
+                min="0"
               />
             </div>
           </div>
@@ -300,6 +314,7 @@ export default function MealsManagement() {
             description: formData.description,
             tier: formData.tier,
             price: parseFloat(formData.price),
+            quantity_available: formData.quantity_available ? parseInt(formData.quantity_available) : null,
             category: formData.category,
             calories: formData.calories ? parseInt(formData.calories) : null,
             protein: formData.protein ? parseInt(formData.protein) : null,
@@ -321,6 +336,7 @@ export default function MealsManagement() {
             description: formData.description,
             tier: formData.tier,
             price: parseFloat(formData.price),
+            quantity_available: formData.quantity_available ? parseInt(formData.quantity_available) : null,
             category: formData.category,
             calories: formData.calories ? parseInt(formData.calories) : null,
             protein: formData.protein ? parseInt(formData.protein) : null,

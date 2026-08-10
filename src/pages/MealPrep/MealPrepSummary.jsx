@@ -129,6 +129,24 @@ function PaymentForm({ total, mealItems, delivery, user, saveOrder, onDone, onSi
           status:         'Confirmed',
           stripe_payment_intent: paymentIntent.id,
         })
+
+        // Decrement inventory for each meal ordered
+        for (const mealItem of mealItems) {
+          // Fetch current quantity
+          const { data: meal, error: fetchErr } = await supabase
+            .from('menu_items')
+            .select('quantity_available')
+            .eq('id', mealItem.id)
+            .single()
+
+          if (!fetchErr && meal) {
+            const newQty = Math.max(0, (meal.quantity_available || 0) - mealItem.qty)
+            await supabase
+              .from('menu_items')
+              .update({ quantity_available: newQty })
+              .eq('id', mealItem.id)
+          }
+        }
       }
 
       onDone(orderNum, total)

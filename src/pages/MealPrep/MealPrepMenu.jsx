@@ -21,16 +21,23 @@ const TAG_CLASS = {
 
 function MealCard({ meal, count, onAdd, onRemove }) {
   const isSelected = count > 0
+  const isOutOfStock = !meal.quantity_available || meal.quantity_available <= 0
+
   return (
-    <div className={`mp-meal-card${isSelected ? ' mp-meal-card--selected' : ''}`}>
+    <div className={`mp-meal-card${isSelected ? ' mp-meal-card--selected' : ''}${isOutOfStock ? ' mp-meal-card--out-of-stock' : ''}`}>
       <div className="mp-meal-card__img-wrap">
-        <img src={meal.img} alt={meal.name} className="mp-meal-card__img" loading="lazy" />
+        <img src={meal.img} alt={meal.name} className="mp-meal-card__img" loading="lazy" style={isOutOfStock ? { opacity: 0.5 } : {}} />
         <div className="mp-meal-card__tags">
           {meal.tags.slice(0, 2).map(t => (
             <span key={t} className={`tag ${TAG_CLASS[t] || ''}`}>{t}</span>
           ))}
         </div>
-        {isSelected && (
+        {isOutOfStock && (
+          <div className="mp-meal-card__selected-badge" style={{ background: '#dc2626', backdropFilter: 'none' }}>
+            Out of Stock
+          </div>
+        )}
+        {isSelected && !isOutOfStock && (
           <div className="mp-meal-card__selected-badge">
             <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <polyline points="20 6 9 17 4 12"/>
@@ -50,28 +57,32 @@ function MealCard({ meal, count, onAdd, onRemove }) {
         </div>
         <div className="mp-meal-card__footer">
           <span className="mp-meal-card__price">${meal.price.toFixed(2)}</span>
-          <div className="mp-counter">
-            <button
-              className="mp-counter__btn"
-              onClick={() => onRemove(meal.id)}
-              disabled={count === 0}
-              aria-label="Remove one"
-            >
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path d="M5 12h14"/>
-              </svg>
-            </button>
-            <span className="mp-counter__val">{count}</span>
-            <button
-              className="mp-counter__btn mp-counter__btn--add"
-              onClick={() => onAdd(meal.id)}
-              aria-label="Add one"
-            >
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-          </div>
+          {isOutOfStock ? (
+            <span style={{ fontSize: '0.85rem', color: '#dc2626', fontWeight: 600 }}>Out of Stock</span>
+          ) : (
+            <div className="mp-counter">
+              <button
+                className="mp-counter__btn"
+                onClick={() => onRemove(meal.id)}
+                disabled={count === 0}
+                aria-label="Remove one"
+              >
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path d="M5 12h14"/>
+                </svg>
+              </button>
+              <span className="mp-counter__val">{count}</span>
+              <button
+                className="mp-counter__btn mp-counter__btn--add"
+                onClick={() => onAdd(meal.id)}
+                aria-label="Add one"
+              >
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
