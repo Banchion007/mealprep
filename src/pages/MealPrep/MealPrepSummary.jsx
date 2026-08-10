@@ -115,7 +115,7 @@ function PaymentForm({ total, mealItems, delivery, user, saveOrder, onDone, onSi
       const orderNum = `HC-${Date.now().toString().slice(-7)}`
 
       if (saveOrder && user) {
-        await supabase.from('orders').insert({
+        const { data: orderData, error: insertError } = await supabase.from('orders').insert({
           order_number:   orderNum,
           user_id:        user.id,
           customer_name:  user.user_metadata?.full_name || user.email,
@@ -128,7 +128,40 @@ function PaymentForm({ total, mealItems, delivery, user, saveOrder, onDone, onSi
           address:        addressStr,
           status:         'Confirmed',
           stripe_payment_intent: paymentIntent.id,
-        })
+        }).select().single()
+
+        if (!insertError && orderData) {
+          // Send confirmation email
+          try {
+            const timeWindowLabel = DELIVERY_WINDOWS.find(w => w.id === delivery.timeWindow)?.time || ''
+            const deliveryDateFormatted = new Date(delivery.date + 'T12:00:00').toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })
+
+            await supabase.functions.invoke('send-order-confirmation', {
+              body: {
+                order_id: orderData.id,
+                order_number: orderNum,
+                customer_name: user.user_metadata?.full_name || user.email,
+                customer_email: user.email,
+                items: mealItems.map(m => ({ name: m.name, qty: m.qty, price: m.price })),
+                subtotal,
+                tax,
+                delivery_fee,
+                total: parseFloat(total.toFixed(2)),
+                delivery_address: addressStr,
+                delivery_date: deliveryDateFormatted,
+                delivery_time: timeWindowLabel,
+              },
+            })
+          } catch (emailErr) {
+            console.error('Failed to send confirmation email:', emailErr)
+            // Don't fail the order if email fails to send
+          }
+        }
 
         // Decrement inventory for each meal ordered
         for (const mealItem of mealItems) {
