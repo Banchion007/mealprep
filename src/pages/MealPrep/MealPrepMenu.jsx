@@ -5,6 +5,8 @@ import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { TIERS, TIER_DESC, DIETARY_OPTIONS } from './data'
 import { useMenu } from '../../contexts/MenuContext'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
+import { Tooltip } from '../../components/Tooltip'
+import '../../components/Tooltip.css'
 
 const TAG_CLASS = {
   'Vegan':       'tag-vegan',
@@ -92,16 +94,20 @@ function TierRow({ tier, meals, selectedMeals, onAdd, onRemove }) {
           <p className="mp-tier__desc">{TIER_DESC[tier]}</p>
         </div>
         <div className="mp-tier__arrows">
-          <button className="mp-tier__arrow" onClick={scrollLeft} aria-label="Scroll left">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </button>
-          <button className="mp-tier__arrow" onClick={scrollRight} aria-label="Scroll right">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
-          </button>
+          <Tooltip label="Scroll left" side="bottom">
+            <button className="mp-tier__arrow" onClick={scrollLeft} aria-label="Scroll left">
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+          </Tooltip>
+          <Tooltip label="Scroll right" side="bottom">
+            <button className="mp-tier__arrow" onClick={scrollRight} aria-label="Scroll right">
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </button>
+          </Tooltip>
         </div>
       </div>
       <div className="mp-tier__row" ref={rowRef}>

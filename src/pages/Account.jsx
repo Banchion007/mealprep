@@ -6,6 +6,8 @@ import React, { useState, useEffect } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { SkeletonProfile, SkeletonOrderCard } from '../components/Skeleton'
+import '../components/Skeleton.css'
 import './Account.css'
 
 /* ── Helpers ── */
@@ -354,9 +356,10 @@ function OrderHistorySection({ user }) {
       </h2>
 
       {loading ? (
-        <div className="acct-orders-loading">
-          <span className="acct-spinner" />
-          <span>Loading your orders…</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SkeletonOrderCard />
+          <SkeletonOrderCard />
+          <SkeletonOrderCard />
         </div>
       ) : error ? (
         <p className="acct-save-msg acct-save-msg--error">{error}</p>
@@ -429,7 +432,9 @@ export default function Account() {
   if (loading) {
     return (
       <div className="acct-gate">
-        <span className="acct-spinner" />
+        <div style={{ width: '100%', maxWidth: '720px', padding: '2rem 1rem' }}>
+          <SkeletonProfile />
+        </div>
       </div>
     )
   }
