@@ -1,7 +1,8 @@
 /* ===================================================
-   Subscribers — meal prep subscriber management
+   Subscribers — meal prep subscriber management (real Supabase data)
 =================================================== */
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
 
 const STATUS_OPTIONS = ['All', 'Active', 'Paused', 'Cancelled']
 const PLAN_OPTIONS   = ['All', 'Basic', 'Standard', 'Premium']
@@ -73,7 +74,54 @@ function ExpandedSubscriber({ sub, colSpan }) {
 }
 
 export default function Subscribers() {
-  const allSubs = useMemo(() => JSON.parse(localStorage.getItem('hc_subscribers') || '[]'), [])
+  const [allSubs, setAllSubs] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchSubscribers = async () => {
+      try {
+        // Fetch all orders and derive subscribers (customers with multiple orders)
+        const { data: orders, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+
+        // Group by customer and create subscriber profiles
+        const customerMap = {}
+        orders.forEach(order => {
+          const userId = order.user_id
+          if (!customerMap[userId]) {
+            customerMap[userId] = {
+              id: userId,
+              name: order.customer_name || 'Unknown',
+              email: order.customer_email || 'unknown@example.com',
+              status: 'Active',
+              plan: 'Standard', // TODO: store actual plan in orders or subscriptions table
+              pricePerWeek: 0,
+              startDate: order.created_at,
+              orderCount: 0,
+            }
+          }
+          customerMap[userId].orderCount += 1
+          // Estimate price per week from order history
+          customerMap[userId].pricePerWeek = ((customerMap[userId].pricePerWeek * (customerMap[userId].orderCount - 1)) + (order.total || 0)) / customerMap[userId].orderCount
+        })
+
+        // Filter to only "subscribers" (customers with 2+ orders)
+        const subscribers = Object.values(customerMap).filter(c => c.orderCount >= 2)
+        setAllSubs(subscribers)
+      } catch (err) {
+        console.error('Failed to fetch subscribers:', err)
+        setAllSubs([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSubscribers()
+  }, [])
 
   const [status, setStatus] = useState('All')
   const [plan,   setPlan]   = useState('All')
@@ -96,6 +144,17 @@ export default function Subscribers() {
   const monthlyRevenue = allSubs
     .filter(s => s.status === 'Active')
     .reduce((sum, s) => sum + s.pricePerWeek * 4.33, 0)
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="acct-spinner" style={{ margin: '0 auto 1rem' }} />
+          <p>Loading subscribers...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>

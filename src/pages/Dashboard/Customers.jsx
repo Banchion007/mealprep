@@ -1,10 +1,10 @@
 /* ===================================================
-   Customers — CRM page
+   Customers — CRM page (now using real Supabase orders)
    Aggregates past order data into customer profiles.
-   Features: order history, tags/notes, analytics,
-   and n8n webhook workflow triggers.
+   Features: order history, tags/notes, analytics.
 =================================================== */
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
 
 /* ── Constants ── */
 const STATUS_OPTS = ['All', 'Active', 'New', 'At Risk', 'Inactive']
@@ -433,12 +433,55 @@ function N8nModal({ config, onSave, onClose }) {
 
 /* ── Main Customers component ── */
 export default function Customers() {
-  const [customers, setCustomers] = useState(() =>
-    JSON.parse(localStorage.getItem('hc_customers') || '[]')
-  )
-  const [n8nConfig, setN8nConfig] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('hc_n8n_config') || 'null') } catch { return null }
-  })
+  const [customers, setCustomers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        // Fetch all orders and aggregate by user
+        const { data: orders, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+
+        // Aggregate orders by user_id to create customer profiles
+        const customerMap = {}
+        orders.forEach(order => {
+          const userId = order.user_id
+          if (!customerMap[userId]) {
+            customerMap[userId] = {
+              id: userId,
+              name: order.customer_name || 'Unknown',
+              email: order.customer_email || 'unknown@example.com',
+              totalSpent: 0,
+              totalOrders: 0,
+              lastOrder: null,
+              status: 'Active',
+              tags: [],
+              orders: [],
+            }
+          }
+          customerMap[userId].totalSpent += order.total || 0
+          customerMap[userId].totalOrders += 1
+          customerMap[userId].lastOrder = order.created_at
+          customerMap[userId].orders.push(order)
+        })
+
+        setCustomers(Object.values(customerMap))
+      } catch (err) {
+        console.error('Failed to fetch customers:', err)
+        setCustomers([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCustomers()
+  }, [])
+
   const [search,       setSearch]       = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [tagFilter,    setTagFilter]    = useState('All')
@@ -447,17 +490,9 @@ export default function Customers() {
   const [n8nModalOpen, setN8nModalOpen] = useState(false)
 
   const saveCustomer = useCallback((updated) => {
-    setCustomers(prev => {
-      const next = prev.map(c => c.id === updated.id ? updated : c)
-      localStorage.setItem('hc_customers', JSON.stringify(next))
-      return next
-    })
+    // TODO: Persist customer updates to Supabase (tags, status, notes)
+    setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c))
   }, [])
-
-  const saveN8nConfig = (cfg) => {
-    setN8nConfig(cfg)
-    localStorage.setItem('hc_n8n_config', JSON.stringify(cfg))
-  }
 
   /* Analytics */
   const totalRevenue = customers.reduce((s, c) => s + c.totalSpent, 0)
@@ -483,10 +518,21 @@ export default function Customers() {
           case 'totalSpent':  return b.totalSpent - a.totalSpent
           case 'totalOrders': return b.totalOrders - a.totalOrders
           case 'name':        return a.name.localeCompare(b.name)
-          default:            return new Date(b.lastOrderDate) - new Date(a.lastOrderDate)
+          default:            return new Date(b.lastOrder || 0) - new Date(a.lastOrder || 0)
         }
       })
   }, [customers, search, statusFilter, tagFilter, sortBy])
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="acct-spinner" style={{ margin: '0 auto 1rem' }} />
+          <p>Loading customers...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
