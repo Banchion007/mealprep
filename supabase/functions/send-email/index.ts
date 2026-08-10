@@ -1,8 +1,19 @@
 import { Resend } from 'npm:resend@6'
+import { checkRateLimit, getClientIp } from '../_shared/rateLimit.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigins = [
+    'https://humblechef.com',
+    'https://www.humblechef.com',
+    'http://localhost:5173', // Vite dev
+    'http://localhost:3000',
+  ]
+  const isAllowed = origin && allowedOrigins.includes(origin)
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? origin : '',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  }
 }
 
 function escapeHtml(value: unknown): string {
@@ -21,6 +32,9 @@ function clampString(value: unknown, maxLen: number): string {
 const MAX_HTML_LEN = 12_000
 
 Deno.serve(async (req: Request) => {
+  const origin = req.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -28,6 +42,15 @@ Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  // Rate limit: 5 requests per minute per IP
+  const clientIp = getClientIp(req)
+  if (!checkRateLimit(clientIp, 5, 60_000)) {
+    return new Response(JSON.stringify({ error: 'Too many requests. Please try again later.' }), {
+      status: 429,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
@@ -46,6 +69,15 @@ Deno.serve(async (req: Request) => {
   const resend = new Resend(apiKey)
 
   try {
+    // Check Content-Length to prevent oversized payloads
+    const contentLength = req.headers.get('content-length')
+    if (contentLength && parseInt(contentLength) > 50_000) {
+      return new Response(JSON.stringify({ error: 'Request body too large' }), {
+        status: 413,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const body = await req.json().catch(() => ({}))
 
     const subject = clampString(body.subject, 200) || 'Contact form submission'

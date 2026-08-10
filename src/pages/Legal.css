@@ -1,0 +1,129 @@
+.legal-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.legal-hero {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, #1a2557));
+  color: white;
+  padding: 4rem 1rem;
+}
+
+.legal-hero__inner {
+  text-align: center;
+}
+
+.legal-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.legal-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.legal-body {
+  padding: 4rem 1rem;
+  background: var(--color-bg);
+}
+
+.legal-body .container {
+  max-width: 900px;
+}
+
+.legal-section {
+  margin-bottom: 3rem;
+  line-height: 1.8;
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.legal-section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+}
+
+.legal-section h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.legal-section p {
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.legal-section ul,
+.legal-section ol {
+  color: var(--color-text);
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.legal-section li {
+  margin-bottom: 0.5rem;
+}
+
+.legal-section a {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.legal-section a:hover {
+  color: var(--color-accent-dark, #ff8c00);
+  text-decoration: underline;
+}
+
+.legal-section em {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.legal-section strong {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .legal-hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .legal-hero {
+    padding: 2rem 1rem;
+  }
+
+  .legal-body {
+    padding: 2rem 1rem;
+  }
+
+  .legal-section {
+    margin-bottom: 2rem;
+  }
+
+  .legal-section h2 {
+    font-size: 1.25rem;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

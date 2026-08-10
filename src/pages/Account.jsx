@@ -220,6 +220,108 @@ function SecuritySection({ user }) {
   )
 }
 
+/* ── Data & privacy section ── */
+function DataPrivacySection({ user }) {
+  const [downloading, setDownloading] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleDownload = async () => {
+    setDownloading(true)
+    setError(null)
+    try {
+      await downloadUserData(user)
+    } catch (err) {
+      setError(err.message || 'Failed to download data')
+    }
+    setDownloading(false)
+  }
+
+  const handleDelete = async () => {
+    if (!deleteConfirm) return
+    setDeleting(true)
+    setError(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
+
+      await supabase.from('orders').delete().eq('user_id', user.id)
+      await supabase.from('recipes').delete().eq('user_id', user.id)
+      await supabase.from('delivery_profiles').delete().eq('user_id', user.id)
+
+      await supabase.auth.signOut()
+      window.location.href = '/'
+    } catch (err) {
+      setError(err.message || 'Failed to delete account')
+      setDeleting(false)
+    }
+  }
+
+  return (
+    <div className="acct-card">
+      <h2 className="acct-card__title">Data & Privacy</h2>
+
+      <div className="acct-security-row">
+        <div>
+          <p className="acct-security-label">Download My Data</p>
+          <p className="acct-security-hint">Export all your orders, recipes, and preferences as JSON.</p>
+        </div>
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={handleDownload}
+          disabled={downloading}
+        >
+          {downloading ? 'Downloading…' : 'Download Data'}
+        </button>
+      </div>
+
+      <div style={{ borderTop: '1px solid var(--color-border)', marginTop: '1.5rem', paddingTop: '1.5rem' }}>
+        <div className="acct-security-row">
+          <div>
+            <p className="acct-security-label">Delete Account</p>
+            <p className="acct-security-hint">Permanently delete your account and all personal data. This cannot be undone.</p>
+          </div>
+          {!deleteConfirm ? (
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => setDeleteConfirm(true)}
+              style={{ color: '#dc2626' }}
+            >
+              Delete Account
+            </button>
+          ) : (
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ color: '#dc2626', marginBottom: '0.75rem', fontSize: '0.9rem' }}>
+                <strong>Are you sure?</strong> This cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => setDeleteConfirm(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-sm"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  style={{ background: '#dc2626', color: 'white' }}
+                >
+                  {deleting ? 'Deleting…' : 'Yes, Delete'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {error && <p className="acct-save-msg acct-save-msg--error" style={{ marginTop: '1rem' }}>{error}</p>}
+    </div>
+  )
+}
+
 /* ── Order history section ── */
 function OrderHistorySection({ user }) {
   const [orders,  setOrders]  = useState([])
@@ -279,6 +381,47 @@ function OrderHistorySection({ user }) {
   )
 }
 
+/* ── Data export & deletion helpers ── */
+async function downloadUserData(user) {
+  try {
+    const { supabase } = await import('../lib/supabase')
+    const [
+      { data: orders },
+      { data: recipes },
+      { data: delivery },
+    ] = await Promise.all([
+      supabase.from('orders').select('*').eq('user_id', user.id),
+      supabase.from('recipes').select('*').eq('user_id', user.id),
+      supabase.from('delivery_profiles').select('*').eq('user_id', user.id),
+    ])
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.full_name || '',
+        createdAt: user.created_at,
+      },
+      orders: orders || [],
+      recipes: recipes || [],
+      delivery: delivery || [],
+    }
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `humble-chef-data-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    throw err
+  }
+}
+
 /* ── Main page ── */
 export default function Account() {
   const { user, loading, signOut } = useAuth()
@@ -326,6 +469,7 @@ export default function Account() {
       <div className="container acct-body">
         <ProfileSection user={user} />
         <SecuritySection user={user} />
+        <DataPrivacySection user={user} />
         <OrderHistorySection user={user} />
 
         <div className="acct-signout-row">

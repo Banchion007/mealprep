@@ -7,10 +7,6 @@ import { useMealPrepSetting } from '../hooks/useMealPrepSetting'
 import './Footer.css'
 
 const FACEBOOK_URL = 'https://www.facebook.com/thehumblechefbj/'
-const PRIVACY_PDF_URL = '/HumbleChef-Privacy-Policy.pdf'
-const TERMS_PDF_URL = '/HumbleChef-Terms-and-Conditions.pdf'
-const TERMS_DOWNLOAD_NAME = 'Website Terms and Conditions.pdf'
-const PRIVACY_DOWNLOAD_NAME = 'Website Privacy Policy.pdf'
 
 const SERVICES = [
   'Corporate Catering',
@@ -108,12 +104,10 @@ export default function Footer() {
         <div className="container footer__bottom-inner">
           <p>&copy; {new Date().getFullYear()} Humble Chef. All rights reserved.</p>
           <div className="footer__bottom-links">
-            <a href={PRIVACY_PDF_URL} download={PRIVACY_DOWNLOAD_NAME}>
-              Privacy Policy
-            </a>
-            <a href={TERMS_PDF_URL} download={TERMS_DOWNLOAD_NAME}>
-              Terms of Service
-            </a>
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms of Service</Link>
+            <Link to="/eula">EULA</Link>
+            <Link to="/dmca">DMCA</Link>
           </div>
         </div>
       </div>

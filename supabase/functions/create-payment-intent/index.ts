@@ -1,6 +1,7 @@
 import Stripe from 'npm:stripe@17'
 import { corsHeaders } from '../_shared/cors.ts'
 import { getUserFromRequest } from '../_shared/auth.ts'
+import { checkRateLimit, getClientIp } from '../_shared/rateLimit.ts'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   apiVersion: '2025-02-24.acacia',
@@ -25,6 +26,15 @@ Deno.serve(async (req: Request) => {
   if (!user) {
     return new Response(JSON.stringify({ error: 'Authentication required' }), {
       status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  // Rate limit: 10 payment intents per hour per user
+  const rateLimitKey = `payment:${user.id}`
+  if (!checkRateLimit(rateLimitKey, 10, 3600_000)) {
+    return new Response(JSON.stringify({ error: 'Too many payment attempts. Please try again later.' }), {
+      status: 429,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
