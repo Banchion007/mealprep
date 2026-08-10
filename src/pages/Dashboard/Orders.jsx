@@ -21,7 +21,7 @@ function CustomerCell({ name }) {
   )
 }
 
-function ExpandedRow({ order, colSpan }) {
+function ExpandedRow({ order, colSpan, onStatusChange, updatingId }) {
   return (
     <tr className="dash-table__expand-row">
       <td colSpan={colSpan}>
@@ -46,6 +46,26 @@ function ExpandedRow({ order, colSpan }) {
               <li>Total: ${order.total.toFixed(2)}</li>
               {order.notes && <li>Notes: {order.notes}</li>}
             </ul>
+            <p className="dash-expand-section__title" style={{ marginTop: '1rem' }}>Update Status</p>
+            <select
+              value={order.status}
+              onChange={e => onStatusChange(order.id, e.target.value)}
+              disabled={updatingId === order.id}
+              style={{
+                padding: '0.5rem',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--color-bg)',
+                color: 'var(--color-text)',
+                fontFamily: 'inherit',
+                cursor: 'pointer',
+              }}
+            >
+              {STATUS_OPTIONS.filter(s => s !== 'All').map(s => <option key={s}>{s}</option>)}
+            </select>
+            {updatingId === order.id && (
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>Updating...</p>
+            )}
           </div>
         </div>
       </td>
@@ -86,6 +106,7 @@ function normalizeSupabaseOrder(o) {
 export default function Orders() {
   const mockOrders = useMemo(() => JSON.parse(localStorage.getItem('hc_orders') || '[]'), [])
   const [realOrders, setRealOrders] = useState(null) // null = not fetched yet
+  const [updatingId, setUpdatingId] = useState(null)
 
   useEffect(() => {
     supabase
@@ -100,6 +121,28 @@ export default function Orders() {
         }
       })
   }, [])
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    setUpdatingId(orderId)
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('order_number', orderId)
+
+      if (error) throw error
+
+      // Update local state
+      setRealOrders(prev => prev.map(o =>
+        o.id === orderId ? { ...o, status: newStatus } : o
+      ))
+    } catch (err) {
+      console.error('Error updating order status:', err)
+      alert('Failed to update order status: ' + err.message)
+    } finally {
+      setUpdatingId(null)
+    }
+  }
 
   // While fetching, show mock; once real data arrives, prefer it but merge in mocks without overlap
   const allOrders = useMemo(() => {
@@ -226,7 +269,14 @@ export default function Orders() {
                       {expandedId === o.id ? '▲' : '▼'}
                     </td>
                   </tr>
-                  {expandedId === o.id && <ExpandedRow order={o} colSpan={8} />}
+                  {expandedId === o.id && (
+                    <ExpandedRow
+                      order={o}
+                      colSpan={8}
+                      onStatusChange={handleStatusChange}
+                      updatingId={updatingId}
+                    />
+                  )}
                 </React.Fragment>
               ))}
             </tbody>
