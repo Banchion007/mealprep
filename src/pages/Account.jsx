@@ -35,11 +35,54 @@ function OrderStatusBadge({ status }) {
 }
 
 /* ── Order card ── */
-function OrderCard({ order }) {
+function OrderCard({ order, onCancelSuccess }) {
   const [open, setOpen] = useState(false)
+  const [cancelConfirm, setCancelConfirm] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState(null)
+
   const items = Array.isArray(order.items) ? order.items : []
   const preview = items.slice(0, 2).map(i => `${i.name} ×${i.qty}`).join(', ')
   const overflow = items.length > 2 ? ` +${items.length - 2} more` : ''
+
+  // Can cancel if status is not "Out for Delivery", "Delivered", or "Cancelled"
+  const canCancel = order.status && !['Out for Delivery', 'Delivered', 'Cancelled'].includes(order.status)
+
+  const handleCancelOrder = async () => {
+    if (!canCancel) return
+    setCancelling(true)
+    setCancelError(null)
+
+    try {
+      // Call edge function to refund and update order
+      const { data, error: fnError } = await supabase.functions.invoke('refund-order', {
+        body: {
+          order_id: order.id,
+          order_number: order.order_number,
+          stripe_payment_intent: order.stripe_payment_intent,
+          total: order.total,
+          customer_email: order.customer_email,
+        },
+      })
+
+      if (fnError) throw fnError
+
+      // Update order status to Cancelled
+      const { error: updateErr } = await supabase
+        .from('orders')
+        .update({ status: 'Cancelled', updated_at: new Date().toISOString() })
+        .eq('id', order.id)
+
+      if (updateErr) throw updateErr
+
+      setCancelConfirm(false)
+      onCancelSuccess?.()
+    } catch (err) {
+      setCancelError(err.message || 'Failed to cancel order. Please contact support.')
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   return (
     <div className={`acct-order-card${open ? ' acct-order-card--open' : ''}`}>
@@ -97,6 +140,59 @@ function OrderCard({ order }) {
             <span>Order Total</span>
             <span className="acct-order-total-val">${Number(order.total).toFixed(2)}</span>
           </div>
+
+          {/* Cancel order section */}
+          {canCancel && !cancelConfirm && (
+            <div style={{ borderTop: '1px solid var(--color-border)', marginTop: '1rem', paddingTop: '1rem' }}>
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => setCancelConfirm(true)}
+                style={{ color: '#dc2626', borderColor: '#dc2626' }}
+              >
+                Cancel Order
+              </button>
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>
+                Refund will be processed in 2-3 business days
+              </p>
+            </div>
+          )}
+
+          {/* Cancel confirmation */}
+          {canCancel && cancelConfirm && (
+            <div style={{ borderTop: '1px solid var(--color-border)', marginTop: '1rem', paddingTop: '1rem' }}>
+              <p style={{ color: '#dc2626', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 600 }}>
+                Cancel this order?
+              </p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
+                Refund of ${Number(order.total).toFixed(2)} will be processed to your original payment method.
+              </p>
+              {cancelError && (
+                <p style={{ color: '#dc2626', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                  {cancelError}
+                </p>
+              )}
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => {
+                    setCancelConfirm(false)
+                    setCancelError(null)
+                  }}
+                  disabled={cancelling}
+                >
+                  Keep Order
+                </button>
+                <button
+                  className="btn btn-sm"
+                  onClick={handleCancelOrder}
+                  disabled={cancelling}
+                  style={{ background: '#dc2626', color: 'white' }}
+                >
+                  {cancelling ? 'Cancelling...' : 'Yes, Cancel Order'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -392,20 +488,27 @@ function OrderHistorySection({ user }) {
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
 
+  const fetchOrders = async () => {
+    try {
+      setLoading(true)
+      const { data, error: fetchErr } = await supabase
+        .from('orders')
+        .select('id, order_number, status, items, total, delivery_date, time_window, address, created_at, type, customer_email, stripe_payment_intent')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (fetchErr) throw fetchErr
+      setOrders(data || [])
+      setError(null)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    let cancelled = false
-    supabase
-      .from('orders')
-      .select('order_number, status, items, total, delivery_date, time_window, address, created_at, type')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (cancelled) return
-        if (error) setError(error.message)
-        else setOrders(data || [])
-        setLoading(false)
-      })
-    return () => { cancelled = true }
+    fetchOrders()
   }, [user.id])
 
   return (
@@ -438,7 +541,7 @@ function OrderHistorySection({ user }) {
       ) : (
         <div className="acct-orders-list">
           {orders.map(order => (
-            <OrderCard key={order.order_number} order={order} />
+            <OrderCard key={order.order_number} order={order} onCancelSuccess={fetchOrders} />
           ))}
         </div>
       )}
