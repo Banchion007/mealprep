@@ -46,6 +46,11 @@ export default function MealPrep() {
       setShowAuthModal(true)
       return
     }
+    if (!user.email_confirmed_at) {
+      alert('Please verify your email address first. Check your inbox for a verification link.')
+      setShowAuthModal(true)
+      return
+    }
     setScreen('menu')
   }
 

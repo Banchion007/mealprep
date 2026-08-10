@@ -6,14 +6,34 @@ import { supabase } from '../lib/supabase'
 import './AuthModal.css'
 
 export default function AuthModal({ onClose }) {
-  const [tab,      setTab]      = useState('signin')
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState('')
-  const [success,  setSuccess]  = useState('')
+  const [tab,                 setTab]                 = useState('signin')
+  const [email,               setEmail]               = useState('')
+  const [password,            setPassword]            = useState('')
+  const [loading,             setLoading]             = useState(false)
+  const [error,               setError]               = useState('')
+  const [success,             setSuccess]             = useState('')
+  const [verificationEmail,   setVerificationEmail]   = useState(null)
+  const [resendLoading,       setResendLoading]       = useState(false)
 
   const reset = () => { setError(''); setSuccess('') }
+
+  const handleResendVerification = async () => {
+    if (!verificationEmail) return
+    setResendLoading(true)
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: verificationEmail,
+      })
+      if (error) throw error
+      setSuccess('Verification email sent!')
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      setError(err.message || 'Failed to resend verification email')
+    } finally {
+      setResendLoading(false)
+    }
+  }
 
   const handleGoogleSignIn = async () => {
     reset()
@@ -42,7 +62,10 @@ export default function AuthModal({ onClose }) {
     const { error } = await supabase.auth.signUp({ email, password })
     setLoading(false)
     if (error) setError(error.message)
-    else setSuccess('Check your email for a confirmation link!')
+    else {
+      setVerificationEmail(email)
+      setSuccess('✓ Account created! Check your email to verify your address.')
+    }
   }
 
   const switchTab = (t) => { setTab(t); reset(); setEmail(''); setPassword('') }
@@ -122,8 +145,38 @@ export default function AuthModal({ onClose }) {
             </div>
           )}
 
-          {/* Form */}
-          {!success && (
+          {/* Form or Verification Prompt */}
+          {verificationEmail ? (
+            <div className="auth-verification-prompt">
+              <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
+                We've sent a verification link to <strong>{verificationEmail}</strong>
+              </p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
+                Click the link in the email to verify your account and start ordering.
+              </p>
+              <button
+                type="button"
+                className="auth-submit"
+                onClick={handleResendVerification}
+                disabled={resendLoading}
+              >
+                {resendLoading ? <span className="auth-submit__spinner" /> : 'Resend Verification Email'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => {
+                  setVerificationEmail(null)
+                  setEmail('')
+                  setPassword('')
+                  reset()
+                }}
+                style={{ marginTop: '0.75rem', width: '100%' }}
+              >
+                Change Email
+              </button>
+            </div>
+          ) : (
             <form className="auth-form" onSubmit={tab === 'signin' ? handleSignIn : handleSignUp}>
               <div className="auth-field">
                 <label className="auth-field__label" htmlFor="auth-email">Email address</label>
@@ -148,7 +201,7 @@ export default function AuthModal({ onClose }) {
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder={tab === 'signup' ? 'At least 6 characters' : '••••••••'}
+                  placeholder={tab === 'signup' ? 'At least 8 characters' : '••••••••'}
                 />
               </div>
               <button type="submit" className="auth-submit" disabled={loading}>

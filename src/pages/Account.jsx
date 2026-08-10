@@ -180,6 +180,9 @@ function SecuritySection({ user }) {
   const [sent,    setSent]    = useState(false)
   const [sending, setSending] = useState(false)
   const [error,   setError]   = useState(null)
+  const [resendingSent,    setResendingSent]    = useState(false)
+  const [resendingSending, setResendingSending] = useState(false)
+  const [resendingError,   setResendingError]   = useState(null)
 
   const handlePasswordReset = async () => {
     setSending(true)
@@ -192,10 +195,69 @@ function SecuritySection({ user }) {
     else setSent(true)
   }
 
+  const handleResendVerification = async () => {
+    setResendingSending(true)
+    setResendingError(null)
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: user.email,
+      })
+      if (error) throw error
+      setResendingSent(true)
+      setTimeout(() => setResendingSent(false), 3000)
+    } catch (err) {
+      setResendingError(err.message || 'Failed to resend verification email')
+    } finally {
+      setResendingSending(false)
+    }
+  }
+
   return (
     <div className="acct-card">
       <h2 className="acct-card__title">Security</h2>
+
+      {/* Email verification status */}
       <div className="acct-security-row">
+        <div>
+          <p className="acct-security-label">Email Verification</p>
+          <p className="acct-security-hint">
+            {user.email_confirmed_at
+              ? '✓ Your email is verified'
+              : 'Verify your email to place orders'}
+          </p>
+        </div>
+        {user.email_confirmed_at ? (
+          <p className="acct-reset-sent">
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Verified
+          </p>
+        ) : (
+          <>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={handleResendVerification}
+              disabled={resendingSending}
+            >
+              {resendingSending ? 'Sending…' : 'Resend Verification'}
+            </button>
+            {resendingSent && (
+              <p className="acct-reset-sent" style={{ position: 'absolute', right: '1rem' }}>
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Email sent!
+              </p>
+            )}
+          </>
+        )}
+      </div>
+      {resendingError && <p className="acct-save-msg acct-save-msg--error" style={{ marginTop: '0.75rem' }}>{resendingError}</p>}
+
+      {/* Password reset */}
+      <div className="acct-security-row" style={{ borderTop: '1px solid var(--color-border)', marginTop: '1.5rem', paddingTop: '1.5rem' }}>
         <div>
           <p className="acct-security-label">Password</p>
           <p className="acct-security-hint">Reset your password via email.</p>
