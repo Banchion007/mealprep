@@ -6,6 +6,7 @@ import { MEALS, DELIVERY_WINDOWS } from './data'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
+import GooglePlacesAutocomplete from '../../components/GooglePlacesAutocomplete'
 
 const WINDOW_ICONS = {
   morning:   (
@@ -57,7 +58,7 @@ function formatDateDisplay(d) {
   return `${weekday}, ${MONTHS[d.getMonth()]} ${d.getDate()}`
 }
 
-const INIT_ADDRESS = { street: '', city: '', state: '', zip: '' }
+const INIT_ADDRESS = { street: '', city: '', state: '', zip: '', lat: null, lng: null, formatted_address: '' }
 
 export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChange, onBack, onNext }) {
   useScrollAnimation()
@@ -92,12 +93,9 @@ export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChang
 
   const validate = () => {
     const e = {}
-    if (!address.street.trim()) e.street = 'Street address is required'
-    if (!address.city.trim())   e.city   = 'City is required'
-    if (!address.state.trim())  e.state  = 'State is required'
-    if (!address.zip.trim())    e.zip    = 'ZIP code is required'
-    if (!dateKey)                e.date   = 'Please select a delivery date'
-    if (!timeWindow)             e.time   = 'Please select a delivery window'
+    if (!address.formatted_address?.trim()) e.address = 'Please select a delivery address'
+    if (!dateKey)                            e.date    = 'Please select a delivery date'
+    if (!timeWindow)                         e.time    = 'Please select a delivery window'
     return e
   }
 
@@ -117,6 +115,8 @@ export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChang
           city:    address.city,
           state:   address.state,
           zip:     address.zip,
+          latitude: address.lat,
+          longitude: address.lng,
         }, { onConflict: 'user_id' })
       } catch { /* silent */ } finally {
         setLoading(false)
@@ -226,50 +226,13 @@ export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChang
           </h3>
           <div className="mp-address-grid">
             <div className="mp-field mp-field--full">
-              <label className="mp-field__label" htmlFor="street">Street Address</label>
-              <input
-                id="street" type="text"
-                className={`mp-field__input${errors.street ? ' mp-field__input--error' : ''}`}
-                placeholder="1234 Main St, Apt 5B"
-                value={address.street}
-                onChange={e => updateAddress('street', e.target.value)}
+              <label className="mp-field__label" htmlFor="address">Delivery Address</label>
+              <GooglePlacesAutocomplete
+                value={address}
+                onSelectPlace={(place) => setAddress(place)}
+                error={errors.address}
               />
-              {errors.street && <span className="mp-field-error">{errors.street}</span>}
-            </div>
-            <div className="mp-field">
-              <label className="mp-field__label" htmlFor="city">City</label>
-              <input
-                id="city" type="text"
-                className={`mp-field__input${errors.city ? ' mp-field__input--error' : ''}`}
-                placeholder="Austin"
-                value={address.city}
-                onChange={e => updateAddress('city', e.target.value)}
-              />
-              {errors.city && <span className="mp-field-error">{errors.city}</span>}
-            </div>
-            <div className="mp-field">
-              <label className="mp-field__label" htmlFor="state">State</label>
-              <input
-                id="state" type="text"
-                className={`mp-field__input${errors.state ? ' mp-field__input--error' : ''}`}
-                placeholder="TX"
-                maxLength={2}
-                value={address.state}
-                onChange={e => updateAddress('state', e.target.value.toUpperCase())}
-              />
-              {errors.state && <span className="mp-field-error">{errors.state}</span>}
-            </div>
-            <div className="mp-field">
-              <label className="mp-field__label" htmlFor="zip">ZIP Code</label>
-              <input
-                id="zip" type="text"
-                className={`mp-field__input${errors.zip ? ' mp-field__input--error' : ''}`}
-                placeholder="78701"
-                maxLength={10}
-                value={address.zip}
-                onChange={e => updateAddress('zip', e.target.value)}
-              />
-              {errors.zip && <span className="mp-field-error">{errors.zip}</span>}
+              {errors.address && <span className="mp-field-error">{errors.address}</span>}
             </div>
           </div>
 

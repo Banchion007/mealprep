@@ -63,7 +63,7 @@ function PaymentForm({ total, mealItems, delivery, user, saveOrder, onDone, onSi
   const [payError,   setPayError]   = useState('')
   const [placing,    setPlacing]    = useState(false)
 
-  const addressStr = `${delivery.address.street}, ${delivery.address.city}, ${delivery.address.state} ${delivery.address.zip}`
+  const addressStr = delivery.address.formatted_address || `${delivery.address.street}, ${delivery.address.city}, ${delivery.address.state} ${delivery.address.zip}`
 
   const handlePlaceOrder = async () => {
     if (!stripe || !elements) return
