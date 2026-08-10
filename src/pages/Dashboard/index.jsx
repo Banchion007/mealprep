@@ -8,7 +8,6 @@ import Overview     from './Overview'
 import Orders       from './Orders'
 import Customers    from './Customers'
 import WeeklyMenuBuilder from './WeeklyMenuBuilder'
-import { seedMockData } from './mockData'
 import { useAuth } from '../../contexts/AuthContext'
 import { isAdminUser } from '../../lib/admin'
 import './Dashboard.css'
@@ -16,9 +15,6 @@ import './Dashboard.css'
 export default function DashboardLayout() {
   const { user, loading } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  // All hooks must be called before any early returns (Rules of Hooks)
-  useEffect(() => { seedMockData() }, [])
 
   // Auth guard — wait for session, then check admin status
   if (loading) {

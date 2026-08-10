@@ -1,13 +1,14 @@
 /* ===================================================
-   Overview — analytics dashboard page
+   Overview — analytics dashboard page (real Supabase data)
 =================================================== */
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, PointElement, LineElement,
   ArcElement, Tooltip, Legend, Filler,
 } from 'chart.js'
 import { Line, Doughnut } from 'react-chartjs-2'
+import { supabase } from '../../lib/supabase'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend, Filler)
 
@@ -36,23 +37,47 @@ function StatCard({ label, value, icon, delta, deltaDir = 'up', prefix = '', suf
 }
 
 export default function Overview() {
-  const orders      = useMemo(() => JSON.parse(localStorage.getItem('hc_orders')      || '[]'), [])
-  const subscribers = useMemo(() => JSON.parse(localStorage.getItem('hc_subscribers') || '[]'), [])
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data: ordersData, error: ordersError } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (!ordersError) {
+          setOrders(ordersData || [])
+        }
+      } catch (err) {
+        console.error('Failed to fetch overview data:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   // ── Computed stats ──
   const today   = new Date()
   const weekAgo = new Date(today); weekAgo.setDate(today.getDate() - 7)
 
-  const thisWeekOrders = orders.filter(o => new Date(o.createdAt) >= weekAgo)
-  const weekRevenue    = thisWeekOrders.reduce((s, o) => s + o.total, 0)
-  const activeSubs     = subscribers.filter(s => s.status === 'Active').length
-  const newCustomers   = new Set(thisWeekOrders.map(o => o.customer)).size
+  const thisWeekOrders = orders.filter(o => new Date(o.created_at) >= weekAgo)
+  const weekRevenue    = thisWeekOrders.reduce((s, o) => s + (o.total || 0), 0)
+  const activeSubs     = 0 // TODO: Query subscriptions table if needed
+  const newCustomers   = new Set(thisWeekOrders.map(o => o.user_id)).size
 
   // ── Line chart: orders per day over last 30 days ──
   const last30Labels = []
   const last30Data   = []
   const ordersByDate = {}
-  orders.forEach(o => { ordersByDate[o.createdAt] = (ordersByDate[o.createdAt] || 0) + 1 })
+  orders.forEach(o => {
+    const dateStr = (o.created_at || '').split('T')[0]
+    ordersByDate[dateStr] = (ordersByDate[dateStr] || 0) + 1
+  })
 
   for (let i = 29; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i)
@@ -94,7 +119,10 @@ export default function Overview() {
 
   // ── Donut chart: revenue by type ──
   const revenueByType = { 'Meal Prep': 0, 'Catering Event': 0, 'À la carte': 0 }
-  orders.forEach(o => { revenueByType[o.type] = (revenueByType[o.type] || 0) + o.total })
+  orders.forEach(o => {
+    const type = o.type || 'Meal Prep'
+    revenueByType[type] = (revenueByType[type] || 0) + (o.total || 0)
+  })
 
   const donutData = {
     labels: Object.keys(revenueByType),
@@ -125,7 +153,7 @@ export default function Overview() {
 
   // ── Recent orders (last 5) ──
   const recent = [...orders]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 5)
 
   const statusClass = s => s.toLowerCase().replace(/\s+/g, '-')
