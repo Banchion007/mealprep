@@ -37,7 +37,7 @@ export default function AuthModal({ onClose }) {
   const handleSignUp = async (e) => {
     e.preventDefault()
     reset()
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
+    if (password.length < 8) { setError('Password must be at least 8 characters.'); return }
     setLoading(true)
     const { error } = await supabase.auth.signUp({ email, password })
     setLoading(false)
