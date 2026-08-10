@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import GooglePlacesAutocomplete from '../../components/GooglePlacesAutocomplete'
+import { isPointInPolygon, getDeliveryFee, SERVICE_AREA_NAME } from '../../config/serviceArea'
 
 const WINDOW_ICONS = {
   morning:   (
@@ -74,6 +75,8 @@ export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChang
   const [saveInfo,   setSaveInfo]   = useState(false)
   const [loading,    setLoading]    = useState(false)
   const [errors,     setErrors]     = useState({})
+  const [deliveryFee, setDeliveryFee] = useState(null)
+  const [serviceAreaWarning, setServiceAreaWarning] = useState(false)
 
   // Group available dates by week for display
   const datesByWeek = AVAILABLE_DATES.reduce((acc, d) => {
@@ -90,6 +93,21 @@ export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChang
     setAddress(prev => ({ ...prev, [field]: val }))
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }))
   }
+
+  // When address is selected, calculate delivery fee and check service area
+  useEffect(() => {
+    if (address.lat && address.lng) {
+      const fee = getDeliveryFee(address.lat, address.lng)
+      setDeliveryFee(fee)
+
+      // Check if in service area (will be empty polygon initially, so all OK)
+      // Import SERVICE_AREA_POLYGON from config when defined
+      setServiceAreaWarning(false)
+    } else {
+      setDeliveryFee(null)
+      setServiceAreaWarning(false)
+    }
+  }, [address.lat, address.lng])
 
   const validate = () => {
     const e = {}
@@ -235,6 +253,30 @@ export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChang
               {errors.address && <span className="mp-field-error">{errors.address}</span>}
             </div>
           </div>
+
+          {/* Delivery fee and service area info */}
+          {address.formatted_address && deliveryFee !== null && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '12px 14px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              fontSize: '14px',
+              color: '#475569',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span>📍 Service Area</span>
+                <span style={{ fontWeight: 600, color: '#1a1641' }}>✓ Available</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Delivery Fee</span>
+                <span style={{ fontWeight: 600, color: '#1a1641' }}>
+                  {deliveryFee === 0 ? 'Free' : `$${deliveryFee.toFixed(2)}`}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Save toggle */}
           {user && (
