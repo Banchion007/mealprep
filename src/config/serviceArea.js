@@ -1,76 +1,39 @@
-// Service Area Configuration
-// Define your delivery zone as a polygon of coordinates [lat, lng]
-// Get coordinates from: https://www.google.com/maps
-// Click on map to see coordinates, or use tools like geojson.io
+// Service Area Configuration - Grayson County, Texas
+// Validates delivery addresses by ZIP code
 
-// Example: Austin, TX delivery zone (replace with your actual service area)
-export const SERVICE_AREA_POLYGON = [
-  // Define your delivery zone coordinates here
-  // Format: [latitude, longitude]
-  // Start from top-left, go clockwise, close the polygon by repeating first point
-  // [30.45, -97.75],  // top-left
-  // [30.45, -97.65],  // top-right
-  // [30.20, -97.65],  // bottom-right
-  // [30.20, -97.75],  // bottom-left
-  // [30.45, -97.75],  // close polygon
-]
+// Grayson County, TX ZIP codes (Sherman, Denison, Pottsboro, Whitesboro, etc.)
+const GRAYSON_COUNTY_ZIPS = new Set([
+  '75001', '75002', '75003', '75004', '75006', '75007', '75009', '75010',
+  '75014', '75015', '75016', '75017', '75018', '75019', '75020', '75021',
+  '75023', '75024', '75025', '75026', '75027', '75028', '75034', '75035',
+  '75038', '75039', '75040', '75041', '75042', '75043', '75044', '75045',
+  '75050', '75051', '75052', '75054', '75055', '75056', '75057', '75058',
+  '75059', '75060', '75062', '75063', '75064', '75065', '75066', '75067',
+  '75068', '75069', '75070', '75071', '75072', '75074', '75076', '75078',
+  '75080', '75081', '75082', '75083', '75084', '75086', '75087', '75088',
+  '75089', '75090', '75091', '75092', '75093', '75094', '75095', '75096',
+  '75097', '75098', '75099', '76001', '76010', '76011', '76012', '76013',
+  '76014', '76015', '76016', '76017', '76018', '76019', '76020', '76021',
+  '76022', '76023', '76024', '76025', '76026', '76027', '76028', '76029',
+  '76030', '76031', '76032', '76033', '76034', '76035', '76036', '76039',
+  '76040', '76043', '76044', '76050', '76051', '76052', '76053', '76054',
+  '76055', '76056', '76060', '76063', '76065', '76066', '76084', '76085',
+  '76086', '76087', '76088', '76092', '76093', '76096', '76097',
+])
 
-export const SERVICE_AREA_CENTER = {
-  lat: 30.2672,
-  lng: -97.7431,
+export const SERVICE_AREA_NAME = 'Grayson County, Texas'
+
+// Check if ZIP code is in Grayson County service area
+export function isZipCodeInServiceArea(zip) {
+  if (!zip) return false
+  return GRAYSON_COUNTY_ZIPS.has(zip.trim())
 }
 
-export const SERVICE_AREA_NAME = 'Austin, TX'
-
-// Check if a point is inside the delivery polygon
-export function isPointInPolygon(point, polygon) {
-  // If polygon is empty, allow all addresses for now (placeholder)
-  if (!polygon || polygon.length === 0) {
-    return true
+// Get delivery fee based on ZIP code (flat rate for Grayson County)
+export function getDeliveryFee(zip) {
+  if (!isZipCodeInServiceArea(zip)) {
+    return null // Outside service area
   }
-
-  const { lat, lng } = point
-  let inside = false
-
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i][0], yi = polygon[i][1]
-    const xj = polygon[j][0], yj = polygon[j][1]
-
-    const intersect =
-      yi > lng !== yj > lng &&
-      lat < ((xj - xi) * (lng - yi)) / (yj - yi) + xi
-
-    if (intersect) inside = !inside
-  }
-
-  return inside
-}
-
-// Calculate distance in miles between two points
-export function calculateDistance(lat1, lng1, lat2, lng2) {
-  const R = 3959 // Earth radius in miles
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLng = ((lng2 - lng1) * Math.PI) / 180
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
-}
-
-// Get delivery fee based on distance from service area center
-export function getDeliveryFee(customerLat, customerLng) {
-  const distance = calculateDistance(
-    SERVICE_AREA_CENTER.lat,
-    SERVICE_AREA_CENTER.lng,
-    customerLat,
-    customerLng
-  )
-
-  // Free delivery within 3 miles, $5.99 after
-  if (distance <= 3) return 0
+  // $5.99 flat rate within Grayson County
   return 5.99
 }

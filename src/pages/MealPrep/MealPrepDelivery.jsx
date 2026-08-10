@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import GooglePlacesAutocomplete from '../../components/GooglePlacesAutocomplete'
-import { isPointInPolygon, getDeliveryFee, SERVICE_AREA_NAME } from '../../config/serviceArea'
+import { isZipCodeInServiceArea, getDeliveryFee, SERVICE_AREA_NAME } from '../../config/serviceArea'
 
 const WINDOW_ICONS = {
   morning:   (
@@ -96,18 +96,21 @@ export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChang
 
   // When address is selected, calculate delivery fee and check service area
   useEffect(() => {
-    if (address.lat && address.lng) {
-      const fee = getDeliveryFee(address.lat, address.lng)
-      setDeliveryFee(fee)
-
-      // Check if in service area (will be empty polygon initially, so all OK)
-      // Import SERVICE_AREA_POLYGON from config when defined
-      setServiceAreaWarning(false)
+    if (address.zip) {
+      const inServiceArea = isZipCodeInServiceArea(address.zip)
+      if (inServiceArea) {
+        const fee = getDeliveryFee(address.zip)
+        setDeliveryFee(fee)
+        setServiceAreaWarning(false)
+      } else {
+        setDeliveryFee(null)
+        setServiceAreaWarning(true)
+      }
     } else {
       setDeliveryFee(null)
       setServiceAreaWarning(false)
     }
-  }, [address.lat, address.lng])
+  }, [address.zip])
 
   const validate = () => {
     const e = {}
@@ -255,26 +258,35 @@ export default function MealPrepDelivery({ delivery, selectedMeals = {}, onChang
           </div>
 
           {/* Delivery fee and service area info */}
-          {address.formatted_address && deliveryFee !== null && (
+          {address.formatted_address && (
             <div style={{
               marginTop: '1rem',
               padding: '12px 14px',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: serviceAreaWarning ? '#fef3c7' : '#f8fafc',
+              border: `1px solid ${serviceAreaWarning ? '#fcd34d' : '#e2e8f0'}`,
               borderRadius: '6px',
               fontSize: '14px',
-              color: '#475569',
+              color: serviceAreaWarning ? '#92400e' : '#475569',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span>📍 Service Area</span>
-                <span style={{ fontWeight: 600, color: '#1a1641' }}>✓ Available</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>Delivery Fee</span>
-                <span style={{ fontWeight: 600, color: '#1a1641' }}>
-                  {deliveryFee === 0 ? 'Free' : `$${deliveryFee.toFixed(2)}`}
+                <span>📍 Service Area ({SERVICE_AREA_NAME})</span>
+                <span style={{ fontWeight: 600, color: serviceAreaWarning ? '#dc2626' : '#1a1641' }}>
+                  {serviceAreaWarning ? '⚠ Outside Zone' : '✓ Delivery Available'}
                 </span>
               </div>
+              {deliveryFee !== null && !serviceAreaWarning && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Delivery Fee</span>
+                  <span style={{ fontWeight: 600, color: '#1a1641' }}>
+                    ${deliveryFee.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              {serviceAreaWarning && (
+                <p style={{ margin: '6px 0 0 0', fontSize: '13px' }}>
+                  We currently only deliver to ZIP codes in Grayson County, Texas. Please contact us for service outside this area.
+                </p>
+              )}
             </div>
           )}
 
