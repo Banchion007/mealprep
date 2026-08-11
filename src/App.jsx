@@ -19,6 +19,7 @@ import EULA            from './pages/EULA'
 import DMCA            from './pages/DMCA'
 import { AuthProvider } from './contexts/AuthContext'
 import { useMealPrepSetting } from './hooks/useMealPrepSetting'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 /* Scroll to top on route change */
 function ScrollToTop() {
@@ -69,6 +70,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Layout />
+        <SpeedInsights />
       </AuthProvider>
     </BrowserRouter>
   )
