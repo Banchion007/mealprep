@@ -19,7 +19,9 @@ import EULA            from './pages/EULA'
 import DMCA            from './pages/DMCA'
 import { AuthProvider } from './contexts/AuthContext'
 import { useMealPrepSetting } from './hooks/useMealPrepSetting'
-import { SpeedInsights } from '@vercel/speed-insights/react'
+import { Suspense } from 'react'
+
+const SpeedInsightsComponent = import.meta.env.PROD ? React.lazy(() => import('@vercel/speed-insights/react').then(m => ({ default: m.SpeedInsights }))) : () => null
 
 /* Scroll to top on route change */
 function ScrollToTop() {
@@ -70,7 +72,11 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Layout />
-        <SpeedInsights />
+        {import.meta.env.PROD && (
+          <Suspense fallback={null}>
+            <SpeedInsightsComponent />
+          </Suspense>
+        )}
       </AuthProvider>
     </BrowserRouter>
   )
