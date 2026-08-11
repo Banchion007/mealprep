@@ -44,8 +44,8 @@ const TEAM = [
 ]
 
 const MILESTONES = [
-  { year: '9yo', event: "I started baking in my mom's kitchen when I was just 9 years old" },
-  { year: '15yo', event: 'I got my first job in a pizza parlor' },
+  { year: '9', event: "I started baking in my mom's kitchen when I was just 9 years old" },
+  { year: '15', event: 'I got my first job in a pizza parlor' },
   { year: '18-23', event: 'I worked every part of a busy family dining restaurant — from busboy to prep cook, line cook, waiter, and crew leader' },
   { year: '25', event: 'I moved into management, where I had the opportunity to serve with The Old Spaghetti Factory, The Sacramento Hilton Hotel, Aramark, Sodexo, and at places like USAA, E-Trade, Johnson & Johnson, Hewlett Packard, and several senior retirement facilities around Sacramento, California' },
   { year: '32', event: 'I also provided catering support for our church and local soccer club' },
@@ -127,7 +127,7 @@ export default function About() {
 
           {/* Timeline */}
           <div className="timeline fade-up">
-            <h3 className="timeline__title">Our Journey</h3>
+            <h3 className="timeline__title">My Journey</h3>
             {MILESTONES.map((m, i) => (
               <div key={i} className="timeline__item">
                 <div className="timeline__year">{m.year}</div>
