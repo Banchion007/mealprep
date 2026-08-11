@@ -225,15 +225,18 @@ export default function Landing() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const hero = document.querySelector('.hero')
-      if (!hero) return
-      const heroHeight = hero.offsetHeight
-      const scrollY = window.scrollY
-      setShowScrollIndicator(scrollY < heroHeight * 0.5)
+      const doc = document.documentElement
+      const remaining = doc.scrollHeight - window.scrollY - window.innerHeight
+      setShowScrollIndicator(remaining > 48)
     }
 
+    handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener('resize', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+    }
   }, [])
 
   return (
@@ -269,24 +272,21 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div
-          ref={scrollIndicatorRef}
-          className="hero__scroll"
-          style={{
-            opacity: showScrollIndicator ? 1 : 0,
-            pointerEvents: showScrollIndicator ? 'auto' : 'none',
-            transition: 'opacity 500ms ease-out'
-          }}
-        >
-          <span>Scroll to explore</span>
-          <div className="hero__scroll-icon">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M12 5v14M5 12l7 7 7-7"/>
-            </svg>
-          </div>
-        </div>
       </section>
+
+      {/* Scroll indicator — fixed to viewport until page bottom */}
+      <div
+        ref={scrollIndicatorRef}
+        className={`hero__scroll${showScrollIndicator ? '' : ' hero__scroll--hidden'}`}
+        aria-hidden={!showScrollIndicator}
+      >
+        <span>Scroll to explore</span>
+        <div className="hero__scroll-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+          </svg>
+        </div>
+      </div>
 
       {/* ── Stats bar ── */}
       <section className="stats-bar">
