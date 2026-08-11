@@ -74,10 +74,9 @@ function UserMenu({ user, isAdmin, signOut }) {
 }
 
 const NAV_LINKS = [
-  { to: '/',          label: 'Home' },
-  { to: '/meal-prep', label: 'Meal Prep' },
-  { to: '/about',     label: 'About' },
-  { to: '/contact',   label: 'Contact' },
+  { to: '/',       label: 'Home' },
+  { to: '/about',  label: 'About' },
+  { to: '/contact', label: 'Contact' },
 ]
 
 const MENU_PDF_URL = '/HumbleChefMenu.pdf'
@@ -172,7 +171,7 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <nav className="navbar__links" aria-label="Main navigation">
-          {NAV_LINKS.filter(({ to }) => to !== '/meal-prep' || mealPrepEnabled).map(({ to, label }) => (
+          {NAV_LINKS.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -230,7 +229,7 @@ export default function Navbar() {
 
       {/* Mobile drawer */}
       <div className={`navbar__mobile${menuOpen ? ' navbar__mobile--open' : ''}`}>
-        {NAV_LINKS.filter(({ to }) => to !== '/meal-prep' || mealPrepEnabled).map(({ to, label }) => (
+        {NAV_LINKS.map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}
