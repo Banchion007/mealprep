@@ -204,16 +204,18 @@ export default function Navbar() {
           >
             Dashboard
           </Link>
-          {user ? (
-            <UserMenu user={user} isAdmin={isAdmin} signOut={signOut} />
-          ) : (
-            <button
-              className="btn btn-outline btn-sm"
-              onClick={() => setShowAuthModal(true)}
-              style={{ minWidth: '70px' }}
-            >
-              Sign In
-            </button>
+          {!loading && (
+            user ? (
+              <UserMenu user={user} isAdmin={isAdmin} signOut={signOut} />
+            ) : (
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => setShowAuthModal(true)}
+                style={{ minWidth: '70px' }}
+              >
+                Sign In
+              </button>
+            )
           )}
           {/* Hamburger */}
           <button
