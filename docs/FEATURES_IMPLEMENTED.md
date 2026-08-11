@@ -454,4 +454,4 @@ RESEND_API_KEY=re_...
 ## Ready for Production ✅
 
 All features implemented, tested, and documented.  
-Deployment checklist available in `DEPLOYMENT_CHECKLIST.md`.
+Deployment checklist available in `/docs/DEPLOYMENT_CHECKLIST.md`.
