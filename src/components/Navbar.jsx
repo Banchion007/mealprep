@@ -188,7 +188,7 @@ export default function Navbar() {
 
         {/* CTA */}
         <div className="navbar__actions">
-          {mealPrepEnabled && (
+          {!loading && mealPrepEnabled && (
             <button
               onClick={handleMealPrepClick}
               className="btn btn-primary btn-sm navbar__cta"
@@ -255,7 +255,7 @@ export default function Navbar() {
             My Account
           </Link>
         )}
-        {mealPrepEnabled && (
+        {!loading && mealPrepEnabled && (
           <button
             onClick={handleMealPrepClick}
             className="btn btn-primary"
