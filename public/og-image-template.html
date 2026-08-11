@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Humble Chef OG Image</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      display: flex;
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 60px 80px;
+      background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4C1D95 100%);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative blob background */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.15;
+    }
+
+    .blob-1 {
+      width: 400px;
+      height: 400px;
+      background: #EA580C;
+      top: -150px;
+      right: -100px;
+    }
+
+    .blob-2 {
+      width: 300px;
+      height: 300px;
+      background: #FFA500;
+      bottom: -100px;
+      left: 50px;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      max-width: 55%;
+    }
+
+    .tagline {
+      font-size: 18px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      font-weight: 500;
+      color: #FFA500;
+    }
+
+    .headline {
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+    }
+
+    .description {
+      font-size: 20px;
+      line-height: 1.5;
+      color: #E0E7FF;
+      max-width: 90%;
+    }
+
+    .logo-section {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      border: 2px solid rgba(255, 165, 0, 0.3);
+    }
+
+    .logo-box img {
+      height: 200px;
+      width: auto;
+      filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+    }
+
+    .url {
+      position: absolute;
+      bottom: 30px;
+      right: 50px;
+      font-size: 16px;
+      color: #E0E7FF;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="content">
+      <div class="tagline">Chef-Prepared Meals</div>
+      <h1 class="headline">
+        Catering & Meal Prep for Collin County
+      </h1>
+      <p class="description">
+        Fresh, chef-made meals delivered daily. From office lunches to events.
+      </p>
+    </div>
+
+    <div class="logo-section">
+      <div class="logo-box">
+        <img src="/hc-logo.png" alt="Humble Chef">
+      </div>
+    </div>
+
+    <div class="url">thehumblechef.com</div>
+  </div>
+</body>
+</html>
