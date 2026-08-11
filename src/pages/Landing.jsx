@@ -3,8 +3,10 @@
 =================================================== */
 import React, { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import TiltedCard from '../components/TiltedCard'
+import { pageMetadata, getCanonicalUrl, SITE_NAME, DEFAULT_OG_IMAGE, getSchemaOrgData } from '../lib/seo'
 import './Landing.css'
 
 /* ---- Data ---- */
@@ -239,8 +241,25 @@ export default function Landing() {
     }
   }, [])
 
+  const meta = pageMetadata.home
+
   return (
-    <div className="landing">
+    <>
+      <Helmet>
+        <title>{meta.title}</title>
+        <meta name="description" content={meta.description} />
+        <link rel="canonical" href={getCanonicalUrl(meta.path)} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:title" content={meta.title} />
+        <meta property="og:description" content={meta.description} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <script type="application/ld+json">
+          {JSON.stringify(getSchemaOrgData())}
+        </script>
+      </Helmet>
+      <div className="landing">
       {/* ── Hero ── */}
       <section className="hero">
         <div className="hero__overlay" />
@@ -443,5 +462,6 @@ export default function Landing() {
         </div>
       </section>
     </div>
+    </>
   )
 }
