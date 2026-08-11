@@ -189,7 +189,7 @@ export default function Navbar() {
 
         {/* CTA */}
         <div className="navbar__actions">
-          {!loading && (
+          {mealPrepEnabled && (
             <button
               onClick={handleMealPrepClick}
               className="btn btn-primary btn-sm navbar__cta"
@@ -208,7 +208,11 @@ export default function Navbar() {
           {user ? (
             <UserMenu user={user} isAdmin={isAdmin} signOut={signOut} />
           ) : (
-            <button className="btn btn-outline btn-sm" onClick={() => setShowAuthModal(true)}>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => setShowAuthModal(true)}
+              style={{ minWidth: '70px' }}
+            >
               Sign In
             </button>
           )}
@@ -252,7 +256,7 @@ export default function Navbar() {
             My Account
           </Link>
         )}
-        {!loading && (
+        {mealPrepEnabled && (
           <button
             onClick={handleMealPrepClick}
             className="btn btn-primary"
