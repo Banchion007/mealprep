@@ -3,6 +3,7 @@
 =================================================== */
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { PageHead } from '../components/PageHead'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { useAuth } from '../contexts/AuthContext'
 import TiltedCard from '../components/TiltedCard'
