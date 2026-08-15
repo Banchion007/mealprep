@@ -184,6 +184,9 @@ export default function Navbar() {
             </NavLink>
           ))}
           <MenuDropdown />
+          <Link to="/quote" className="btn btn-accent btn-sm navbar__quote-btn">
+            Get a Quote
+          </Link>
         </nav>
 
         {/* CTA */}
@@ -252,6 +255,9 @@ export default function Navbar() {
         <a href={MENU_PDF_URL} download className="navbar__mobile-link">
           View Catering Menu
         </a>
+        <Link to="/quote" className="navbar__mobile-link navbar__mobile-link--quote">
+          Get a Quote
+        </Link>
         {user && (
           <Link to="/account" className="navbar__mobile-link">
             My Account

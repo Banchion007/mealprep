@@ -223,6 +223,22 @@ h4 { font-size: 1.15rem; font-weight: 600; }
   border-color: var(--color-border);
 }
 
+.btn-accent {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 12px oklch(0.6228 0.2064 36 / 0.25);
+}
+.btn-accent:hover {
+  background: var(--color-accent-dark);
+  border-color: var(--color-accent-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px oklch(0.6228 0.2064 36 / 0.40);
+}
+.btn-accent:active {
+  transform: translateY(0);
+}
+
 .btn-lg { padding: 1rem 2.4rem; font-size: 1rem; }
 .btn-sm { padding: 0.5rem 1.1rem; font-size: 0.82rem; }
 

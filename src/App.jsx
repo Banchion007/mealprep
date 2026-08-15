@@ -10,6 +10,7 @@ import About          from './pages/About'
 import Contact        from './pages/Contact'
 import Menu           from './pages/Menu'
 import MealPrep       from './pages/MealPrep/index'
+import QuotePage      from './pages/QuotePage'
 import UnderConstruction from './pages/UnderConstruction'
 import DashboardLayout from './pages/Dashboard/index'
 import Account         from './pages/Account'
@@ -51,6 +52,7 @@ function Layout() {
           <Route path="/contact"      element={<Contact />} />
           <Route path="/menu"         element={<Menu />} />
           <Route path="/meal-prep"    element={<MealPrepRoute />} />
+          <Route path="/quote"        element={<QuotePage />} />
           <Route path="/under-construction" element={<UnderConstruction />} />
           <Route path="/account"      element={<Account />} />
           <Route path="/privacy"      element={<PrivacyPolicy />} />

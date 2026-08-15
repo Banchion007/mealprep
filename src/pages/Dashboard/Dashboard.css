@@ -1814,6 +1814,103 @@
   margin-top: 0.2rem;
 }
 
+/* ── Tab navigation ── */
+.crm-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: 1.5rem;
+}
+
+.crm-tab {
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.crm-tab:hover {
+  color: var(--color-text);
+}
+
+.crm-tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.crm-tab__count {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-left: 0.5rem;
+}
+
+/* ── Quote detail panel ── */
+.quote-detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+}
+
+.quote-detail-panel section {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+}
+
+.quote-detail-panel section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.quote-detail-panel h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--color-secondary);
+}
+
+.quote-detail-panel p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.quote-detail-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 1rem;
+}
+
+.quote-detail-panel li {
+  font-size: 0.9rem;
+  padding: 0.25rem 0;
+}
+
+.quote-detail-panel li::before {
+  content: '• ';
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.quote-detail-panel a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.quote-detail-panel a:hover {
+  text-decoration: underline;
+}
+
 /* ── n8n header button ── */
 .crm-n8n-header-btn {
   display: flex;

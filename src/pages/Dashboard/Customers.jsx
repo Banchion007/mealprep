@@ -431,23 +431,233 @@ function N8nModal({ config, onSave, onClose }) {
   )
 }
 
+/* ── Quotes Tab Component ── */
+function QuotesTab({ quotes, setQuotes }) {
+  const [expandedId, setExpandedId] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+
+  const STATUS_COLORS = {
+    'new': { bg: '#DBEAFE', color: '#1D4ED8' },
+    'reviewed': { bg: '#FEF3C7', color: '#92400E' },
+    'quoted': { bg: '#E9D5FF', color: '#6D28D9' },
+    'booked': { bg: '#DCFCE7', color: '#15803D' },
+    'declined': { bg: '#F1F5F9', color: '#64748B' },
+  };
+
+  const filtered = quotes.filter(q => {
+    if (statusFilter !== 'All' && q.status !== statusFilter) return false;
+    if (search) {
+      const qLower = search.toLowerCase();
+      return q.name.toLowerCase().includes(qLower) || q.email.toLowerCase().includes(qLower);
+    }
+    return true;
+  });
+
+  const handleStatusChange = async (quoteId, newStatus) => {
+    await supabase.from('quotes').update({ status: newStatus }).eq('id', quoteId);
+    setQuotes(prev => prev.map(q => q.id === quoteId ? { ...q, status: newStatus } : q));
+  };
+
+  const handleNotesChange = async (quoteId, notes) => {
+    await supabase.from('quotes').update({ admin_notes: notes }).eq('id', quoteId);
+    setQuotes(prev => prev.map(q => q.id === quoteId ? { ...q, admin_notes: notes } : q));
+  };
+
+  const fmtDate = (d) => {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const fmtMoney = (n) => `$${Number(n).toFixed(0)}`;
+
+  return (
+    <div className="dash-section">
+      <div className="dash-filters">
+        <div className="dash-filter-group">
+          <label>Search</label>
+          <input
+            type="text"
+            className="crm-search-input"
+            placeholder="Name or email…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="dash-filter-group">
+          <label>Status</label>
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+            <option value="All">All</option>
+            <option value="new">New</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="quoted">Quoted</option>
+            <option value="booked">Booked</option>
+            <option value="declined">Declined</option>
+          </select>
+        </div>
+      </div>
+
+      <p className="crm-results-count"><strong>{filtered.length}</strong> quote{filtered.length !== 1 ? 's' : ''}</p>
+
+      <div className="dash-table-wrap">
+        <table className="dash-table">
+          <thead>
+            <tr>
+              <th>Submitted</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Tier</th>
+              <th>Guests</th>
+              <th>Est. Total</th>
+              <th>Event Type</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={8}>
+                  <div className="dash-empty">
+                    <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" style={{ opacity: 0.3 }}>
+                      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
+                    </svg>
+                    <p>No quotes submitted yet.</p>
+                  </div>
+                </td>
+              </tr>
+            ) : filtered.map(quote => (
+              <React.Fragment key={quote.id}>
+                <tr className={`crm-row${expandedId === quote.id ? ' expanded' : ''}`} onClick={() => setExpandedId(expandedId === quote.id ? null : quote.id)}>
+                  <td>{fmtDate(quote.created_at)}</td>
+                  <td><strong>{quote.name}</strong></td>
+                  <td>{quote.email}</td>
+                  <td>{quote.tier_name}</td>
+                  <td>{quote.guest_count_min}–{quote.guest_count_max}</td>
+                  <td>{fmtMoney(quote.total_low)}–{fmtMoney(quote.total_high)}</td>
+                  <td>{quote.event_type}</td>
+                  <td>
+                    <span className="crm-status-badge" style={STATUS_COLORS[quote.status] || STATUS_COLORS.new}>
+                      {quote.status}
+                    </span>
+                  </td>
+                </tr>
+
+                {expandedId === quote.id && (
+                  <tr className="crm-expand-row">
+                    <td colSpan={8}>
+                      <div className="crm-expand-content">
+                        <div className="quote-detail-panel">
+                          <section>
+                            <h3>Contact Info</h3>
+                            <p><strong>Name:</strong> {quote.name}</p>
+                            <p><strong>Email:</strong> <a href={`mailto:${quote.email}`}>{quote.email}</a></p>
+                            {quote.phone && <p><strong>Phone:</strong> {quote.phone}</p>}
+                          </section>
+
+                          <section>
+                            <h3>Event Details</h3>
+                            <p><strong>Type:</strong> {quote.event_type}</p>
+                            <p><strong>Date:</strong> {quote.event_date ? fmtDate(quote.event_date) : '(Not specified)'}</p>
+                            <p><strong>Guests:</strong> {quote.guest_count_min}–{quote.guest_count_max}</p>
+                          </section>
+
+                          <section>
+                            <h3>Tier & Pricing</h3>
+                            <p><strong>{quote.tier_name}</strong> · ${quote.base_price_low}–${quote.base_price_high}/person</p>
+                            <p><strong>Estimated Total:</strong> {fmtMoney(quote.total_low)}–{fmtMoney(quote.total_high)}</p>
+                          </section>
+
+                          {quote.selected_items && Object.keys(quote.selected_items).length > 0 && (
+                            <section>
+                              <h3>Menu Selections</h3>
+                              {Object.entries(quote.selected_items).map(([k, v]) => (
+                                (v && v.length > 0) && (
+                                  <div key={k}>
+                                    <strong>{k.replace(/([A-Z])/g, ' $1').trim()}:</strong>
+                                    <ul style={{ marginLeft: '1rem', marginTop: '0.25rem' }}>
+                                      {v.map((item, i) => <li key={i}>{item}</li>)}
+                                    </ul>
+                                  </div>
+                                )
+                              ))}
+                            </section>
+                          )}
+
+                          {quote.upgrades && quote.upgrades.length > 0 && (
+                            <section>
+                              <h3>Add-Ons</h3>
+                              <ul>
+                                {quote.upgrades.map((u, i) => <li key={i}>{u.name}</li>)}
+                              </ul>
+                            </section>
+                          )}
+
+                          {quote.message && (
+                            <section>
+                              <h3>Customer Message</h3>
+                              <p>{quote.message}</p>
+                            </section>
+                          )}
+
+                          <section>
+                            <h3>Admin Status</h3>
+                            <select value={quote.status} onChange={e => handleStatusChange(quote.id, e.target.value)} style={{ padding: '0.5rem', marginBottom: '1rem', borderRadius: '4px', border: '1px solid var(--color-border)' }}>
+                              <option value="new">New</option>
+                              <option value="reviewed">Reviewed</option>
+                              <option value="quoted">Quoted</option>
+                              <option value="booked">Booked</option>
+                              <option value="declined">Declined</option>
+                            </select>
+                          </section>
+
+                          <section>
+                            <h3>Admin Notes</h3>
+                            <textarea
+                              value={quote.admin_notes || ''}
+                              onChange={e => handleNotesChange(quote.id, e.target.value)}
+                              placeholder="Add internal notes…"
+                              style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--color-border)', fontFamily: 'inherit', minHeight: '100px' }}
+                            />
+                          </section>
+
+                          <section>
+                            <a href={`mailto:${quote.email}`} className="btn btn-primary" style={{ display: 'inline-block', marginTop: '0.5rem' }}>
+                              Send Email
+                            </a>
+                          </section>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Customers component ── */
 export default function Customers() {
   const [customers, setCustomers] = useState([])
+  const [quotes, setQuotes] = useState([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('customers')
 
   useEffect(() => {
-    const fetchCustomers = async () => {
+    const fetchData = async () => {
       try {
         // Fetch all orders and aggregate by user
-        const { data: orders, error } = await supabase
+        const { data: orders, error: ordersError } = await supabase
           .from('orders')
           .select('*')
           .order('created_at', { ascending: false })
 
-        if (error) throw error
+        if (ordersError) throw ordersError
 
-        // Aggregate orders by user_id to create customer profiles
         const customerMap = {}
         orders.forEach(order => {
           const userId = order.user_id
@@ -471,15 +681,25 @@ export default function Customers() {
         })
 
         setCustomers(Object.values(customerMap))
+
+        // Fetch submitted quotes
+        const { data: quotesData, error: quotesError } = await supabase
+          .from('quotes')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (quotesError) throw quotesError
+        setQuotes(quotesData || [])
       } catch (err) {
-        console.error('Failed to fetch customers:', err)
+        console.error('Failed to fetch data:', err)
         setCustomers([])
+        setQuotes([])
       } finally {
         setLoading(false)
       }
     }
 
-    fetchCustomers()
+    fetchData()
   }, [])
 
   const [search,       setSearch]       = useState('')
@@ -488,6 +708,11 @@ export default function Customers() {
   const [sortBy,       setSortBy]       = useState('lastOrder')
   const [expandedId,   setExpandedId]   = useState(null)
   const [n8nModalOpen, setN8nModalOpen] = useState(false)
+  const [n8nConfig,    setN8nConfig]    = useState(null)
+
+  const saveN8nConfig = useCallback((config) => {
+    setN8nConfig(config)
+  }, [])
 
   const saveCustomer = useCallback((updated) => {
     // TODO: Persist customer updates to Supabase (tags, status, notes)
@@ -540,16 +765,35 @@ export default function Customers() {
       <div className="crm-page-header">
         <div>
           <h1 className="dash-page-title">Customers</h1>
-          <p className="crm-page-sub">{customers.length} customer{customers.length !== 1 ? 's' : ''} · all-time</p>
+          <p className="crm-page-sub">{activeTab === 'customers' ? `${customers.length} customer${customers.length !== 1 ? 's' : ''} · all-time` : `${quotes.length} quote${quotes.length !== 1 ? 's' : ''} · all-time`}</p>
         </div>
-        <button className="crm-n8n-header-btn" onClick={() => setN8nModalOpen(true)}>
-          <div className="crm-n8n-logo crm-n8n-logo--sm">n8n</div>
-          <span className={`crm-n8n-dot${n8nConfig?.webhookUrl ? ' crm-n8n-dot--on' : ' crm-n8n-dot--off'}`} />
-          Workflows
+        {activeTab === 'customers' && (
+          <button className="crm-n8n-header-btn" onClick={() => setN8nModalOpen(true)}>
+            <div className="crm-n8n-logo crm-n8n-logo--sm">n8n</div>
+            <span className={`crm-n8n-dot${n8nConfig?.webhookUrl ? ' crm-n8n-dot--on' : ' crm-n8n-dot--off'}`} />
+            Workflows
+          </button>
+        )}
+      </div>
+
+      {/* Tab navigation */}
+      <div className="crm-tabs">
+        <button
+          className={`crm-tab${activeTab === 'customers' ? ' active' : ''}`}
+          onClick={() => setActiveTab('customers')}
+        >
+          All Customers
+        </button>
+        <button
+          className={`crm-tab${activeTab === 'quotes' ? ' active' : ''}`}
+          onClick={() => setActiveTab('quotes')}
+        >
+          Submitted Quotes <span className="crm-tab__count">({quotes.length})</span>
         </button>
       </div>
 
-      {/* Stat cards */}
+      {/* Stat cards — Customers tab only */}
+      {activeTab === 'customers' && (
       <div className="crm-stats-row">
         {[
           { label: 'Total Customers', value: customers.length,   color: 'var(--color-primary)', bg: 'var(--primary-alpha-9)' },
@@ -566,7 +810,12 @@ export default function Customers() {
           </div>
         ))}
       </div>
+      )}
 
+      {/* Quotes tab content */}
+      {activeTab === 'quotes' && <QuotesTab quotes={quotes} setQuotes={setQuotes} />}
+
+      {activeTab === 'customers' && (
       <div className="dash-section">
         {/* Filters */}
         <div className="dash-filters">
@@ -692,6 +941,7 @@ export default function Customers() {
           </table>
         </div>
       </div>
+      )}
 
       {n8nModalOpen && (
         <N8nModal
