@@ -57,19 +57,13 @@ export function AuthProvider({ children }) {
         // Only redirect after explicit login, not on initial page load
         setShowAuthModal(false)
 
-        // Redirect to the page they were trying to access
-        // First check localStorage (survives OAuth redirect), then state
+        // Redirect to the page they were trying to access, or homepage by default
         const savedRedirectUrl = localStorage.getItem('auth_redirect_url')
-        const finalRedirectUrl = savedRedirectUrl || redirectUrl
+        const finalRedirectUrl = savedRedirectUrl || redirectUrl || '/'
 
-        if (finalRedirectUrl) {
-          navigate(finalRedirectUrl)
-          localStorage.removeItem('auth_redirect_url')
-          setRedirectUrl(null)
-        } else if (isAdminUser(session?.user)) {
-          // Admin users go to dashboard by default
-          navigate('/dashboard')
-        }
+        navigate(finalRedirectUrl)
+        localStorage.removeItem('auth_redirect_url')
+        setRedirectUrl(null)
       }
     })
 
