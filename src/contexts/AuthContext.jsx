@@ -49,12 +49,12 @@ export function AuthProvider({ children }) {
     initializeAuth()
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
       setLoading(false)
 
-      if (session?.user) {
-        // User just logged in
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Only redirect after explicit login, not on initial page load
         setShowAuthModal(false)
 
         // Redirect to the page they were trying to access
