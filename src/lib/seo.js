@@ -28,6 +28,11 @@ export const pageMetadata = {
     title: 'Contact Humble Chef | Catering & Meal Prep Quotes',
     description: 'Get in touch with Humble Chef for catering, office lunch, or weekly meal prep in Grayson/Collin County, TX. Request a quote or ask about our menus.',
   },
+  quote: {
+    path: '/quote',
+    title: 'Get a Catering Quote | Humble Chef',
+    description: 'Get an instant quote for catering services in Grayson/Collin County, TX. Customize your menu and get pricing for your event.',
+  },
   privacy: {
     path: '/privacy',
     title: 'Privacy Policy | Humble Chef',
@@ -63,4 +68,29 @@ export const getSchemaOrgData = () => ({
       closes: '17:00',
     }
   ],
+})
+
+export const getWebsiteSchema = () => ({
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE_NAME,
+  url: SITE_URL,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${SITE_URL}?q={search_term_string}`
+    }
+  }
+})
+
+export const getBreadcrumbSchema = (breadcrumbs = []) => ({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbs.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: `${SITE_URL}${item.path}`
+  }))
 })

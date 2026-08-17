@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from 'react'
 import { animate } from 'motion'
+import { Helmet } from 'react-helmet-async'
 import { TIERS, BREAKFAST_OPTIONS } from '../data/menuData'
 import { calculateQuoteRange, formatCurrency, formatRange } from '../utils/quoteCalculations'
 import { supabase } from '../lib/supabase'
 import { sendEmailViaResend } from '../lib/resendEmail'
+import { pageMetadata, getCanonicalUrl, SITE_NAME, DEFAULT_OG_IMAGE, getSchemaOrgData } from '../lib/seo'
 import './QuotePage.css'
 
 const STEPS = ['Your Event', 'Choose Tier', 'Build Your Menu', 'Add-Ons', 'Your Info', 'Review & Submit'];
@@ -644,9 +646,26 @@ export default function QuotePage() {
     return <ConfirmationScreen formData={formData} />;
   }
 
+  const meta = pageMetadata.quote;
+
   return (
-    <div className="quote-page">
-      <ProgressBar currentStep={currentStep} />
+    <>
+      <Helmet>
+        <title>{meta.title}</title>
+        <meta name="description" content={meta.description} />
+        <link rel="canonical" href={getCanonicalUrl(meta.path)} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:title" content={meta.title} />
+        <meta property="og:description" content={meta.description} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <script type="application/ld+json">
+          {JSON.stringify(getSchemaOrgData())}
+        </script>
+      </Helmet>
+      <div className="quote-page">
+        <ProgressBar currentStep={currentStep} />
 
       <div className="quote-container">
         {currentStep === 0 && (
@@ -739,6 +758,7 @@ export default function QuotePage() {
         )}
       </div>
     </div>
+    </>
   );
 }
 

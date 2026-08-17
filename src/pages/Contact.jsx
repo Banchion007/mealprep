@@ -2,8 +2,10 @@
    Contact Page — form with validation + company info
 =================================================== */
 import React, { useState, useEffect, useRef } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { sendEmailViaResend } from '../lib/resendEmail'
+import { pageMetadata, getCanonicalUrl, SITE_NAME, DEFAULT_OG_IMAGE, getSchemaOrgData } from '../lib/seo'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import './Contact.css'
@@ -138,9 +140,26 @@ export default function Contact() {
     }
   }, [])
 
+  const meta = pageMetadata.contact
+
   return (
-    <div className="contact-page">
-      <section className="page-hero contact-hero">
+    <>
+      <Helmet>
+        <title>{meta.title}</title>
+        <meta name="description" content={meta.description} />
+        <link rel="canonical" href={getCanonicalUrl(meta.path)} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:title" content={meta.title} />
+        <meta property="og:description" content={meta.description} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <script type="application/ld+json">
+          {JSON.stringify(getSchemaOrgData())}
+        </script>
+      </Helmet>
+      <div className="contact-page">
+        <section className="page-hero contact-hero">
         <div className="page-hero__overlay" />
         <img
           src="/heroes/contact.svg"
@@ -351,5 +370,6 @@ export default function Contact() {
         </div>
       </section>
     </div>
+    </>
   )
 }
