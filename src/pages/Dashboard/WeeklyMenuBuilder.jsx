@@ -145,7 +145,7 @@ export default function WeeklyMenuBuilder() {
                 padding: '1rem',
                 borderBottom: `2px solid var(--color-border)`
               }}>
-                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>{tier.key}</h2>
+                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#fff' }}>{tier.key}</h2>
                 <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', opacity: 0.9 }}>{tier.desc}</p>
               </div>
 

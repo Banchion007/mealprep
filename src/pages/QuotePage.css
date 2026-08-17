@@ -145,7 +145,11 @@
 }
 
 .quote-form__btn {
-  padding: 0.85rem 1.5rem;
+  padding: 1rem 1.5rem;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   border-radius: var(--radius-md);
   font-weight: 600;
@@ -813,38 +817,251 @@
   gap: 1rem;
 }
 
+.quote-page__navigation .quote-form__btn {
+  flex: 1;
+  min-height: 48px;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
+  .quote-page {
+    padding-bottom: 6rem;
+  }
+
   .quote-progress {
-    padding: 1rem 1.5rem;
+    padding: 1rem 1.2rem;
+  }
+
+  .quote-progress__bar {
+    margin-bottom: 1rem;
   }
 
   .quote-progress__labels {
     grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+    font-size: 0.65rem;
+  }
+
+  .quote-container {
+    padding: 1.5rem 1.2rem;
   }
 
   .quote-step__title {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .quote-form {
+    gap: 1.2rem;
+  }
+
+  .quote-form__input,
+  .quote-form__select,
+  .quote-form__textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem 1rem;
+    min-height: 44px;
+  }
+
+  .quote-form__btn {
+    min-height: 48px;
+    font-size: 0.9rem;
+    padding: 0.85rem 1rem;
   }
 
   .tiers-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .tier-card {
     padding: 1rem;
   }
 
+  .tier-card__badge {
+    font-size: 0.65rem;
+  }
+
+  .tier-card__name {
+    font-size: 1.2rem;
+  }
+
   .menu-items-grid {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .menu-item {
+    padding: 0.65rem;
+    font-size: 0.9rem;
+  }
+
+  .upgrades-list {
+    gap: 0.8rem;
+  }
+
+  .upgrade-card {
+    padding: 0.85rem;
+    flex-direction: column;
+  }
+
+  .upgrade-card__left {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .upgrade-card__price {
+    width: 100%;
+    margin-left: 0;
+    text-align: right;
+    font-size: 0.9rem;
   }
 
   .review-container {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .review-sidebar {
     position: static;
     top: auto;
+  }
+
+  .review-summary {
+    padding: 1rem;
+  }
+
+  .quote-page__navigation {
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 0 1.2rem;
+  }
+
+  .quote-page__navigation .quote-form__btn {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .confirmation {
+    padding: 2rem 1.2rem;
+  }
+
+  .confirmation__title {
+    font-size: 1.4rem;
+  }
+
+  .confirmation__buttons {
+    gap: 0.8rem;
+  }
+
+  .confirmation__buttons .quote-form__btn {
+    min-height: 48px;
+  }
+
+  .menu-breakfast {
+    padding: 1rem;
+  }
+
+  .breakfast-option {
+    padding: 0.65rem;
+  }
+
+  .breakfast-option strong {
+    font-size: 0.9rem;
+  }
+
+  .breakfast-option p {
+    font-size: 0.85rem;
+  }
+
+  .breakfast-option small {
+    font-size: 0.75rem;
+  }
+
+  .review-detail {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .review-detail__label {
+    font-weight: 600;
+  }
+}
+
+/* Extra small phones (375px and below) */
+@media (max-width: 375px) {
+  .quote-container {
+    padding: 1rem 1rem;
+  }
+
+  .quote-progress {
+    padding: 0.75rem 1rem;
+  }
+
+  .quote-progress__labels {
+    font-size: 0.6rem;
+    gap: 0.2rem;
+  }
+
+  .quote-step__title {
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .quote-form__label {
+    font-size: 0.9rem;
+  }
+
+  .tier-card {
+    padding: 0.85rem;
+  }
+
+  .tier-card__name {
+    font-size: 1.1rem;
+  }
+
+  .tier-card__price-text {
+    font-size: 1.1rem;
+  }
+
+  .menu-item {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .upgrade-card {
+    padding: 0.75rem;
+  }
+
+  .upgrade-card__info {
+    flex: 1;
+  }
+
+  .upgrade-card__name {
+    font-size: 0.85rem;
+  }
+
+  .upgrade-card__meta {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .confirmation {
+    padding: 1.5rem 1rem;
+  }
+
+  .confirmation__icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .confirmation__title {
+    font-size: 1.25rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .confirmation__subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
   }
 }

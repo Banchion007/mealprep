@@ -1901,14 +1901,24 @@
   margin-right: 0.5rem;
 }
 
-.quote-detail-panel a {
+.quote-detail-panel a:not(.btn) {
   color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
 }
 
-.quote-detail-panel a:hover {
+.quote-detail-panel a:not(.btn):hover {
   text-decoration: underline;
+}
+
+.quote-detail-panel a.btn-primary {
+  color: #fff;
+  text-decoration: none;
+}
+
+.quote-detail-panel a.btn-primary:hover {
+  color: #fff;
+  text-decoration: none;
 }
 
 /* ── n8n header button ── */
