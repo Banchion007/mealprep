@@ -11,7 +11,9 @@ import Contact        from './pages/Contact'
 import Menu           from './pages/Menu'
 import MealPrep       from './pages/MealPrep/index'
 import QuotePage      from './pages/QuotePage'
+import QuoteSubmitted from './pages/QuoteSubmitted'
 import UnderConstruction from './pages/UnderConstruction'
+import NotFound       from './pages/NotFound'
 import DashboardLayout from './pages/Dashboard/index'
 import Account         from './pages/Account'
 import PrivacyPolicy   from './pages/PrivacyPolicy'
@@ -53,6 +55,7 @@ function Layout() {
           <Route path="/menu"         element={<Menu />} />
           <Route path="/meal-prep"    element={<MealPrepRoute />} />
           <Route path="/quote"        element={<QuotePage />} />
+          <Route path="/quote/submitted" element={<QuoteSubmitted />} />
           <Route path="/under-construction" element={<UnderConstruction />} />
           <Route path="/account"      element={<Account />} />
           <Route path="/privacy"      element={<PrivacyPolicy />} />
@@ -60,8 +63,8 @@ function Layout() {
           <Route path="/eula"         element={<EULA />} />
           <Route path="/dmca"         element={<DMCA />} />
           <Route path="/dashboard/*"  element={<DashboardLayout />} />
-          {/* Catch-all → home */}
-          <Route path="*"             element={<Landing />} />
+          {/* Catch-all → 404 */}
+          <Route path="*"             element={<NotFound />} />
         </Routes>
       </main>
       {!isDashboard && <Footer />}

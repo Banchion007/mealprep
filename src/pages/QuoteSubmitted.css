@@ -1,0 +1,130 @@
+.quote-submitted {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, rgba(35, 64, 142, 0.95) 100%);
+  color: #fff;
+}
+
+.quote-submitted__container {
+  text-align: center;
+  max-width: 600px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quote-submitted__icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.quote-submitted__title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 640px) {
+  .quote-submitted__title {
+    font-size: 1.5rem;
+  }
+}
+
+.quote-submitted__subtitle {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.quote-submitted__note {
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 4px solid var(--color-accent);
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.quote-submitted__buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .quote-submitted__buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .quote-submitted__buttons .btn {
+    width: 100%;
+  }
+}
+
+.quote-submitted__buttons .btn {
+  flex: 1;
+  min-width: 160px;
+}
+
+.quote-submitted__next-steps {
+  text-align: left;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2rem;
+  border-radius: 0.75rem;
+  backdrop-filter: blur(10px);
+}
+
+.quote-submitted__next-steps h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.quote-submitted__next-steps ul {
+  list-style: none;
+  padding: 0;
+}
+
+.quote-submitted__next-steps li {
+  padding: 0.75rem 0;
+  padding-left: 2rem;
+  position: relative;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+.quote-submitted__next-steps li:before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+  font-weight: bold;
+  font-size: 1.1rem;
+}

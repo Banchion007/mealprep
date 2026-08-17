@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { animate } from 'motion'
 import { Helmet } from 'react-helmet-async'
 import { TIERS, BREAKFAST_OPTIONS } from '../data/menuData'
@@ -534,6 +535,7 @@ function ConfirmationScreen({ formData }) {
 }
 
 export default function QuotePage() {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedTierId, setSelectedTierId] = useState(null);
   const [selections, setSelections] = useState({});
@@ -544,7 +546,6 @@ export default function QuotePage() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
 
   const tier = selectedTierId ? TIERS.find(t => t.id === selectedTierId) : null;
   const calculated = tier ? calculateQuoteRange(tier, upgrades, eventData.guestCountMin, eventData.guestCountMax) : null;
@@ -633,7 +634,8 @@ export default function QuotePage() {
         html: buildCustomerEmailHTML(formData.name, tier, selections, calculated)
       });
 
-      setSubmitted(true);
+      // Redirect to submission confirmation page for Google tracking
+      navigate('/quote/submitted');
     } catch (err) {
       console.error('Quote submission error:', err);
       setSubmitError('Something went wrong. Please try again or contact us at humblechefbrian@gmail.com');
@@ -641,10 +643,6 @@ export default function QuotePage() {
       setIsSubmitting(false);
     }
   };
-
-  if (submitted) {
-    return <ConfirmationScreen formData={formData} />;
-  }
 
   const meta = pageMetadata.quote;
 
