@@ -436,6 +436,7 @@ function QuotesTab({ quotes, setQuotes }) {
   const [expandedId, setExpandedId] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const STATUS_COLORS = {
     'new': { bg: '#DBEAFE', color: '#1D4ED8' },
@@ -462,6 +463,23 @@ function QuotesTab({ quotes, setQuotes }) {
   const handleNotesChange = async (quoteId, notes) => {
     await supabase.from('quotes').update({ admin_notes: notes }).eq('id', quoteId);
     setQuotes(prev => prev.map(q => q.id === quoteId ? { ...q, admin_notes: notes } : q));
+  };
+
+  const handleDeleteClick = (quoteId, quoteName) => {
+    setDeleteConfirm({ quoteId, quoteName });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm) return;
+    try {
+      await supabase.from('quotes').delete().eq('id', deleteConfirm.quoteId);
+      setQuotes(prev => prev.filter(q => q.id !== deleteConfirm.quoteId));
+      setDeleteConfirm(null);
+      setExpandedId(null);
+    } catch (err) {
+      console.error('Delete quote error:', err);
+      alert('Failed to delete quote. Please try again.');
+    }
   };
 
   const fmtDate = (d) => {
@@ -622,9 +640,18 @@ function QuotesTab({ quotes, setQuotes }) {
                           </section>
 
                           <section>
-                            <a href={`mailto:${quote.email}`} className="btn btn-primary" style={{ display: 'inline-block', marginTop: '0.5rem' }}>
-                              Send Email
-                            </a>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                              <a href={`mailto:${quote.email}`} className="btn btn-primary">
+                                Send Email
+                              </a>
+                              <button
+                                className="btn"
+                                onClick={() => handleDeleteClick(quote.id, quote.name)}
+                                style={{ background: '#FEE2E2', color: '#DC2626', border: '1px solid #FECACA' }}
+                              >
+                                Delete Quote
+                              </button>
+                            </div>
                           </section>
                         </div>
                       </div>
@@ -636,6 +663,34 @@ function QuotesTab({ quotes, setQuotes }) {
           </tbody>
         </table>
       </div>
+
+      {deleteConfirm && (
+        <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h3 style={{ marginBottom: '1rem', color: 'var(--color-primary)' }}>
+              Delete Quote?
+            </h3>
+            <p style={{ marginBottom: '1.5rem', color: 'var(--color-text-muted)' }}>
+              Are you sure you want to delete the quote from <strong>{deleteConfirm.quoteName}</strong>? This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button
+                className="btn btn-outline"
+                onClick={() => setDeleteConfirm(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn"
+                onClick={handleConfirmDelete}
+                style={{ background: '#DC2626', color: '#fff', border: 'none' }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
