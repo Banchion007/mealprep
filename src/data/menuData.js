@@ -273,6 +273,18 @@ export const TIERS = [
       }
     },
     availableUpgrades: []
+  },
+  {
+    id: 8,
+    name: "Custom",
+    tagline: "Design your perfect menu",
+    pricePerPersonLow: null,
+    pricePerPersonHigh: null,
+    serviceStyle: "Work directly with our Executive Chef to plan and design exactly what you want. We'll customize every detail to match your event, preferences, and budget.",
+    guestMinimum: null,
+    highlights: ["Consult with Executive Chef", "Fully customizable menu", "Flexible pricing", "Personalized service planning"],
+    courses: {},
+    availableUpgrades: []
   }
 ];
 

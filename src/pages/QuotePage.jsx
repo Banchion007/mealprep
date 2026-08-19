@@ -119,32 +119,45 @@ function Step1EventDetails({ data, onChange, onNext }) {
 
 function TierCard({ tier, isSelected, onSelect }) {
   const isPremium = tier.id >= 6;
+  const isCustom = tier.id === 8;
+
   return (
     <div
-      className={`tier-card${tier.id === 7 ? ' tier-card--opulence' : tier.id === 6 ? ' tier-card--elegance' : ''}${isSelected ? ' selected' : ''}`}
+      className={`tier-card${tier.id === 7 ? ' tier-card--opulence' : tier.id === 6 ? ' tier-card--elegance' : isCustom ? ' tier-card--custom' : ''}${isSelected ? ' selected' : ''}`}
       onClick={onSelect}
     >
       {tier.id === 7 && <div className="tier-card__badge">Most Premium</div>}
       {tier.id === 6 && <div className="tier-card__badge">Popular for Events</div>}
+      {isCustom && <div className="tier-card__badge">Design It Your Way</div>}
 
       <div className="tier-card__header">
         <h3 className="tier-card__name">{tier.name}</h3>
         <p className="tier-card__tagline">{tier.tagline}</p>
       </div>
 
-      <div className="tier-card__price">
-        <span className="tier-card__price-text">${tier.pricePerPersonLow}–${tier.pricePerPersonHigh}</span>
-        <span className="tier-card__price-label">per person</span>
-      </div>
+      {!isCustom && (
+        <div className="tier-card__price">
+          <span className="tier-card__price-text">${tier.pricePerPersonLow}–${tier.pricePerPersonHigh}</span>
+          <span className="tier-card__price-label">per person</span>
+        </div>
+      )}
 
-      <div className="tier-card__details">
-        <p className="tier-card__minimum">
-          {tier.guestMinimum ? `Minimum ${tier.guestMinimum} guests` : 'No minimum'}
-        </p>
-      </div>
+      {isCustom && (
+        <div className="tier-card__price tier-card__price--custom">
+          <p className="tier-card__custom-text">{tier.serviceStyle}</p>
+        </div>
+      )}
+
+      {!isCustom && (
+        <div className="tier-card__details">
+          <p className="tier-card__minimum">
+            {tier.guestMinimum ? `Minimum ${tier.guestMinimum} guests` : 'No minimum'}
+          </p>
+        </div>
+      )}
 
       <div className="tier-card__highlights">
-        {tier.highlights.slice(0, isPremium ? 5 : 3).map((h, i) => (
+        {tier.highlights.slice(0, isPremium || isCustom ? 5 : 3).map((h, i) => (
           <div key={i} className="tier-card__highlight">
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <polyline points="20 6 9 17 4 12"/>
@@ -161,10 +174,15 @@ function TierCard({ tier, isSelected, onSelect }) {
   );
 }
 
-function Step2ChooseTier({ selectedTierId, onSelect, onNext }) {
+function Step2ChooseTier({ selectedTierId, onSelect, onNext, onJumpToStep }) {
   const handleSelect = (tierId) => {
     onSelect(tierId);
-    setTimeout(onNext, 400);
+    const tier = TIERS.find(t => t.id === tierId);
+    if (tier && tier.id === 8) {
+      setTimeout(() => onJumpToStep(4), 400);
+    } else {
+      setTimeout(onNext, 400);
+    }
   };
 
   const sortedTiers = [...TIERS].reverse();
@@ -350,6 +368,7 @@ function Step5YourInfo({ formData, onChange, errors }) {
             placeholder="Tell us about your event, dietary restrictions, special requests…"
             rows="5"
           />
+          <p className="quote-form__hint">Please include a brief explanation of what you're looking for — this helps us create the perfect menu for your event.</p>
         </div>
       </div>
     </StepTransition>
@@ -679,6 +698,7 @@ export default function QuotePage() {
             selectedTierId={selectedTierId}
             onSelect={setSelectedTierId}
             onNext={() => setCurrentStep(2)}
+            onJumpToStep={(step) => setCurrentStep(step)}
           />
         )}
 
