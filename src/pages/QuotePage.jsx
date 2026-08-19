@@ -637,6 +637,14 @@ export default function QuotePage() {
     });
   }, []);
 
+  const handleBack = useCallback(() => {
+    if (currentStep === 4 && selectedTierId === 8) {
+      setCurrentStep(1);
+    } else {
+      setCurrentStep(Math.max(0, currentStep - 1));
+    }
+  }, [currentStep, selectedTierId]);
+
   const validateStep5 = () => {
     const stepErrors = {};
     if (!formData.name.trim()) stepErrors.name = 'Name is required';
@@ -798,7 +806,7 @@ export default function QuotePage() {
       <div className="quote-page__navigation">
         <button
           className="quote-form__btn quote-form__btn--outline"
-          onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+          onClick={handleBack}
           disabled={currentStep === 0}
         >
           Back
