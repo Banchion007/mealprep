@@ -521,6 +521,11 @@ function Step6ReviewSubmit({ tier, selections, upgrades, guestCountMin, guestCou
 }
 
 function ConfirmationScreen({ formData }) {
+  const handleStartNewQuote = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    window.location.reload();
+  };
+
   return (
     <StepTransition step={7}>
       <div className="confirmation">
@@ -543,7 +548,7 @@ function ConfirmationScreen({ formData }) {
           </button>
           <button
             className="quote-form__btn quote-form__btn--outline"
-            onClick={() => window.location.reload()}
+            onClick={handleStartNewQuote}
           >
             Start a New Quote
           </button>
@@ -553,21 +558,54 @@ function ConfirmationScreen({ formData }) {
   );
 }
 
+const STORAGE_KEY = 'hc_quote_wizard_state';
+
+function getInitialState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Failed to load quote state:', e);
+  }
+  return null;
+}
+
 export default function QuotePage() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [selectedTierId, setSelectedTierId] = useState(null);
-  const [selections, setSelections] = useState({});
-  const [upgrades, setUpgrades] = useState([]);
-  const [breakfastSelected, setBreakfastSelected] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
-  const [eventData, setEventData] = useState({ guestCountMin: null, guestCountMax: null, eventType: '', eventDate: '' });
+  const initialState = getInitialState();
+
+  const [currentStep, setCurrentStep] = useState(initialState?.currentStep ?? 0);
+  const [selectedTierId, setSelectedTierId] = useState(initialState?.selectedTierId ?? null);
+  const [selections, setSelections] = useState(initialState?.selections ?? {});
+  const [upgrades, setUpgrades] = useState(initialState?.upgrades ?? []);
+  const [breakfastSelected, setBreakfastSelected] = useState(initialState?.breakfastSelected ?? false);
+  const [formData, setFormData] = useState(initialState?.formData ?? { name: '', email: '', phone: '', message: '' });
+  const [eventData, setEventData] = useState(initialState?.eventData ?? { guestCountMin: null, guestCountMax: null, eventType: '', eventDate: '' });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
   const tier = selectedTierId ? TIERS.find(t => t.id === selectedTierId) : null;
   const calculated = tier ? calculateQuoteRange(tier, upgrades, eventData.guestCountMin, eventData.guestCountMax) : null;
+
+  React.useEffect(() => {
+    const state = {
+      currentStep,
+      selectedTierId,
+      selections,
+      upgrades,
+      breakfastSelected,
+      formData,
+      eventData
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.error('Failed to save quote state:', e);
+    }
+  }, [currentStep, selectedTierId, selections, upgrades, breakfastSelected, formData, eventData]);
 
   const handleNext = useCallback(() => {
     let stepErrors = {};
@@ -653,7 +691,7 @@ export default function QuotePage() {
         html: buildCustomerEmailHTML(formData.name, tier, selections, calculated)
       });
 
-      // Redirect to submission confirmation page for Google tracking
+      localStorage.removeItem(STORAGE_KEY);
       navigate('/quote/submitted');
     } catch (err) {
       console.error('Quote submission error:', err);
