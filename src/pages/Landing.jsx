@@ -7,6 +7,8 @@ import { Helmet } from 'react-helmet-async'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import TiltedCard from '../components/TiltedCard'
 import { pageMetadata, getCanonicalUrl, SITE_NAME, DEFAULT_OG_IMAGE, getSchemaOrgData } from '../lib/seo'
+import { supabase } from '../lib/supabase'
+import { fetchGalleryGroups, getGalleryImageUrl } from '../utils/galleryUtils'
 import './Landing.css'
 
 /* ---- Data ---- */
@@ -186,6 +188,8 @@ export default function Landing() {
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(true)
   const [showScrollIndicator, setShowScrollIndicator] = useState(true)
+  const [galleryImages, setGalleryImages] = useState([])
+  const [galleryLoading, setGalleryLoading] = useState(true)
   const scrollIndicatorRef = useRef(null)
 
   const updateScrollButtons = useCallback(() => {
@@ -239,6 +243,28 @@ export default function Landing() {
       window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleScroll)
     }
+  }, [])
+
+  useEffect(() => {
+    const loadGalleryImages = async () => {
+      try {
+        setGalleryLoading(true)
+        const groups = await fetchGalleryGroups(supabase)
+        if (groups.length > 0) {
+          const latestGroup = groups[0]
+          const imageUrls = latestGroup.files.slice(0, 4).map(file =>
+            getGalleryImageUrl(supabase, latestGroup.year, latestGroup.quarter, file.name)
+          )
+          setGalleryImages(imageUrls)
+        }
+      } catch (error) {
+        console.error('Failed to load gallery images:', error)
+      } finally {
+        setGalleryLoading(false)
+      }
+    }
+
+    loadGalleryImages()
   }, [])
 
   const meta = pageMetadata.home
@@ -444,6 +470,54 @@ export default function Landing() {
               </button>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Gallery Preview ── */}
+      <section className="section gallery-preview">
+        <div className="container">
+          <div className="gallery-preview__header fade-up">
+            <p className="section-label">Our Work</p>
+            <h2 className="section-title">See Our Craftsmanship</h2>
+            <p className="section-sub">Beautiful presentations and exquisite cuisine for every occasion.</p>
+          </div>
+
+          {galleryLoading ? (
+            <div className="gallery-preview__loading">
+              <div className="gallery-preview__skeleton gallery-preview__skeleton--1" />
+              <div className="gallery-preview__skeleton gallery-preview__skeleton--2" />
+              <div className="gallery-preview__skeleton gallery-preview__skeleton--3" />
+              <div className="gallery-preview__skeleton gallery-preview__skeleton--4" />
+            </div>
+          ) : galleryImages.length > 0 ? (
+            <>
+              <div className="gallery-preview__grid">
+                {galleryImages.map((imageUrl, idx) => (
+                  <Link
+                    key={idx}
+                    to="/gallery"
+                    className="gallery-preview__item fade-up"
+                  >
+                    <div className="gallery-preview__photo-wrapper">
+                      <img
+                        src={imageUrl}
+                        alt="Gallery preview"
+                        className="gallery-preview__photo"
+                      />
+                      <div className="gallery-preview__overlay">
+                        <span className="gallery-preview__view-text">View Gallery</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <div className="gallery-preview__cta fade-up">
+                <Link to="/gallery" className="btn btn-primary btn-lg">
+                  Explore Full Gallery
+                </Link>
+              </div>
+            </>
+          ) : null}
         </div>
       </section>
 

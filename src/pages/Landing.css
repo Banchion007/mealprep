@@ -797,6 +797,123 @@
 .testimonial-card__role { font-size: 0.75rem; color: var(--color-text-light); }
 .stars { display: flex; gap: 2px; margin-bottom: 0.2rem; }
 
+/* ── Gallery Preview ── */
+.gallery-preview {
+  background: #fafafa;
+  padding: 5rem 1.5rem;
+}
+
+.gallery-preview__header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.gallery-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 1024px) {
+  .gallery-preview__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .gallery-preview__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gallery-preview__item {
+  display: block;
+  text-decoration: none;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.gallery-preview__photo-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  aspect-ratio: 1;
+  background: #e8e8e8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.gallery-preview__item:hover .gallery-preview__photo-wrapper {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+}
+
+.gallery-preview__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s ease;
+}
+
+.gallery-preview__item:hover .gallery-preview__photo {
+  transform: scale(1.05);
+}
+
+.gallery-preview__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(35, 64, 142, 0.85);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.gallery-preview__item:hover .gallery-preview__overlay {
+  opacity: 1;
+}
+
+.gallery-preview__view-text {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.gallery-preview__loading {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.gallery-preview__skeleton {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.gallery-preview__cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
 /* ── Contact CTA ── */
 .contact-cta { background: oklch(0.972 0.005 282.66); }
 .contact-cta__inner {
