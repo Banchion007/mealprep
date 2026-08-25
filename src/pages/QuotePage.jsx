@@ -2,14 +2,14 @@ import React, { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { animate } from 'motion'
 import { Helmet } from 'react-helmet-async'
-import { TIERS, BREAKFAST_OPTIONS } from '../data/menuData'
+import { TIERS, COMBOS, getCombosByTier } from '../data/menuData'
 import { calculateQuoteRange, formatCurrency, formatRange } from '../utils/quoteCalculations'
 import { supabase } from '../lib/supabase'
 import { sendEmailViaResend } from '../lib/resendEmail'
 import { pageMetadata, getCanonicalUrl, SITE_NAME, DEFAULT_OG_IMAGE, getSchemaOrgData } from '../lib/seo'
 import './QuotePage.css'
 
-const STEPS = ['Your Event', 'Choose Tier', 'Build Your Menu', 'Add-Ons', 'Your Info', 'Review & Submit'];
+const STEPS = ['Your Event', 'Choose Tier', 'Build Your Menu', 'Your Info', 'Review & Submit'];
 const EVENT_TYPES = ['Wedding', 'Corporate Event', 'Birthday / Celebration', 'Holiday Party', 'Graduation', 'Casual Gathering', 'Other'];
 
 function ProgressBar({ currentStep }) {
@@ -44,7 +44,127 @@ function StepTransition({ step, children }) {
   return <div ref={ref} className="quote-step">{children}</div>;
 }
 
-function Step1EventDetails({ data, onChange, onNext }) {
+function SmallGroupModal({ onCustom, onContinue }) {
+  return (
+    <div className="quote-modal-overlay" onClick={onContinue}>
+      <div className="quote-modal" onClick={e => e.stopPropagation()}>
+        <h2>Considering a smaller gathering?</h2>
+        <p>
+          For groups under 30, a custom menu is often a better fit — we can tailor everything
+          specifically to your event without locking into a set package.
+        </p>
+        <div className="quote-modal__buttons">
+          <button className="quote-form__btn quote-form__btn--outline" onClick={onContinue}>
+            No thanks, continue with standard options
+          </button>
+          <button className="quote-form__btn quote-form__btn--primary" onClick={onCustom}>
+            Yes, I'd like a custom menu
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OpulenceBrochure({ onEventDescriptionChange, eventDescription }) {
+  return (
+    <StepTransition step={2}>
+      <h2 className="quote-step__title">Opulence — The Ultimate Experience</h2>
+
+      <div className="opulence-brochure">
+        <div className="opulence-section">
+          <h3>Every detail is tailored specifically to your event.</h3>
+          <p>
+            From the moment you reach out, our Executive Chef works directly with you to craft
+            a menu that tells your story. This isn't a package — it's a collaboration.
+          </p>
+        </div>
+
+        <div className="opulence-highlights">
+          <div className="opulence-highlight">
+            <h4>Custom Menu Development</h4>
+            <p>Work directly with our Executive Chef to design every course and element.</p>
+          </div>
+          <div className="opulence-highlight">
+            <h4>Full On-Site Staffing</h4>
+            <p>Dedicated chef, full waitstaff (1 per 10 guests), bartender, and event coordinator.</p>
+          </div>
+          <div className="opulence-highlight">
+            <h4>Multi-Course Plated Service</h4>
+            <p>Served on fine China with real silverware and glassware.</p>
+          </div>
+          <div className="opulence-highlight">
+            <h4>Premium & Wagyu Proteins</h4>
+            <p>Only the finest selections as standard.</p>
+          </div>
+          <div className="opulence-highlight">
+            <h4>Amuse-Bouche by the Chef</h4>
+            <p>A custom bite created fresh for your event.</p>
+          </div>
+          <div className="opulence-highlight">
+            <h4>Signature Mocktails</h4>
+            <p>Custom-paired to complement your menu.</p>
+          </div>
+          <div className="opulence-highlight">
+            <h4>White-Glove Presentation</h4>
+            <p>Premium table styling and meticulous attention to every detail.</p>
+          </div>
+        </div>
+
+        <div className="quote-form">
+          <div className="quote-form__group">
+            <label className="quote-form__label">Tell us about your event *</label>
+            <textarea
+              className="quote-form__textarea"
+              value={eventDescription || ''}
+              onChange={e => onEventDescriptionChange(e.target.value)}
+              placeholder="Share as much as you'd like — the date, the occasion, the number of guests, the vibe you're going for, any dietary needs, and anything else that matters to you. The more you share, the better we can prepare."
+              rows="6"
+            />
+            <p className="quote-form__hint">This helps us understand your vision so we can create something extraordinary.</p>
+          </div>
+        </div>
+      </div>
+    </StepTransition>
+  );
+}
+
+function TierCard({ tier, isSelected, onSelect }) {
+  const showPrice = tier.pricePerPersonLow !== null;
+
+  return (
+    <div
+      className={`tier-card tier-card--${tier.key}${isSelected ? ' selected' : ''}`}
+      onClick={onSelect}
+    >
+      <div className="tier-card__header">
+        <h3 className="tier-card__name">{tier.name}</h3>
+        <p className="tier-card__tagline">{tier.tagline}</p>
+      </div>
+
+      {showPrice && (
+        <div className="tier-card__price">
+          <span className="tier-card__price-text">${tier.pricePerPersonLow}–${tier.pricePerPersonHigh}</span>
+          <span className="tier-card__price-label">per person</span>
+        </div>
+      )}
+
+      {!showPrice && (
+        <div className="tier-card__price tier-card__price--custom">
+          <p className="tier-card__custom-text">Custom pricing — tailored to your event</p>
+        </div>
+      )}
+
+      <p className="tier-card__description">{tier.description}</p>
+
+      <button className="tier-card__btn">
+        {isSelected ? '✓ Selected' : 'Select This Option'}
+      </button>
+    </div>
+  );
+}
+
+function Step1EventDetails({ data, onChange, isNonprofit, setIsNonprofit, onNext }) {
   const errors = {};
   if (!data.guestCountMin || data.guestCountMin < 1) errors.guestCountMin = 'Minimum guests required (at least 1)';
   if (!data.guestCountMax || data.guestCountMax < data.guestCountMin) errors.guestCountMax = 'Maximum guests must be >= minimum';
@@ -105,93 +225,40 @@ function Step1EventDetails({ data, onChange, onNext }) {
           />
         </div>
 
+        <div className="quote-form__group">
+          <label className="quote-form__checkbox-label">
+            <input
+              type="checkbox"
+              checked={isNonprofit}
+              onChange={e => setIsNonprofit(e.target.checked)}
+            />
+            <span>This event is for a non-profit organization</span>
+          </label>
+        </div>
+
         <button
           className="quote-form__btn quote-form__btn--primary"
           onClick={onNext}
           disabled={!canProceed}
         >
-          Next: Choose Your Tier
+          Next: Choose Your Option
         </button>
       </div>
     </StepTransition>
   );
 }
 
-function TierCard({ tier, isSelected, onSelect }) {
-  const isPremium = tier.id >= 6;
-  const isCustom = tier.id === 8;
-
-  return (
-    <div
-      className={`tier-card${tier.id === 7 ? ' tier-card--opulence' : tier.id === 6 ? ' tier-card--elegance' : isCustom ? ' tier-card--custom' : ''}${isSelected ? ' selected' : ''}`}
-      onClick={onSelect}
-    >
-      {tier.id === 7 && <div className="tier-card__badge">Most Premium</div>}
-      {tier.id === 6 && <div className="tier-card__badge">Popular for Events</div>}
-      {isCustom && <div className="tier-card__badge">Design It Your Way</div>}
-
-      <div className="tier-card__header">
-        <h3 className="tier-card__name">{tier.name}</h3>
-        <p className="tier-card__tagline">{tier.tagline}</p>
-      </div>
-
-      {!isCustom && (
-        <div className="tier-card__price">
-          <span className="tier-card__price-text">${tier.pricePerPersonLow}–${tier.pricePerPersonHigh}</span>
-          <span className="tier-card__price-label">per person</span>
-        </div>
-      )}
-
-      {isCustom && (
-        <div className="tier-card__price tier-card__price--custom">
-          <p className="tier-card__custom-text">{tier.serviceStyle}</p>
-        </div>
-      )}
-
-      {!isCustom && (
-        <div className="tier-card__details">
-          <p className="tier-card__minimum">
-            {tier.guestMinimum ? `Minimum ${tier.guestMinimum} guests` : 'No minimum'}
-          </p>
-        </div>
-      )}
-
-      <div className="tier-card__highlights">
-        {tier.highlights.slice(0, isPremium || isCustom ? 5 : 3).map((h, i) => (
-          <div key={i} className="tier-card__highlight">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            <span>{h}</span>
-          </div>
-        ))}
-      </div>
-
-      <button className="tier-card__btn">
-        {isSelected ? '✓ Selected' : 'Select This Tier'}
-      </button>
-    </div>
-  );
-}
-
-function Step2ChooseTier({ selectedTierId, onSelect, onNext, onJumpToStep }) {
+function Step2ChooseTier({ selectedTierId, onSelect, onNext }) {
   const handleSelect = (tierId) => {
     onSelect(tierId);
-    const tier = TIERS.find(t => t.id === tierId);
-    if (tier && tier.id === 8) {
-      setTimeout(() => onJumpToStep(4), 400);
-    } else {
-      setTimeout(onNext, 400);
-    }
+    setTimeout(onNext, 400);
   };
-
-  const sortedTiers = [...TIERS].reverse();
 
   return (
     <StepTransition step={2}>
-      <h2 className="quote-step__title">Choose Your Tier</h2>
+      <h2 className="quote-step__title">Choose Your Option</h2>
       <div className="tiers-grid">
-        {sortedTiers.map(tier => (
+        {TIERS.map(tier => (
           <TierCard
             key={tier.id}
             tier={tier}
@@ -204,124 +271,123 @@ function Step2ChooseTier({ selectedTierId, onSelect, onNext, onJumpToStep }) {
   );
 }
 
-function Step3BuildMenu({ selectedTierId, selections, onSelectItem, addBreakfast, breakfastSelected }) {
-  const tier = TIERS.find(t => t.id === selectedTierId);
-  if (!tier) return null;
+function ComboCard({ combo, isSelected, onSelect }) {
+  return (
+    <div
+      className={`combo-card${isSelected ? ' selected' : ''}`}
+      onClick={onSelect}
+    >
+      <div className="combo-card__header">
+        <h4 className="combo-card__name">{combo.name}</h4>
+        {combo.tier === 'splurge' && <span className="combo-card__badge">Splurge</span>}
+      </div>
+      <p className="combo-card__description">{combo.description}</p>
 
-  const courseKeys = Object.keys(tier.courses);
+      <div className="combo-card__components">
+        {combo.components.map((comp, i) => (
+          <div key={i} className="combo-component">
+            <span className="combo-component__type">{comp.type}:</span>
+            <span className="combo-component__name">{comp.name}</span>
+          </div>
+        ))}
+      </div>
+
+      <button className="combo-card__btn">
+        {isSelected ? '✓ Selected' : 'Select'}
+      </button>
+    </div>
+  );
+}
+
+function Step3BuildMenu({ selectedTierId, selectedCombos, onToggleCombo, calculated, onUpgradeClick }) {
+  const availableCombos = getCombosByTier(selectedTierId);
+  if (!availableCombos.length) return null;
+
+  const standardCombos = availableCombos.filter(c => c.tier === 'standard');
+  const splurgeCombos = availableCombos.filter(c => c.tier === 'splurge');
+
+  const tierData = TIERS.find(t => t.id === selectedTierId);
+  const isSplurge = tierData.key === 'splurge';
 
   return (
     <StepTransition step={3}>
       <h2 className="quote-step__title">Build Your Menu</h2>
 
-      <div className="menu-builder">
-        {courseKeys.map(courseKey => {
-          const course = tier.courses[courseKey];
-          const selected = selections[courseKey] || [];
+      <div className="combo-selector">
+        <div className="combo-section">
+          <h3 className="combo-section__title">All Options</h3>
+          <div className="combo-grid">
+            {standardCombos.map(combo => (
+              <ComboCard
+                key={combo.id}
+                combo={combo}
+                isSelected={selectedCombos.some(c => c.id === combo.id)}
+                onSelect={() => onToggleCombo(combo)}
+              />
+            ))}
+          </div>
+        </div>
 
-          return (
-            <div key={courseKey} className="menu-course">
-              <div className="menu-course__header">
-                <h3 className="menu-course__title">{course.label}</h3>
-                <p className="menu-course__limit">{course.chooseCount}</p>
-              </div>
-
-              <div className="menu-items-grid">
-                {course.items.map((item, i) => (
-                  <label key={i} className="menu-item">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(item)}
-                      onChange={e => {
-                        if (e.target.checked) {
-                          onSelectItem(courseKey, [...selected, item]);
-                        } else {
-                          onSelectItem(courseKey, selected.filter(s => s !== item));
-                        }
-                      }}
-                    />
-                    <span className="menu-item__label">{item}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-
-        <div className="menu-breakfast">
-          <h3 className="menu-breakfast__title">Add Breakfast Items?</h3>
-          <label className="menu-breakfast__toggle">
-            <input
-              type="checkbox"
-              checked={breakfastSelected}
-              onChange={e => addBreakfast(e.target.checked)}
-            />
-            <span>Include breakfast options</span>
-          </label>
-
-          {breakfastSelected && (
-            <div className="menu-breakfast__options">
-              {BREAKFAST_OPTIONS.filter(b => b.availableTiers.includes(selectedTierId)).map(option => (
-                <div key={option.id} className="breakfast-option">
-                  <strong>{option.name}</strong>
-                  <p>{option.description}</p>
-                  <small>{option.serviceNote}</small>
-                </div>
+        {splurgeCombos.length > 0 && isSplurge && (
+          <div className="combo-section">
+            <h3 className="combo-section__title combo-section__title--splurge">Premium Options</h3>
+            <div className="combo-grid">
+              {splurgeCombos.map(combo => (
+                <ComboCard
+                  key={combo.id}
+                  combo={combo}
+                  isSelected={selectedCombos.some(c => c.id === combo.id)}
+                  onSelect={() => onToggleCombo(combo)}
+                />
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {!isSplurge && splurgeCombos.length > 0 && (
+          <div className="combo-upsell">
+            <p><strong>Want more options?</strong> Upgrade to Splurge a Little to unlock premium combo options and elevated menu items.</p>
+            <button className="quote-form__btn quote-form__btn--outline" onClick={onUpgradeClick}>
+              Upgrade my tier
+            </button>
+          </div>
+        )}
+
+        {selectedCombos.length > 0 && (
+          <div className="combo-pricing">
+            <h4>Your Selections</h4>
+            <p className="combo-count">{selectedCombos.length} combo{selectedCombos.length !== 1 ? 's' : ''} selected</p>
+            {selectedCombos.length > 1 && (
+              <p className="combo-multiplier-note">
+                Adding {selectedCombos.length - 1} additional combo{selectedCombos.length > 2 ? 's adds' : ' adds'} approximately +{((selectedCombos.length - 1) * 50)}% per person to your estimate.
+              </p>
+            )}
+            {selectedCombos.length >= 4 && (
+              <p className="combo-note">For events with 4+ food stations, we recommend reaching out directly so we can plan logistics properly.</p>
+            )}
+            {calculated.showPrice && (
+              <div className="estimated-price">
+                <p><strong>Estimated per person:</strong> ${calculated.perPersonLow}–${calculated.perPersonHigh}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </StepTransition>
   );
 }
 
-function Step4AddOns({ selectedTierId, upgrades, onToggleUpgrade }) {
+function Step4YourInfo({ selectedTierId, formData, onChange, errors, eventDescription }) {
   const tier = TIERS.find(t => t.id === selectedTierId);
-  if (!tier || !tier.availableUpgrades.length) return null;
+  const isCustom = tier.key === 'custom';
 
   return (
     <StepTransition step={4}>
-      <h2 className="quote-step__title">Add-Ons & Upgrades</h2>
-
-      <div className="upgrades-list">
-        {tier.availableUpgrades.map(upgrade => {
-          const isSelected = upgrades.some(u => u.id === upgrade.id);
-
-          return (
-            <div key={upgrade.id} className={`upgrade-card${isSelected ? ' selected' : ''}`}>
-              <div className="upgrade-card__left">
-                <label className="upgrade-card__checkbox">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => onToggleUpgrade(upgrade)}
-                  />
-                  <span className="checkmark" />
-                </label>
-                <div className="upgrade-card__info">
-                  <h4 className="upgrade-card__name">{upgrade.name}</h4>
-                  <div className="upgrade-card__meta">
-                    <span className="upgrade-card__type">{upgrade.type === 'protein' ? 'Protein' : 'Service'}</span>
-                    {upgrade.unit && <span className="upgrade-card__unit">{upgrade.unit}</span>}
-                  </div>
-                </div>
-              </div>
-              <div className="upgrade-card__price">
-                ${upgrade.priceAddLow}–${upgrade.priceAddHigh}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </StepTransition>
-  );
-}
-
-function Step5YourInfo({ formData, onChange, errors }) {
-  return (
-    <StepTransition step={5}>
       <h2 className="quote-step__title">Your Information</h2>
+
+      {isCustom && (
+        <p className="quote-form__intro">Tell us what you have in mind and we'll put together something just for you.</p>
+      )}
 
       <div className="quote-form">
         <div className="quote-form__group">
@@ -359,28 +425,35 @@ function Step5YourInfo({ formData, onChange, errors }) {
           />
         </div>
 
-        <div className="quote-form__group">
-          <label className="quote-form__label">Message / Special Requests</label>
-          <textarea
-            className="quote-form__textarea"
-            value={formData.message || ''}
-            onChange={e => onChange({ message: e.target.value })}
-            placeholder="Tell us about your event, dietary restrictions, special requests…"
-            rows="5"
-          />
-          <p className="quote-form__hint">Please include a brief explanation of what you're looking for — this helps us create the perfect menu for your event.</p>
-        </div>
+        {!eventDescription && (
+          <div className="quote-form__group">
+            <label className="quote-form__label">Message / Special Requests</label>
+            <textarea
+              className="quote-form__textarea"
+              value={formData.message || ''}
+              onChange={e => onChange({ message: e.target.value })}
+              placeholder="Tell us about your event, dietary restrictions, special requests…"
+              rows="5"
+            />
+            <p className="quote-form__hint">Please include a brief explanation of what you're looking for — this helps us create the perfect menu for your event.</p>
+          </div>
+        )}
       </div>
     </StepTransition>
   );
 }
 
-function ReviewSummary({ tier, selections, upgrades, guestCountMin, guestCountMax, formData, calculated }) {
+function ReviewSummary({ tier, selectedCombos, guestCountMin, guestCountMax, calculated, isOpulence }) {
   return (
     <div className="review-summary">
       <div className="review-summary__section">
-        <h4>Tier & Pricing</h4>
-        <p><strong>{tier.name}</strong> · ${tier.pricePerPersonLow}–${tier.pricePerPersonHigh}/person</p>
+        <h4>Option & Pricing</h4>
+        <p><strong>{tier.name}</strong></p>
+        {calculated.showPrice ? (
+          <p>${calculated.perPersonLow}–${calculated.perPersonHigh}/person</p>
+        ) : (
+          <p><em>Custom pricing — tailored to your event</em></p>
+        )}
       </div>
 
       <div className="review-summary__section">
@@ -388,39 +461,57 @@ function ReviewSummary({ tier, selections, upgrades, guestCountMin, guestCountMa
         <p>{guestCountMin}–{guestCountMax} guests</p>
       </div>
 
-      <div className="review-summary__section">
-        <h4>Estimated Total</h4>
-        <p className="review-summary__total">{formatRange(calculated.totalLow, calculated.totalHigh)}</p>
-      </div>
-
-      {upgrades.length > 0 && (
+      {selectedCombos.length > 0 && !isOpulence && (
         <div className="review-summary__section">
-          <h4>{upgrades.length} Add-On{upgrades.length !== 1 ? 's' : ''}</h4>
+          <h4>Combos ({selectedCombos.length})</h4>
           <ul>
-            {upgrades.map((u, i) => <li key={i}>{u.name}</li>)}
+            {selectedCombos.map((c, i) => <li key={i}>{c.name}</li>)}
           </ul>
+        </div>
+      )}
+
+      {calculated.showPrice && (
+        <div className="review-summary__section">
+          <h4>Estimated Total</h4>
+          <p className="review-summary__total">${calculated.totalLow}–${calculated.totalHigh}</p>
         </div>
       )}
     </div>
   );
 }
 
-function Step6ReviewSubmit({ tier, selections, upgrades, guestCountMin, guestCountMax, formData, calculated, onSubmit, isSubmitting, submitError }) {
+function Step5ReviewSubmit({ tier, selectedCombos, guestCountMin, guestCountMax, formData, calculated, eventDescription, isNonprofit, onSubmit, isSubmitting, submitError }) {
+  const isOpulence = tier.key === 'opulence';
+  const isCustom = tier.key === 'custom';
+
   return (
-    <StepTransition step={6}>
+    <StepTransition step={5}>
       <h2 className="quote-step__title">Review & Submit</h2>
 
       <div className="review-container">
         <div className="review-main">
+          {isNonprofit && (
+            <section className="review-section review-section--highlight">
+              <p><strong>✓ Non-profit event</strong> — We'll handle pricing considerations.</p>
+            </section>
+          )}
+
+          {isOpulence && (
+            <section className="review-section">
+              <h3>Your Event</h3>
+              <p>{eventDescription}</p>
+            </section>
+          )}
+
           <section className="review-section">
             <h3>Event Details</h3>
             <div className="review-detail">
-              <span className="review-detail__label">Event Type:</span>
-              <span>{selections.eventType || '—'}</span>
+              <span className="review-detail__label">Type:</span>
+              <span>{formData.eventType || '—'}</span>
             </div>
             <div className="review-detail">
               <span className="review-detail__label">Date:</span>
-              <span>{selections.eventDate || '(Not specified)'}</span>
+              <span>{formData.eventDate || '(Not specified)'}</span>
             </div>
             <div className="review-detail">
               <span className="review-detail__label">Guests:</span>
@@ -429,39 +520,23 @@ function Step6ReviewSubmit({ tier, selections, upgrades, guestCountMin, guestCou
           </section>
 
           <section className="review-section">
-            <h3>Selected Tier</h3>
-            <div className="review-detail">
-              <span className="review-detail__label">{tier.name}</span>
-              <span>${tier.pricePerPersonLow}–${tier.pricePerPersonHigh}/person</span>
-            </div>
-            <p className="review-section__desc">{tier.serviceStyle}</p>
+            <h3>Option</h3>
+            <p><strong>{tier.name}</strong></p>
           </section>
 
-          <section className="review-section">
-            <h3>Your Menu</h3>
-            {Object.entries(selections)
-              .filter(([k]) => !['eventType', 'eventDate'].includes(k))
-              .map(([courseKey, items]) => {
-                if (!items || !items.length) return null;
-                return (
-                  <div key={courseKey} className="review-course">
-                    <h4>{courseKey.replace(/([A-Z])/g, ' $1').trim()}</h4>
-                    <ul>
-                      {items.map((item, i) => <li key={i}>{item}</li>)}
-                    </ul>
-                  </div>
-                );
-              })}
-          </section>
-
-          {upgrades.length > 0 && (
+          {selectedCombos.length > 0 && !isOpulence && (
             <section className="review-section">
-              <h3>Add-Ons</h3>
-              <ul>
-                {upgrades.map((u, i) => (
-                  <li key={i}>{u.name} ({u.type})</li>
-                ))}
-              </ul>
+              <h3>Selected Combos</h3>
+              {selectedCombos.map((combo, i) => (
+                <div key={i} className="review-combo">
+                  <h4>{combo.name}</h4>
+                  <ul>
+                    {combo.components.map((comp, j) => (
+                      <li key={j}><strong>{comp.type}:</strong> {comp.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </section>
           )}
 
@@ -489,9 +564,17 @@ function Step6ReviewSubmit({ tier, selections, upgrades, guestCountMin, guestCou
             )}
           </section>
 
-          <div className="review-disclaimer">
-            <p>This is an estimate based on your selections. Final pricing will be confirmed by Humble Chef after reviewing your request.</p>
-          </div>
+          {calculated.showPrice && (
+            <div className="review-disclaimer">
+              <p>This is an estimate based on your selections. Final pricing will be confirmed by Humble Chef after reviewing your request.</p>
+            </div>
+          )}
+
+          {!calculated.showPrice && (
+            <div className="review-disclaimer">
+              <p>We'll review your event details and reach out with a custom quote tailored to your needs.</p>
+            </div>
+          )}
 
           {submitError && <p className="quote-form__error quote-form__error--submit">{submitError}</p>}
 
@@ -507,12 +590,11 @@ function Step6ReviewSubmit({ tier, selections, upgrades, guestCountMin, guestCou
         <aside className="review-sidebar">
           <ReviewSummary
             tier={tier}
-            selections={selections}
-            upgrades={upgrades}
+            selectedCombos={selectedCombos}
             guestCountMin={guestCountMin}
             guestCountMax={guestCountMax}
-            formData={formData}
             calculated={calculated}
+            isOpulence={isOpulence}
           />
         </aside>
       </div>
@@ -527,7 +609,7 @@ function ConfirmationScreen({ formData }) {
   };
 
   return (
-    <StepTransition step={7}>
+    <StepTransition step={6}>
       <div className="confirmation">
         <div className="confirmation__icon">✓</div>
         <h2 className="confirmation__title">Your quote request has been submitted!</h2>
@@ -578,9 +660,11 @@ export default function QuotePage() {
 
   const [currentStep, setCurrentStep] = useState(initialState?.currentStep ?? 0);
   const [selectedTierId, setSelectedTierId] = useState(initialState?.selectedTierId ?? null);
-  const [selections, setSelections] = useState(initialState?.selections ?? {});
-  const [upgrades, setUpgrades] = useState(initialState?.upgrades ?? []);
-  const [breakfastSelected, setBreakfastSelected] = useState(initialState?.breakfastSelected ?? false);
+  const [selectedCombos, setSelectedCombos] = useState(initialState?.selectedCombos ?? []);
+  const [isNonprofit, setIsNonprofit] = useState(initialState?.isNonprofit ?? false);
+  const [eventDescription, setEventDescription] = useState(initialState?.eventDescription ?? '');
+  const [hasSeenSmallGroupPrompt, setHasSeenSmallGroupPrompt] = useState(initialState?.hasSeenSmallGroupPrompt ?? false);
+  const [showSmallGroupModal, setShowSmallGroupModal] = useState(false);
   const [formData, setFormData] = useState(initialState?.formData ?? { name: '', email: '', phone: '', message: '' });
   const [eventData, setEventData] = useState(initialState?.eventData ?? { guestCountMin: null, guestCountMax: null, eventType: '', eventDate: '' });
   const [errors, setErrors] = useState({});
@@ -588,15 +672,16 @@ export default function QuotePage() {
   const [submitError, setSubmitError] = useState(null);
 
   const tier = selectedTierId ? TIERS.find(t => t.id === selectedTierId) : null;
-  const calculated = tier ? calculateQuoteRange(tier, upgrades, eventData.guestCountMin, eventData.guestCountMax) : null;
+  const calculated = tier ? calculateQuoteRange(selectedTierId, selectedCombos, eventData.guestCountMin, eventData.guestCountMax) : null;
 
   React.useEffect(() => {
     const state = {
       currentStep,
       selectedTierId,
-      selections,
-      upgrades,
-      breakfastSelected,
+      selectedCombos,
+      isNonprofit,
+      eventDescription,
+      hasSeenSmallGroupPrompt,
       formData,
       eventData
     };
@@ -605,7 +690,7 @@ export default function QuotePage() {
     } catch (e) {
       console.error('Failed to save quote state:', e);
     }
-  }, [currentStep, selectedTierId, selections, upgrades, breakfastSelected, formData, eventData]);
+  }, [currentStep, selectedTierId, selectedCombos, isNonprofit, eventDescription, hasSeenSmallGroupPrompt, formData, eventData]);
 
   const handleNext = useCallback(() => {
     let stepErrors = {};
@@ -613,6 +698,52 @@ export default function QuotePage() {
     if (currentStep === 0) {
       if (!eventData.guestCountMin || eventData.guestCountMin < 1) stepErrors.guestCountMin = 'Minimum guests required';
       if (!eventData.guestCountMax || eventData.guestCountMax < eventData.guestCountMin) stepErrors.guestCountMax = 'Max must be >= min';
+
+      if (!Object.keys(stepErrors).length) {
+        // Check for small group modal
+        if (!hasSeenSmallGroupPrompt && eventData.guestCountMin < 30 && eventData.guestCountMax < 30) {
+          setShowSmallGroupModal(true);
+          setHasSeenSmallGroupPrompt(true);
+          return;
+        }
+      }
+    }
+
+    if (currentStep === 1) {
+      if (!selectedTierId) {
+        stepErrors.tier = 'Please select an option';
+      } else {
+        const selectedTier = TIERS.find(t => t.id === selectedTierId);
+
+        // Handle different tier flows
+        if (selectedTier.key === 'opulence') {
+          // Opulence goes to brochure step
+          setCurrentStep(2);
+          return;
+        } else if (selectedTier.key === 'custom') {
+          // Custom goes directly to info step
+          setCurrentStep(3);
+          return;
+        }
+        // Standard/Splurge continue normally
+      }
+    }
+
+    if (currentStep === 2) {
+      // Combo selection step or opulence brochure step
+      if (tier.key === 'opulence') {
+        if (!eventDescription.trim()) {
+          stepErrors.eventDescription = 'Please tell us about your event';
+        }
+      } else {
+        if (selectedCombos.length === 0) {
+          stepErrors.combos = 'Please select at least one combo';
+        }
+      }
+    }
+
+    if (currentStep === 3 && tier.key !== 'custom') {
+      // Custom tier skips this validation
     }
 
     if (Object.keys(stepErrors).length) {
@@ -623,29 +754,36 @@ export default function QuotePage() {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     }
-  }, [currentStep, eventData]);
+  }, [currentStep, eventData, selectedTierId, selectedCombos, eventDescription, tier, hasSeenSmallGroupPrompt]);
 
-  const handleSelectItem = useCallback((courseKey, items) => {
-    setSelections(prev => ({ ...prev, [courseKey]: items }));
-  }, []);
+  const handleSmallGroupCustom = () => {
+    setShowSmallGroupModal(false);
+    setSelectedTierId(4); // Custom tier
+    setCurrentStep(1);
+  };
 
-  const handleToggleUpgrade = useCallback((upgrade) => {
-    setUpgrades(prev => {
-      const exists = prev.find(u => u.id === upgrade.id);
-      if (exists) return prev.filter(u => u.id !== upgrade.id);
-      return [...prev, upgrade];
+  const handleSmallGroupContinue = () => {
+    setShowSmallGroupModal(false);
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handleToggleCombo = useCallback((combo) => {
+    setSelectedCombos(prev => {
+      const exists = prev.find(c => c.id === combo.id);
+      if (exists) {
+        return prev.filter(c => c.id !== combo.id);
+      } else {
+        return [...prev, { id: combo.id, name: combo.name }];
+      }
     });
   }, []);
 
-  const handleBack = useCallback(() => {
-    if (currentStep === 4 && selectedTierId === 8) {
-      setCurrentStep(1);
-    } else {
-      setCurrentStep(Math.max(0, currentStep - 1));
-    }
-  }, [currentStep, selectedTierId]);
+  const handleUpgradeTier = useCallback(() => {
+    setSelectedTierId(2); // Splurge tier
+    // Combos stay the same
+  }, []);
 
-  const validateStep5 = () => {
+  const validateStep4 = () => {
     const stepErrors = {};
     if (!formData.name.trim()) stepErrors.name = 'Name is required';
     if (!formData.email.trim()) stepErrors.email = 'Email is required';
@@ -655,12 +793,23 @@ export default function QuotePage() {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep5()) return;
+    if (!validateStep4()) return;
 
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
+      // Build subject line
+      let subject = 'New Quote Request';
+      if (isNonprofit) subject = `[NON-PROFIT] ${subject}`;
+      if (tier.key === 'opulence') subject = `OPULENCE — ${subject}`;
+
+      const guestRange = eventData.guestCountMin < 30 && eventData.guestCountMax < 30
+        ? 'Small/Custom Group'
+        : `${eventData.guestCountMin}–${eventData.guestCountMax} guests`;
+
+      subject += ` — ${tier.name} — ${guestRange} — ${formData.name}`;
+
       const quotePayload = {
         name: formData.name,
         email: formData.email,
@@ -674,10 +823,11 @@ export default function QuotePage() {
         tier_name: tier.name,
         base_price_low: tier.pricePerPersonLow,
         base_price_high: tier.pricePerPersonHigh,
-        selected_items: selections,
-        upgrades: upgrades,
+        selected_combos: selectedCombos,
+        event_description: eventDescription || null,
         total_low: calculated.totalLow,
         total_high: calculated.totalHigh,
+        is_nonprofit: isNonprofit,
         status: 'new'
       };
 
@@ -689,14 +839,14 @@ export default function QuotePage() {
 
       await sendEmailViaResend({
         to: 'humblechefbrian@gmail.com',
-        subject: `New Quote Request — ${tier.name} — ${eventData.guestCountMin}–${eventData.guestCountMax} guests — ${formData.name}`,
-        html: buildAdminEmailHTML(quotePayload, selections)
+        subject,
+        html: buildAdminEmailHTML(quotePayload, isNonprofit)
       });
 
       await sendEmailViaResend({
         to: formData.email,
         subject: 'Your Humble Chef Quote Request Has Been Received',
-        html: buildCustomerEmailHTML(formData.name, tier, selections, calculated)
+        html: buildCustomerEmailHTML(formData.name, tier, selectedCombos, calculated)
       });
 
       localStorage.removeItem(STORAGE_KEY);
@@ -709,7 +859,19 @@ export default function QuotePage() {
     }
   };
 
+  const handleBack = useCallback(() => {
+    if (currentStep === 3 && tier?.key === 'custom') {
+      setCurrentStep(1);
+    } else if (currentStep === 2 && tier?.key === 'opulence') {
+      setCurrentStep(1);
+    } else {
+      setCurrentStep(Math.max(0, currentStep - 1));
+    }
+  }, [currentStep, tier]);
+
   const meta = pageMetadata.quote;
+  const isOpulence = tier?.key === 'opulence';
+  const isCustom = tier?.key === 'custom';
 
   return (
     <>
@@ -730,105 +892,122 @@ export default function QuotePage() {
       <div className="quote-page">
         <ProgressBar currentStep={currentStep} />
 
-      <div className="quote-container">
-        {currentStep === 0 && (
-          <Step1EventDetails
-            data={eventData}
-            onChange={(updates) => setEventData(prev => ({ ...prev, ...updates }))}
-            onNext={handleNext}
-          />
+        {showSmallGroupModal && (
+          <SmallGroupModal onCustom={handleSmallGroupCustom} onContinue={handleSmallGroupContinue} />
         )}
 
-        {currentStep === 1 && (
-          <Step2ChooseTier
-            selectedTierId={selectedTierId}
-            onSelect={setSelectedTierId}
-            onNext={() => setCurrentStep(2)}
-            onJumpToStep={(step) => setCurrentStep(step)}
-          />
-        )}
-
-        {currentStep === 2 && tier && (
-          <Step3BuildMenu
-            selectedTierId={selectedTierId}
-            selections={selections}
-            onSelectItem={handleSelectItem}
-            addBreakfast={setBreakfastSelected}
-            breakfastSelected={breakfastSelected}
-          />
-        )}
-
-        {currentStep === 3 && tier && (
-          tier.availableUpgrades.length ? (
-            <Step4AddOns
-              selectedTierId={selectedTierId}
-              upgrades={upgrades}
-              onToggleUpgrade={handleToggleUpgrade}
+        <div className="quote-container">
+          {currentStep === 0 && (
+            <Step1EventDetails
+              data={eventData}
+              onChange={(updates) => setEventData(prev => ({ ...prev, ...updates }))}
+              isNonprofit={isNonprofit}
+              setIsNonprofit={setIsNonprofit}
+              onNext={handleNext}
             />
-          ) : (
-            <div style={{ padding: '2rem', textAlign: 'center' }}>
-              <p>This tier includes all features. Proceeding to your information…</p>
-              <button
-                className="quote-form__btn quote-form__btn--primary"
-                onClick={() => setCurrentStep(4)}
-                style={{ marginTop: '1rem' }}
-              >
-                Continue
-              </button>
-            </div>
-          )
-        )}
+          )}
 
-        {currentStep === 4 && (
-          <Step5YourInfo
-            formData={formData}
-            onChange={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
-            errors={errors}
-          />
-        )}
+          {currentStep === 1 && (
+            <Step2ChooseTier
+              selectedTierId={selectedTierId}
+              onSelect={setSelectedTierId}
+              onNext={handleNext}
+            />
+          )}
 
-        {currentStep === 5 && tier && calculated && (
-          <Step6ReviewSubmit
-            tier={tier}
-            selections={selections}
-            upgrades={upgrades}
-            guestCountMin={eventData.guestCountMin}
-            guestCountMax={eventData.guestCountMax}
-            formData={formData}
-            calculated={calculated}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-            submitError={submitError}
-          />
-        )}
-      </div>
+          {currentStep === 2 && isOpulence && (
+            <OpulenceBrochure
+              eventDescription={eventDescription}
+              onEventDescriptionChange={setEventDescription}
+            />
+          )}
 
-      <div className="quote-page__navigation">
-        <button
-          className="quote-form__btn quote-form__btn--outline"
-          onClick={handleBack}
-          disabled={currentStep === 0}
-        >
-          Back
-        </button>
+          {currentStep === 2 && !isOpulence && tier && (
+            <Step3BuildMenu
+              selectedTierId={selectedTierId}
+              selectedCombos={selectedCombos}
+              onToggleCombo={handleToggleCombo}
+              calculated={calculated}
+              onUpgradeClick={handleUpgradeTier}
+            />
+          )}
 
-        {currentStep < STEPS.length - 1 && (
+          {currentStep === 3 && tier && (
+            <Step4YourInfo
+              selectedTierId={selectedTierId}
+              formData={formData}
+              onChange={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
+              errors={errors}
+              eventDescription={eventDescription}
+            />
+          )}
+
+          {currentStep === 4 && tier && calculated && (
+            <Step5ReviewSubmit
+              tier={tier}
+              selectedCombos={selectedCombos}
+              guestCountMin={eventData.guestCountMin}
+              guestCountMax={eventData.guestCountMax}
+              formData={formData}
+              calculated={calculated}
+              eventDescription={eventDescription}
+              isNonprofit={isNonprofit}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+              submitError={submitError}
+            />
+          )}
+
+          {currentStep === 5 && (
+            <ConfirmationScreen formData={formData} />
+          )}
+        </div>
+
+        <div className="quote-page__navigation">
           <button
-            className="quote-form__btn quote-form__btn--primary"
-            onClick={handleNext}
+            className="quote-form__btn quote-form__btn--outline"
+            onClick={handleBack}
+            disabled={currentStep === 0}
           >
-            Next
+            Back
           </button>
-        )}
+
+          {currentStep < 4 && (
+            <button
+              className="quote-form__btn quote-form__btn--primary"
+              onClick={handleNext}
+            >
+              Next
+            </button>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 }
 
-function buildAdminEmailHTML(quote, selections) {
-  return `
+function buildAdminEmailHTML(quote, isNonprofit) {
+  let html = `
     <div style="font-family: Montserrat, sans-serif; max-width: 600px; margin: 0 auto;">
+  `;
+
+  if (quote.tier_name === 'Opulence') {
+    html += `
+      <div style="background: #DC2626; color: #fff; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+        <p style="margin: 0; font-weight: bold;">⚡ OPULENCE REQUEST — Schedule a call with this client as soon as possible.</p>
+      </div>
+    `;
+  }
+
+  if (isNonprofit) {
+    html += `
+      <div style="background: #FEF3C7; color: #92400E; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 3px solid #FBBF24;">
+        <p style="margin: 0; font-weight: bold;">⚠️ NON-PROFIT EVENT — Handle pricing manually. Do not send standard quote response.</p>
+      </div>
+    `;
+  }
+
+  html += `
       <h2 style="color: #2340;">New Quote Request</h2>
       <div style="background: #f5f5f5; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
         <p><strong>From:</strong> ${quote.name}</p>
@@ -841,36 +1020,52 @@ function buildAdminEmailHTML(quote, selections) {
         <p><strong>Guests:</strong> ${quote.guest_count_min}–${quote.guest_count_max}</p>
       </div>
       <div style="background: #f5f5f5; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
-        <p><strong>Tier:</strong> ${quote.tier_name}</p>
-        <p><strong>Price Range:</strong> $${quote.base_price_low}–$${quote.base_price_high}/person</p>
-        <p><strong>Estimated Total:</strong> $${quote.total_low}–$${quote.total_high}</p>
+        <p><strong>Option:</strong> ${quote.tier_name}</p>
+        ${quote.base_price_low ? `<p><strong>Price Range:</strong> $${quote.base_price_low}–$${quote.base_price_high}/person</p>` : '<p><strong>Pricing:</strong> Custom (to be discussed)</p>'}
+        ${quote.total_low ? `<p><strong>Estimated Total:</strong> $${quote.total_low}–$${quote.total_high}</p>` : ''}
       </div>
+  `;
+
+  if (quote.selected_combos && quote.selected_combos.length > 0) {
+    html += `
       <div style="margin: 1rem 0;">
-        <h3>Selected Items</h3>
-        ${Object.entries(selections).map(([k, v]) => `<p><strong>${k}:</strong> ${(v || []).join(', ') || 'None'}</p>`).join('')}
+        <h3>Selected Combos</h3>
+        <ul>
+          ${quote.selected_combos.map(c => `<li>${c.name}</li>`).join('')}
+        </ul>
       </div>
-      ${quote.upgrades.length ? `
-        <div style="margin: 1rem 0;">
-          <h3>Add-Ons</h3>
-          <ul>
-            ${quote.upgrades.map(u => `<li>${u.name}</li>`).join('')}
-          </ul>
-        </div>
-      ` : ''}
-      ${quote.message ? `
-        <div style="margin: 1rem 0;">
-          <h3>Customer Message</h3>
-          <p>${quote.message}</p>
-        </div>
-      ` : ''}
+    `;
+  }
+
+  if (quote.event_description) {
+    html += `
+      <div style="margin: 1rem 0;">
+        <h3>About Their Event</h3>
+        <p>${quote.event_description}</p>
+      </div>
+    `;
+  }
+
+  if (quote.message) {
+    html += `
+      <div style="margin: 1rem 0;">
+        <h3>Customer Message</h3>
+        <p>${quote.message}</p>
+      </div>
+    `;
+  }
+
+  html += `
       <div style="background: #f5f5f5; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
         <p><small>Submitted via humblechef.com quote form</small></p>
       </div>
     </div>
   `;
+
+  return html;
 }
 
-function buildCustomerEmailHTML(name, tier, selections, calculated) {
+function buildCustomerEmailHTML(name, tier, selectedCombos, calculated) {
   return `
     <div style="font-family: Montserrat, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #2340;">Your Humble Chef Quote Request Has Been Received</h2>
@@ -878,8 +1073,8 @@ function buildCustomerEmailHTML(name, tier, selections, calculated) {
       <p>Thank you for reaching out to Humble Chef! We've received your quote request and Brian will be in touch within 1–2 business days.</p>
       <div style="background: #f5f5f5; padding: 1rem; border-radius: 0.5rem; margin: 1.5rem 0;">
         <h3 style="margin-top: 0;">Your Selections</h3>
-        <p><strong>Tier:</strong> ${tier.name}</p>
-        <p><strong>Estimated Total:</strong> $${calculated.totalLow}–$${calculated.totalHigh}</p>
+        <p><strong>Option:</strong> ${tier.name}</p>
+        ${calculated.showPrice ? `<p><strong>Estimated Total:</strong> $${calculated.totalLow}–$${calculated.totalHigh}</p>` : '<p><strong>We\'ll provide custom pricing</strong> based on your specific needs.</p>'}
       </div>
       <div style="margin: 1rem 0;">
         <p><strong>Contact us directly:</strong></p>

@@ -845,6 +845,517 @@
   gap: 1rem;
 }
 
+/* Modal Overlay */
+.quote-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.quote-modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.quote-modal h2 {
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-family: var(--font-display);
+}
+
+.quote-modal p {
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.quote-modal__buttons {
+  display: flex;
+  gap: 1rem;
+  flex-direction: row-reverse;
+}
+
+.quote-modal__buttons .quote-form__btn {
+  flex: 1;
+}
+
+/* Tier Cards — New Styling */
+.tiers-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .tiers-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.tier-card {
+  padding: 1.5rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.tier-card--standard {
+  border-color: #d1d5db;
+}
+
+.tier-card--splurge {
+  background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 100%);
+  border-color: #fbbf24;
+}
+
+.tier-card--opulence {
+  background: linear-gradient(135deg, #1a1641 0%, #2d1b69 100%);
+  border-color: #8b6ba8;
+  color: #fff;
+}
+
+.tier-card--opulence .tier-card__name,
+.tier-card--opulence .tier-card__tagline,
+.tier-card--opulence .tier-card__description {
+  color: #ffd700;
+}
+
+.tier-card--custom {
+  background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+  border-color: #06b6d4;
+  color: #fff;
+}
+
+.tier-card--custom .tier-card__name,
+.tier-card--custom .tier-card__tagline,
+.tier-card--custom .tier-card__description {
+  color: #fff;
+}
+
+.tier-card.selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--primary-alpha-15);
+}
+
+.tier-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.tier-card__header {
+  margin-bottom: 1rem;
+}
+
+.tier-card__name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.tier-card__tagline {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.tier-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tier-card__price-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.tier-card__price-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.tier-card__price--custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  margin-bottom: 1rem;
+}
+
+.tier-card__custom-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: center;
+  margin: 0;
+  opacity: 0.95;
+}
+
+.tier-card__description {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.tier-card__btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.tier-card--splurge .tier-card__btn {
+  background: #fbbf24;
+  color: #1a1641;
+}
+
+.tier-card--opulence .tier-card__btn {
+  background: #ffd700;
+  color: #1a1641;
+}
+
+.tier-card.selected .tier-card__btn {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.tier-card__btn:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+/* Combo Cards */
+.combo-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.combo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.combo-section__title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-secondary);
+  margin: 0;
+}
+
+.combo-section__title--splurge {
+  color: var(--color-accent);
+}
+
+.combo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .combo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.combo-card {
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.combo-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.combo-card.selected {
+  border-color: var(--color-primary);
+  background: var(--primary-alpha-9);
+}
+
+.combo-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.combo-card__name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-secondary);
+  margin: 0;
+}
+
+.combo-card__badge {
+  display: inline-block;
+  background: var(--color-accent);
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.combo-card__description {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.combo-card__components {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--primary-alpha-9);
+  border-radius: var(--radius-md);
+}
+
+.combo-component {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.combo-component__type {
+  font-weight: 600;
+  color: var(--color-primary);
+  min-width: 70px;
+}
+
+.combo-component__name {
+  color: var(--color-text);
+}
+
+.combo-card__btn {
+  width: 100%;
+  padding: 0.65rem;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.combo-card__btn:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.combo-card.selected .combo-card__btn {
+  background: var(--color-primary);
+}
+
+.combo-pricing {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--primary-alpha-9);
+  border-radius: var(--radius-lg);
+}
+
+.combo-pricing h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  color: var(--color-secondary);
+}
+
+.combo-count {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin: 0.25rem 0;
+}
+
+.combo-multiplier-note {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  font-weight: 500;
+  margin: 0.5rem 0;
+}
+
+.combo-note {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
+}
+
+.estimated-price {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.estimated-price p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-secondary);
+}
+
+.combo-upsell {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 100%);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.combo-upsell p {
+  margin-bottom: 1rem;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+/* Opulence Brochure */
+.opulence-brochure {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.opulence-section {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #1a1641 0%, #2d1b69 100%);
+  border-radius: var(--radius-lg);
+  color: #fff;
+}
+
+.opulence-section h3 {
+  font-size: 1.4rem;
+  margin: 0 0 1rem 0;
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.opulence-section p {
+  margin: 0;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+.opulence-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.opulence-highlight {
+  padding: 1.25rem;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--color-accent);
+}
+
+.opulence-highlight h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-secondary);
+  margin: 0 0 0.5rem 0;
+}
+
+.opulence-highlight p {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Form Enhancements */
+.quote-form__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.quote-form__checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+
+.quote-form__intro {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin: -1rem 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+.review-combo {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--primary-alpha-9);
+  border-radius: var(--radius-md);
+}
+
+.review-combo h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  color: var(--color-secondary);
+}
+
+.review-combo ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.review-combo li {
+  font-size: 0.85rem;
+  padding: 0.25rem 0;
+  color: var(--color-text-muted);
+}
+
+.review-combo li strong {
+  color: var(--color-text);
+}
+
+.review-section--highlight {
+  background: #DBEAFE;
+  border-left: 3px solid #1D4ED8;
+  color: #1D4ED8;
+  font-weight: 500;
+}
+
 /* Navigation */
 .quote-page__navigation {
   display: flex;
@@ -1101,5 +1612,50 @@
   .confirmation__subtitle {
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
+  }
+
+  .combo-card {
+    padding: 0.75rem;
+  }
+
+  .combo-card__name {
+    font-size: 1rem;
+  }
+
+  .combo-section__title {
+    font-size: 1.1rem;
+  }
+
+  .quote-modal {
+    width: 90%;
+    max-width: 400px;
+  }
+
+  .quote-modal__buttons {
+    flex-direction: column-reverse;
+  }
+
+  .quote-modal__buttons .quote-form__btn {
+    width: 100%;
+  }
+
+  .opulence-highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .opulence-highlight {
+    padding: 1rem;
+  }
+
+  .tier-card {
+    padding: 0.85rem;
+  }
+
+  .tier-card__name {
+    font-size: 1.1rem;
+  }
+
+  .quote-form__checkbox-label {
+    font-size: 0.9rem;
   }
 }

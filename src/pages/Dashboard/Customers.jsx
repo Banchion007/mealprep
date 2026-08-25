@@ -548,11 +548,29 @@ function QuotesTab({ quotes, setQuotes }) {
               <React.Fragment key={quote.id}>
                 <tr className={`crm-row${expandedId === quote.id ? ' expanded' : ''}`} onClick={() => setExpandedId(expandedId === quote.id ? null : quote.id)}>
                   <td>{fmtDate(quote.created_at)}</td>
-                  <td><strong>{quote.name}</strong></td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <strong>{quote.name}</strong>
+                      {quote.is_nonprofit && (
+                        <span style={{ display: 'inline-block', background: '#DCFCE7', color: '#15803D', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase' }}>
+                          Non-Profit
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td>{quote.email}</td>
-                  <td>{quote.tier_name}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <span>{quote.tier_name}</span>
+                      {quote.tier_name === 'Opulence' && (
+                        <span style={{ display: 'inline-block', background: '#FEF3C7', color: '#92400E', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase' }}>
+                          OPULENCE
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td>{quote.guest_count_min}–{quote.guest_count_max}</td>
-                  <td>{fmtMoney(quote.total_low)}–{fmtMoney(quote.total_high)}</td>
+                  <td>{quote.total_low && quote.total_high ? fmtMoney(quote.total_low) + '–' + fmtMoney(quote.total_high) : 'Custom'}</td>
                   <td>{quote.event_type}</td>
                   <td>
                     <span className="crm-status-badge" style={STATUS_COLORS[quote.status] || STATUS_COLORS.new}>
@@ -581,32 +599,30 @@ function QuotesTab({ quotes, setQuotes }) {
                           </section>
 
                           <section>
-                            <h3>Tier & Pricing</h3>
-                            <p><strong>{quote.tier_name}</strong> · ${quote.base_price_low}–${quote.base_price_high}/person</p>
-                            <p><strong>Estimated Total:</strong> {fmtMoney(quote.total_low)}–{fmtMoney(quote.total_high)}</p>
+                            <h3>Option & Pricing</h3>
+                            <p><strong>{quote.tier_name}</strong></p>
+                            {quote.base_price_low && quote.base_price_high ? (
+                              <>
+                                <p>${quote.base_price_low}–${quote.base_price_high}/person</p>
+                                <p><strong>Estimated Total:</strong> {fmtMoney(quote.total_low)}–{fmtMoney(quote.total_high)}</p>
+                              </>
+                            ) : (
+                              <p><em>Custom pricing — tailored to event</em></p>
+                            )}
                           </section>
 
-                          {quote.selected_items && Object.keys(quote.selected_items).length > 0 && (
+                          {quote.event_description && (
                             <section>
-                              <h3>Menu Selections</h3>
-                              {Object.entries(quote.selected_items).map(([k, v]) => (
-                                (v && v.length > 0) && (
-                                  <div key={k}>
-                                    <strong>{k.replace(/([A-Z])/g, ' $1').trim()}:</strong>
-                                    <ul style={{ marginLeft: '1rem', marginTop: '0.25rem' }}>
-                                      {v.map((item, i) => <li key={i}>{item}</li>)}
-                                    </ul>
-                                  </div>
-                                )
-                              ))}
+                              <h3>Event Description</h3>
+                              <p>{quote.event_description}</p>
                             </section>
                           )}
 
-                          {quote.upgrades && quote.upgrades.length > 0 && (
+                          {quote.selected_combos && quote.selected_combos.length > 0 && (
                             <section>
-                              <h3>Add-Ons</h3>
+                              <h3>Selected Combos</h3>
                               <ul>
-                                {quote.upgrades.map((u, i) => <li key={i}>{u.name}</li>)}
+                                {quote.selected_combos.map((combo, i) => <li key={i}><strong>{combo.name}</strong></li>)}
                               </ul>
                             </section>
                           )}
