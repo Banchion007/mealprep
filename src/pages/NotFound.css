@@ -76,7 +76,7 @@
 
 .not-found__links {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
 }
@@ -109,8 +109,10 @@
 }
 
 .not-found__link-icon {
-  font-size: 1.75rem;
+  width: 1.75rem;
+  height: 1.75rem;
   display: block;
+  color: #fff;
 }
 
 .not-found__cta {
