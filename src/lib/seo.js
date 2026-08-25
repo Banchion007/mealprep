@@ -33,6 +33,11 @@ export const pageMetadata = {
     title: 'Get a Catering Quote | Humble Chef',
     description: 'Get an instant quote for catering services in Grayson/Collin County, TX. Customize your menu and get pricing for your event.',
   },
+  gallery: {
+    path: '/gallery',
+    title: 'Gallery | Humble Chef Catering',
+    description: 'Browse photos from our catering events and meal prep — from intimate gatherings to large celebrations across North Texas.',
+  },
   privacy: {
     path: '/privacy',
     title: 'Privacy Policy | Humble Chef',

@@ -10,6 +10,7 @@ import Customers    from './Customers'
 import Subscribers  from './Subscribers'
 import MealsManagement from './MealsManagement'
 import WeeklyMenuBuilder from './WeeklyMenuBuilder'
+import GalleryAdmin  from './Gallery'
 import { useAuth } from '../../contexts/AuthContext'
 import { isAdminUser } from '../../lib/admin'
 import './Dashboard.css'
@@ -53,6 +54,7 @@ export default function DashboardLayout() {
           <Route path="subscribers"  element={<Subscribers />} />
           <Route path="meals"        element={<MealsManagement />} />
           <Route path="weekly-menu" element={<WeeklyMenuBuilder />} />
+          <Route path="gallery"      element={<GalleryAdmin />} />
           <Route path="*"            element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>

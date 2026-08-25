@@ -75,6 +75,7 @@ function UserMenu({ user, isAdmin, signOut }) {
 
 const NAV_LINKS = [
   { to: '/',       label: 'Home' },
+  { to: '/gallery', label: 'Gallery' },
   { to: '/about',  label: 'About' },
   { to: '/contact', label: 'Contact' },
 ]
