@@ -38,9 +38,8 @@ export default function AuthModal({ onClose }) {
   const handleGoogleSignIn = async () => {
     reset()
     setLoading(true)
-    // Use current domain (localhost for dev, production domain for prod)
-    // Redirect to auth callback page that handles token processing
-    const redirectTo = `${window.location.origin}/auth/callback`
+    // Supabase OAuth redirect - must match Site URL in Supabase project settings
+    const redirectTo = `${window.location.origin}/`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
