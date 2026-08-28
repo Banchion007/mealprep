@@ -2556,6 +2556,18 @@
 }
 
 /* ── Responsive ── */
+@media (max-width: 1200px) {
+  .dash-sidebar {
+    width: 200px;
+  }
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dash-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 900px) {
   .crm-expand-content {
     grid-template-columns: 1fr;
@@ -2568,6 +2580,112 @@
   .crm-stats-row { gap: 0.5rem; }
   .crm-stat-card { min-width: 100px; }
   .crm-modal__workflow-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  /* Hide sidebar on tablet, show only main content */
+  .dash-layout {
+    flex-direction: column;
+  }
+  .dash-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    overflow-y: visible;
+    padding: 0.75rem;
+  }
+  .dash-sidebar__nav {
+    flex-direction: row;
+    gap: 0.5rem;
+    overflow-x: auto;
+    flex: 1;
+  }
+  .dash-sidebar__link {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .dash-main {
+    padding: 1.5rem;
+  }
+  .dash-page-title {
+    font-size: 1.3rem;
+  }
+  .dash-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .stat-card {
+    padding: 1.25rem;
+  }
+  .stat-card__value {
+    font-size: 1.5rem;
+  }
+  .dash-charts {
+    grid-template-columns: 1fr;
+  }
+  .chart-card {
+    padding: 1.25rem;
+  }
+  .dash-section__header {
+    gap: 0.75rem;
+  }
+  .dash-section__title {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-layout {
+    min-height: auto;
+  }
+  .dash-main {
+    padding: 1rem;
+    min-height: calc(100vh - 56px);
+  }
+  .dash-sidebar {
+    order: -1;
+    padding: 0.5rem;
+  }
+  .dash-sidebar__nav {
+    gap: 0.3rem;
+  }
+  .dash-sidebar__link {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  .dash-page-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  .dash-stats {
+    gap: 0.75rem;
+  }
+  .stat-card {
+    padding: 1rem;
+  }
+  .stat-card__label {
+    font-size: 0.7rem;
+  }
+  .stat-card__value {
+    font-size: 1.25rem;
+  }
+  .stat-card__icon {
+    width: 32px;
+    height: 32px;
+  }
+  .dash-section__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .chart-card {
+    padding: 1rem;
+  }
+  .crm-stat-card {
+    min-width: 80px;
+    padding: 0.75rem;
+  }
 }
 
 /* -- Confirmation Modal -- */
