@@ -11,10 +11,11 @@ export default function AuthCallback() {
   const { user, loading } = useAuth()
 
   useEffect(() => {
-    // Give auth state a moment to settle after redirect
-    const timer = setTimeout(() => {
-      if (!loading) {
-        // Check if user is logged in
+    // Wait for auth state to settle, then redirect
+    // On mobile with slow networks, this may take up to 2 seconds
+    if (!loading) {
+      // Small delay to ensure session is fully established
+      const timer = setTimeout(() => {
         const savedRedirectUrl = localStorage.getItem('auth_redirect_url')
         const finalUrl = savedRedirectUrl || '/'
 
@@ -23,11 +24,11 @@ export default function AuthCallback() {
 
         // Redirect
         navigate(finalUrl, { replace: true })
-      }
-    }, 500)
+      }, 300)
 
-    return () => clearTimeout(timer)
-  }, [loading, navigate, user])
+      return () => clearTimeout(timer)
+    }
+  }, [loading, navigate])
 
   return (
     <div style={{
