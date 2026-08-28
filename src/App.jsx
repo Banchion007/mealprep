@@ -17,6 +17,7 @@ import UnderConstruction from './pages/UnderConstruction'
 import NotFound       from './pages/NotFound'
 import DashboardLayout from './pages/Dashboard/index'
 import Account         from './pages/Account'
+import AuthCallback    from './pages/AuthCallback'
 import PrivacyPolicy   from './pages/PrivacyPolicy'
 import TermsOfService  from './pages/TermsOfService'
 import EULA            from './pages/EULA'
@@ -58,6 +59,7 @@ function Layout() {
           <Route path="/gallery"      element={<GalleryPage />} />
           <Route path="/quote"        element={<QuotePage />} />
           <Route path="/quote/submitted" element={<QuoteSubmitted />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/under-construction" element={<UnderConstruction />} />
           <Route path="/account"      element={<Account />} />
           <Route path="/privacy"      element={<PrivacyPolicy />} />

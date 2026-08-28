@@ -24,11 +24,12 @@ export function AuthProvider({ children }) {
   const handleOpenAuthModal = () => {
     // Save current location to localStorage so it persists through OAuth redirect
     const currentPath = location.pathname + location.search
-    // Don't save auth-related or root paths
-    if (currentPath !== '/' && !currentPath.includes('/dashboard')) {
+    // Always save the path, even if it's home (helps on mobile)
+    if (currentPath !== '/' && !currentPath.includes('/dashboard') && !currentPath.includes('/auth/callback')) {
       localStorage.setItem('auth_redirect_url', currentPath)
-    } else {
-      localStorage.removeItem('auth_redirect_url')
+    } else if (currentPath === '/') {
+      // On mobile, don't clear it - let callback page decide
+      // localStorage.removeItem('auth_redirect_url')
     }
     setShowAuthModal(true)
   }
@@ -38,7 +39,9 @@ export function AuthProvider({ children }) {
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        setUser(session?.user ?? null)
+        if (session?.user) {
+          setUser(session.user)
+        }
         setLoading(false)
       } catch (err) {
         console.error('Auth init error:', err)
@@ -48,27 +51,25 @@ export function AuthProvider({ children }) {
 
     initializeAuth()
 
-    // Listen for auth state changes
+    // Listen for auth state changes (handles OAuth callback)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-
-      if (event === 'SIGNED_IN' && session?.user) {
-        // Only redirect after explicit login, not on initial page load
-        setShowAuthModal(false)
-
-        // Redirect to the page they were trying to access, or homepage by default
-        const savedRedirectUrl = localStorage.getItem('auth_redirect_url')
-        const finalRedirectUrl = savedRedirectUrl || redirectUrl || '/'
-
-        navigate(finalRedirectUrl)
-        localStorage.removeItem('auth_redirect_url')
-        setRedirectUrl(null)
+      if (session?.user) {
+        setUser(session.user)
+      } else {
+        setUser(null)
       }
+
+      // Handle sign in event
+      if (event === 'SIGNED_IN' && session?.user) {
+        setShowAuthModal(false)
+        // Redirect will be handled by AuthCallback page
+      }
+
+      setLoading(false)
     })
 
     return () => subscription?.unsubscribe()
-  }, [navigate, redirectUrl])
+  }, [])
 
   const signOut = async () => {
     await supabase.auth.signOut()

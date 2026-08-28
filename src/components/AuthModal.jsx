@@ -39,8 +39,8 @@ export default function AuthModal({ onClose }) {
     reset()
     setLoading(true)
     // Use current domain (localhost for dev, production domain for prod)
-    // Supabase will append #access_token to this URL after Google redirects
-    const redirectTo = `${window.location.origin}/#/`
+    // Redirect to auth callback page that handles token processing
+    const redirectTo = `${window.location.origin}/auth/callback`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
