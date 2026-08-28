@@ -38,19 +38,27 @@ export default function AuthModal({ onClose }) {
   const handleGoogleSignIn = async () => {
     reset()
     setLoading(true)
-    // Supabase OAuth redirect - must match Site URL in Supabase project settings
-    const redirectTo = `${window.location.origin}/`
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectTo,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        }
-      },
-    })
-    if (error) { setError(error.message); setLoading(false) }
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        },
+      })
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+        console.error('OAuth error:', error)
+      }
+    } catch (err) {
+      setError(err.message)
+      setLoading(false)
+      console.error('OAuth exception:', err)
+    }
   }
 
   const handleSignIn = async (e) => {

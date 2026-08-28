@@ -36,17 +36,23 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let mounted = true
+    let authTimeout
 
     // Check for existing session on mount
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const { data: { session }, error } = await supabase.auth.getSession()
         if (mounted) {
           if (session?.user) {
             setUser(session.user)
+            setLoading(false)
+          } else {
+            // Don't set loading to false yet - wait for auth state change listener
           }
-          // Keep loading true until we get an auth state change event
-          // This ensures we wait for Supabase to fully initialize
+          if (error) {
+            console.error('Session fetch error:', error)
+            setLoading(false)
+          }
         }
       } catch (err) {
         console.error('Auth init error:', err)
@@ -59,25 +65,35 @@ export function AuthProvider({ children }) {
     // Listen for auth state changes (handles OAuth callback and session restoration)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (mounted) {
+        console.log('Auth event:', event, 'User:', session?.user?.email)
+
         if (session?.user) {
           setUser(session.user)
         } else {
           setUser(null)
         }
 
-        // Handle sign in event
+        // Handle all auth events
         if (event === 'SIGNED_IN' && session?.user) {
           setShowAuthModal(false)
+          console.log('User signed in:', session.user.email)
         }
 
-        // Always set loading to false when we get an auth event
-        // This signals that auth state is ready
+        // Set loading to false after any auth event
         setLoading(false)
       }
     })
 
+    // Timeout fallback - if no auth event after 5 seconds, set loading to false
+    authTimeout = setTimeout(() => {
+      if (mounted) {
+        setLoading(false)
+      }
+    }, 5000)
+
     return () => {
       mounted = false
+      clearTimeout(authTimeout)
       subscription?.unsubscribe()
     }
   }, [])
