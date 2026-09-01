@@ -139,6 +139,7 @@ function MenuDropdown() {
 export default function Navbar() {
   const [scrolled,     setScrolled]     = useState(false)
   const [menuOpen,     setMenuOpen]     = useState(false)
+  const [mobileMenuDropdownOpen, setMobileMenuDropdownOpen] = useState(false)
   const { mealPrepEnabled, loading } = useMealPrepSetting()
   const location = useLocation()
   const navigate = useNavigate()
@@ -176,6 +177,16 @@ export default function Navbar() {
   return (
     <header className={`navbar${scrolled ? ' navbar--scrolled' : ''}`}>
       <div className="navbar__inner container">
+        {/* Mobile Hamburger (left) */}
+        <button
+          className={`navbar__burger${menuOpen ? ' open' : ''}`}
+          onClick={() => setMenuOpen(v => !v)}
+          aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+        >
+          <span /><span /><span />
+        </button>
+
         {/* Logo */}
         <Link to="/" className="navbar__logo">
           <img src="/hc-logo-long.png" alt="Humble Chef" className="navbar__logo-img" />
@@ -232,63 +243,142 @@ export default function Navbar() {
               </button>
             )
           )}
-          {/* Hamburger */}
-          <button
-            className={`navbar__burger${menuOpen ? ' open' : ''}`}
-            onClick={() => setMenuOpen(v => !v)}
-            aria-label="Toggle menu"
-            aria-expanded={menuOpen}
-          >
-            <span /><span /><span />
-          </button>
         </div>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile menu overlay */}
+      {menuOpen && (
+        <div
+          className="navbar__mobile-overlay"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile drawer panel */}
       <div className={`navbar__mobile${menuOpen ? ' navbar__mobile--open' : ''}`}>
-        {NAV_LINKS.map(({ to, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            className={({ isActive }) =>
-              `navbar__mobile-link${isActive ? ' navbar__mobile-link--active' : ''}`
-            }
+        <div className="navbar__mobile-content">
+          {/* Main nav links */}
+          {NAV_LINKS.map(({ to, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                `navbar__mobile-link${isActive ? ' navbar__mobile-link--active' : ''}`
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
+
+          {/* Menu dropdown in mobile */}
+          <div className="navbar__mobile-menu-dropdown">
+            <button
+              className="navbar__mobile-menu-trigger"
+              onClick={() => setMobileMenuDropdownOpen(!mobileMenuDropdownOpen)}
+              aria-expanded={mobileMenuDropdownOpen}
+            >
+              Menu
+              <svg className={`navbar__mobile-menu-caret${mobileMenuDropdownOpen ? ' open' : ''}`} width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {mobileMenuDropdownOpen && (
+              <div className="navbar__mobile-menu-panel">
+                <Link
+                  to={mealPrepEnabled ? '/menu' : '/under-construction'}
+                  className="navbar__mobile-menu-item"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setMobileMenuDropdownOpen(false)
+                  }}
+                >
+                  View Meal Prep Menu
+                </Link>
+                <a
+                  href={MENU_PDF_URL}
+                  download
+                  className="navbar__mobile-menu-item"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setMobileMenuDropdownOpen(false)
+                  }}
+                >
+                  View Catering Menu
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Get a Quote */}
+          <Link
+            to="/quote"
+            className="navbar__mobile-link navbar__mobile-link--quote"
+            onClick={() => setMenuOpen(false)}
           >
-            {label}
-          </NavLink>
-        ))}
-        <Link
-          to={mealPrepEnabled ? '/menu' : '/under-construction'}
-          className="navbar__mobile-link"
-        >
-          View Meal Prep Menu
-        </Link>
-        <a href={MENU_PDF_URL} download className="navbar__mobile-link">
-          View Catering Menu
-        </a>
-        <Link to="/quote" className="navbar__mobile-link navbar__mobile-link--quote">
-          Get a Quote
-        </Link>
-        {user && (
-          <Link to="/account" className="navbar__mobile-link">
-            My Account
+            Get a Quote
           </Link>
-        )}
-        {!loading && mealPrepEnabled && (
-          <button
-            onClick={handleMealPrepClick}
-            className="btn btn-primary"
-            style={{ marginTop: '0.5rem', width: '100%' }}
-          >
-            Order Meals
-          </button>
-        )}
-        {isAdmin && (
-          <Link to="/dashboard" className="btn btn-outline" style={{ marginTop: '0.5rem' }}>
-            Dashboard
-          </Link>
-        )}
+
+          {/* Spacer to push account to bottom */}
+          <div className="navbar__mobile-spacer" />
+
+          {/* Account section at bottom */}
+          <div className="navbar__mobile-account">
+            {!loading && mealPrepEnabled && (
+              <button
+                onClick={() => {
+                  handleMealPrepClick()
+                  setMenuOpen(false)
+                }}
+                className="btn btn-primary navbar__mobile-btn"
+              >
+                Order Meals
+              </button>
+            )}
+            {user && (
+              <Link
+                to="/account"
+                className="navbar__mobile-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                My Account
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                to="/dashboard"
+                className="navbar__mobile-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                Admin Dashboard
+              </Link>
+            )}
+            {!loading && (
+              !user ? (
+                <button
+                  className="btn btn-primary navbar__mobile-btn"
+                  onClick={() => {
+                    setShowAuthModal(true)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Sign In
+                </button>
+              ) : (
+                <button
+                  className="btn btn-outline navbar__mobile-btn navbar__mobile-btn--danger"
+                  onClick={() => {
+                    signOut()
+                    setMenuOpen(false)
+                  }}
+                >
+                  Sign Out
+                </button>
+              )
+            )}
+          </div>
+        </div>
       </div>
     </header>
   )
