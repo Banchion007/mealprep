@@ -167,6 +167,16 @@ export default function Navbar() {
     return () => window.removeEventListener('keydown', handleEscape)
   }, [menuOpen])
 
+  // Prevent scrolling when menu is open on mobile
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = 'unset'
+      }
+    }
+  }, [menuOpen])
+
   // Add shadow on scroll
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20)
