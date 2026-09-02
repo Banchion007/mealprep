@@ -348,7 +348,7 @@ export default function Navbar() {
             {isAdmin && (
               <Link
                 to="/dashboard"
-                className="navbar__mobile-link"
+                className="btn btn-outline navbar__mobile-btn"
                 onClick={() => setMenuOpen(false)}
               >
                 Admin Dashboard
