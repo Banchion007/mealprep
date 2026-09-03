@@ -81,3 +81,83 @@ export async function deleteGalleryPhoto(supabase, year, quarter, filename) {
 
   if (error) throw error
 }
+
+// ===== NEW: Metadata operations =====
+
+export async function fetchGalleryWithMetadata(supabase, year, quarter) {
+  const { data, error } = await supabase
+    .from('gallery_images')
+    .select('*')
+    .eq('year', year)
+    .eq('quarter', quarter)
+    .order('display_order', { ascending: true })
+
+  if (error) throw error
+  return data || []
+}
+
+export async function createGalleryImageMetadata(supabase, year, quarter, storagePath, metadata = {}) {
+  const { data, error } = await supabase
+    .from('gallery_images')
+    .insert([{
+      year,
+      quarter,
+      storage_path: storagePath,
+      title: metadata.title || null,
+      caption: metadata.caption || null,
+      crop_position: metadata.crop_position || { x: 0, y: 0, width: 100, height: 75 },
+      is_featured: metadata.is_featured || false,
+      display_order: metadata.display_order || 0,
+    }])
+    .select()
+
+  if (error) throw error
+  return data?.[0]
+}
+
+export async function updateGalleryImageMetadata(supabase, imageId, updates) {
+  const { data, error } = await supabase
+    .from('gallery_images')
+    .update(updates)
+    .eq('id', imageId)
+    .select()
+
+  if (error) throw error
+  return data?.[0]
+}
+
+export async function deleteGalleryImageMetadata(supabase, imageId) {
+  const { error } = await supabase
+    .from('gallery_images')
+    .delete()
+    .eq('id', imageId)
+
+  if (error) throw error
+}
+
+export async function reorderGalleryImages(supabase, images) {
+  const updates = images.map((img, index) => ({
+    id: img.id,
+    display_order: index
+  }))
+
+  const { error } = await supabase
+    .from('gallery_images')
+    .upsert(updates, { onConflict: 'id' })
+
+  if (error) throw error
+}
+
+export async function getFeaturedGalleryImage(supabase, year, quarter) {
+  const { data, error } = await supabase
+    .from('gallery_images')
+    .select('*')
+    .eq('year', year)
+    .eq('quarter', quarter)
+    .eq('is_featured', true)
+    .limit(1)
+    .single()
+
+  if (error && error.code !== 'PGRST116') throw error
+  return data
+}

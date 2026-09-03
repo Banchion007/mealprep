@@ -25,11 +25,12 @@ const FEATURES = [
   {
     icon: (
       <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <circle cx="12" cy="10" r="3"/>
       </svg>
     ),
-    title: 'Fresh Ingredients',
-    desc: 'Sourced daily from local farms and trusted suppliers. Never frozen, always vibrant.',
+    title: 'Locally Sourced',
+    desc: 'Ingredients from local Grayson County vendors and nearby farms. Fresh, seasonal, and close to home.',
   },
   {
     icon: (
@@ -43,11 +44,11 @@ const FEATURES = [
   {
     icon: (
       <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
       </svg>
     ),
-    title: 'On-Time Delivery',
-    desc: 'Punctual and professional. Your food arrives hot, fresh, and exactly on schedule.',
+    title: '5-Star Service',
+    desc: 'Warm, attentive, and detail-obsessed from first inquiry to last plate. Excellent service you can count on.',
   },
   {
     icon: (
@@ -401,23 +402,23 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Meal Prep CTA Banner ── */}
+      {/* ── Quote CTA Banner ── */}
       <section className="meal-cta fade-up">
         <div className="container meal-cta__inner">
           <div className="meal-cta__text">
-            <p className="section-label" style={{ color: 'var(--color-accent-light)' }}>Weekly Meal Prep</p>
-            <h2 style={{ color: '#fff', marginBottom: '0.75rem' }}>Eat Well, Every Day.</h2>
+            <p className="section-label" style={{ color: 'var(--color-accent-light)' }}>Catering Quotes</p>
+            <h2 style={{ color: '#fff', marginBottom: '0.75rem' }}>Plan Your Next Event.</h2>
             <p style={{ color: 'rgba(255,251,245,0.8)', maxWidth: '480px' }}>
-              Choose your plan, customize your meals, set your delivery schedule. We handle the rest. Fresh, macro-balanced meals delivered to your door every week.
+              Tell us about your gathering and we will build a custom menu and price range. Instant quotes for weddings, corporate events, and celebrations across North Texas.
             </p>
           </div>
           <div className="meal-cta__actions">
-            <Link to="/meal-prep" className="btn btn-lg" style={{ background: '#fff', color: 'var(--color-primary)', fontWeight: 700 }}>
-              Build My Meal Plan
+            <Link to="/quote" className="btn btn-lg" style={{ background: '#fff', color: 'var(--color-primary)', fontWeight: 700 }}>
+              Get a Quote
             </Link>
-            <a href="#menu" onClick={handleOpenMenu} className="btn btn-lg btn-outline" style={{ borderColor: 'rgba(255,255,255,0.5)', color: '#fff' }}>
-              See Full Menu
-            </a>
+            <Link to="/contact" className="btn btn-lg btn-outline" style={{ borderColor: 'rgba(255,255,255,0.5)', color: '#fff' }}>
+              Talk to Us
+            </Link>
           </div>
         </div>
       </section>

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
-import { fetchGalleryGroups, getGalleryImageUrl } from '../utils/galleryUtils'
+import { fetchGalleryWithMetadata, getGalleryImageUrl } from '../utils/galleryUtils'
 import { PageHead } from '../components/PageHead'
 import { SkeletonCard } from '../components/Skeleton'
 import './GalleryPage.css'
 
-function Lightbox({ isOpen, images, currentIndex, onClose, onNext, onPrev }) {
+function Lightbox({ isOpen, imageData, currentIndex, onClose, onNext, onPrev }) {
   useEffect(() => {
     if (!isOpen) return
     const handleEsc = (e) => { if (e.key === 'Escape') onClose() }
@@ -14,9 +14,9 @@ function Lightbox({ isOpen, images, currentIndex, onClose, onNext, onPrev }) {
     return () => document.removeEventListener('keydown', handleEsc)
   }, [isOpen, onClose])
 
-  if (!isOpen || !images[currentIndex]) return null
+  if (!isOpen || !imageData[currentIndex]) return null
 
-  const currentImage = images[currentIndex]
+  const current = imageData[currentIndex]
 
   return (
     <AnimatePresence>
@@ -34,19 +34,29 @@ function Lightbox({ isOpen, images, currentIndex, onClose, onNext, onPrev }) {
           </button>
 
           <AnimatePresence mode="wait">
-            <motion.img
-              key={currentImage}
-              src={currentImage}
-              alt="Gallery view"
-              className="gallery-lightbox-image"
+            <motion.div
+              key={current.id}
+              className="gallery-lightbox-content"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
-            />
+            >
+              <img
+                src={current.url}
+                alt={current.title || 'Gallery view'}
+                className="gallery-lightbox-image"
+              />
+              {(current.title || current.caption) && (
+                <div className="gallery-lightbox-info">
+                  {current.title && <p className="gallery-lightbox-title">{current.title}</p>}
+                  {current.caption && <p className="gallery-lightbox-caption">{current.caption}</p>}
+                </div>
+              )}
+            </motion.div>
           </AnimatePresence>
 
-          {images.length > 1 && (
+          {imageData.length > 1 && (
             <>
               <button className="gallery-lightbox-nav gallery-lightbox-nav--prev" onClick={onPrev} aria-label="Previous photo">
                 ‹
@@ -55,7 +65,7 @@ function Lightbox({ isOpen, images, currentIndex, onClose, onNext, onPrev }) {
                 ›
               </button>
               <div className="gallery-lightbox-counter">
-                {currentIndex + 1} / {images.length}
+                {currentIndex + 1} / {imageData.length}
               </div>
             </>
           )}
@@ -65,43 +75,34 @@ function Lightbox({ isOpen, images, currentIndex, onClose, onNext, onPrev }) {
   )
 }
 
-function QuarterSection({ group, supabase, onPhotoClick }) {
-  const [imageUrls, setImageUrls] = useState({})
+function QuarterSection({ images, onPhotoClick }) {
   const [loaded, setLoaded] = useState({})
 
-  useEffect(() => {
-    const urls = {}
-    group.files.forEach(file => {
-      urls[file.name] = getGalleryImageUrl(supabase, group.year, group.quarter, file.name)
-    })
-    setImageUrls(urls)
-  }, [group, supabase])
-
-  const handleImageLoad = (filename) => {
-    setLoaded(prev => ({ ...prev, [filename]: true }))
+  const handleImageLoad = (id) => {
+    setLoaded(prev => ({ ...prev, [id]: true }))
   }
 
   return (
-    <section className="gallery-section" id={`section-${group.quarter}-${group.year}`}>
+    <section className="gallery-section" id={`section-${images[0]?.quarter}-${images[0]?.year}`}>
       <div className="gallery-section__header">
-        <h2 className="gallery-section__title">{group.label}</h2>
+        <h2 className="gallery-section__title">{images[0]?.quarter} {images[0]?.year}</h2>
         <div className="gallery-section__divider" />
       </div>
 
       <div className="gallery-masonry">
-        {group.files.map((file) => (
-          <div key={file.name} className="gallery-masonry__item">
+        {images.map((image) => (
+          <div key={image.id} className="gallery-masonry__item">
             <div className="gallery-photo-wrapper">
-              {!loaded[file.name] && (
+              {!loaded[image.id] && (
                 <div className="gallery-photo-placeholder" aria-hidden="true" />
               )}
               <img
-                src={imageUrls[file.name]}
-                alt="Gallery photo"
-                className={`gallery-photo ${loaded[file.name] ? 'loaded' : ''}`}
+                src={image.url}
+                alt={image.title || 'Gallery photo'}
+                className={`gallery-photo ${loaded[image.id] ? 'loaded' : ''}`}
                 loading="lazy"
-                onLoad={() => handleImageLoad(file.name)}
-                onClick={() => onPhotoClick(imageUrls[file.name])}
+                onLoad={() => handleImageLoad(image.id)}
+                onClick={() => onPhotoClick(image)}
               />
             </div>
           </div>
@@ -111,7 +112,7 @@ function QuarterSection({ group, supabase, onPhotoClick }) {
   )
 }
 
-function QuarterNav({ groups, activeQuarter }) {
+function QuarterNav({ quarters, activeQuarter }) {
   const [scrollLeft, setScrollLeft] = useState(false)
   const [scrollRight, setScrollRight] = useState(true)
   const navRef = React.useRef(null)
@@ -144,15 +145,15 @@ function QuarterNav({ groups, activeQuarter }) {
         </button>
       )}
       <nav className="gallery-quarter-nav__list" ref={navRef}>
-        {groups.map((group) => (
+        {quarters.map((qtr) => (
           <a
-            key={`${group.quarter}-${group.year}`}
-            href={`#section-${group.quarter}-${group.year}`}
+            key={`${qtr.quarter}-${qtr.year}`}
+            href={`#section-${qtr.quarter}-${qtr.year}`}
             className={`gallery-quarter-nav__item ${
-              activeQuarter === `${group.quarter}-${group.year}` ? 'active' : ''
+              activeQuarter === `${qtr.quarter}-${qtr.year}` ? 'active' : ''
             }`}
           >
-            {group.label}
+            {qtr.quarter} {qtr.year}
           </a>
         ))}
       </nav>
@@ -172,7 +173,8 @@ function QuarterNav({ groups, activeQuarter }) {
 }
 
 export default function GalleryPage() {
-  const [groups, setGroups] = useState([])
+  const [groupedImages, setGroupedImages] = useState([])
+  const [quarters, setQuarters] = useState([])
   const [loading, setLoading] = useState(true)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxImages, setLightboxImages] = useState([])
@@ -186,10 +188,48 @@ export default function GalleryPage() {
   const loadGallery = async () => {
     try {
       setLoading(true)
-      const data = await fetchGalleryGroups(supabase)
-      setGroups(data)
-      if (data.length > 0) {
-        setActiveQuarter(`${data[0].quarter}-${data[0].year}`)
+      const YEARS = ['2026', '2025', '2024']
+      const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4']
+
+      const allImages = []
+      const uniqueQuarters = []
+      const quarterSet = new Set()
+
+      for (const year of YEARS) {
+        for (const quarter of QUARTERS) {
+          try {
+            const images = await fetchGalleryWithMetadata(supabase, parseInt(year), quarter)
+            if (images.length > 0) {
+              const withUrls = images.map(img => ({
+                ...img,
+                url: getGalleryImageUrl(supabase, year, quarter, img.storage_path)
+              }))
+              allImages.push(...withUrls)
+
+              const key = `${quarter}-${year}`
+              if (!quarterSet.has(key)) {
+                quarterSet.add(key)
+                uniqueQuarters.push({ quarter, year })
+              }
+            }
+          } catch (err) {
+            // Skip if quarter has no images
+          }
+        }
+      }
+
+      // Group by quarter
+      const grouped = {}
+      allImages.forEach(img => {
+        const key = `${img.quarter}-${img.year}`
+        if (!grouped[key]) grouped[key] = []
+        grouped[key].push(img)
+      })
+
+      setGroupedImages(grouped)
+      setQuarters(uniqueQuarters)
+      if (uniqueQuarters.length > 0) {
+        setActiveQuarter(`${uniqueQuarters[0].quarter}-${uniqueQuarters[0].year}`)
       }
     } catch (error) {
       console.error('Error loading gallery:', error)
@@ -198,9 +238,12 @@ export default function GalleryPage() {
     }
   }
 
-  const handlePhotoClick = (url) => {
-    setLightboxImages([url])
-    setLightboxIndex(0)
+  const handlePhotoClick = (imageData) => {
+    const quarterKey = `${imageData.quarter}-${imageData.year}`
+    const quarterImages = groupedImages[quarterKey] || []
+    setLightboxImages(quarterImages)
+    const index = quarterImages.findIndex(img => img.id === imageData.id)
+    setLightboxIndex(Math.max(0, index))
     setLightboxOpen(true)
   }
 
@@ -228,13 +271,13 @@ export default function GalleryPage() {
       { threshold: 0.3 }
     )
 
-    groups.forEach((group) => {
-      const element = document.getElementById(`section-${group.quarter}-${group.year}`)
+    quarters.forEach((qtr) => {
+      const element = document.getElementById(`section-${qtr.quarter}-${qtr.year}`)
       if (element) observer.observe(element)
     })
 
     return () => observer.disconnect()
-  }, [groups])
+  }, [quarters])
 
   return (
     <>
@@ -255,7 +298,7 @@ export default function GalleryPage() {
               ))}
             </div>
           </div>
-        ) : groups.length === 0 ? (
+        ) : quarters.length === 0 ? (
           <div className="gallery-empty">
             <div className="gallery-empty__content">
               <svg className="gallery-empty__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -268,24 +311,26 @@ export default function GalleryPage() {
           </div>
         ) : (
           <>
-            <QuarterNav groups={groups} activeQuarter={activeQuarter} />
+            <QuarterNav quarters={quarters} activeQuarter={activeQuarter} />
 
             <div className="gallery-content">
-              {groups.map((group) => (
-                <QuarterSection
-                  key={`${group.quarter}-${group.year}`}
-                  group={group}
-                  supabase={supabase}
-                  onPhotoClick={handlePhotoClick}
-                />
-              ))}
+              {quarters.map((qtr) => {
+                const key = `${qtr.quarter}-${qtr.year}`
+                return groupedImages[key] && groupedImages[key].length > 0 ? (
+                  <QuarterSection
+                    key={key}
+                    images={groupedImages[key]}
+                    onPhotoClick={handlePhotoClick}
+                  />
+                ) : null
+              })}
             </div>
           </>
         )}
 
         <Lightbox
           isOpen={lightboxOpen}
-          images={lightboxImages}
+          imageData={lightboxImages}
           currentIndex={lightboxIndex}
           onClose={() => setLightboxOpen(false)}
           onNext={handleLightboxNext}
